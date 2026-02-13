@@ -1,0 +1,37 @@
+# Business Overview: SMS Automated Import
+
+## Problem
+Users find it difficult to manually enter every expense, especially small daily transactions. While the app provides a "Lite Parse" feature, it still requires the user to find the SMS, copy it, and paste it. This high friction leads to incomplete financial tracking.
+
+## Objective
+To provide a seamless, "magic" experience where the user can click a single button to pull their recent spending history from their SMS inbox directly into the app.
+
+## Feature Summary
+The SMS Automated Import will scan the user's messaging inbox for transaction notifications from banks and payment apps (UPI, Credit Cards, etc.). It will intelligently extract the amount and the merchant, presenting them as a list of suggested expenses for the user to categorize and save.
+
+## High-Level Workflow
+1. User navigates to "Import" screen.
+2. User taps "Sync from Inbox".
+3. App requests SMS permissions if not already granted.
+4. App scans recent 50 messages.
+5. Items matching "Spent/Debited/Paid" patterns are displayed.
+6. User reviews, selects categories, and taps "Save All".
+
+## Business Value
+- **Engagement**: Users are more likely to use the app if it requires less effort.
+- **Accuracy**: Eliminates typos in amounts or merchant names.
+- **Differentiation**: Positions Expenze as a "smart" personal finance manager rather than a simple ledger.
+
+## Risks
+- **Privacy Sensitivity**: Users may be hesitant to grant SMS permissions.
+- **Platform Limitations**: iOS does not allow direct SMS reading (this feature will be Android-exclusive for now).
+
+## Cost Implications
+- **Free**: No external APIs or subscription costs. Uses native device capabilities.
+
+## Timeline
+- Implementation: 1 day
+- Documentation & Review: 1 day
+- Testing: 1 day
+
+Date: 2026-02-13

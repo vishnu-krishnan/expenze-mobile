@@ -1,0 +1,46 @@
+# RFC: Automated SMS Expense Import
+
+## Problem
+Currently, users must manually copy and paste transaction SMS text into the "Lite Parse" area to track expenses. This process is tedious and prone to manual error, leading to low feature adoption.
+
+## Proposal
+Implement an "Inbox Sync" feature using the `telephony` package for Flutter. This will allow the app to:
+1. Request `READ_SMS` and `RECEIVE_SMS` permissions.
+2. Query the device's SMS inbox for messages related to financial transactions.
+3. Automatically parse these messages and present a list of "Detected Expenses" for user review.
+
+## Alternatives
+- **Manual Input Only**: Safe but poor user experience.
+- **Background Listener**: Automatically track expenses as they arrive. This is deferred to a later phase to minimize battery impact and complexity.
+- **Accessibility Service**: Can read notifications from banking apps. Highly intrusive and often blocked by bank apps for security.
+
+## Trade-offs
+### Pros
+- Dramatically reduces time to log expenses.
+- Increases data accuracy by reading directly from the source.
+- Modern "Smart App" feel.
+
+### Cons
+- Requires sensitive system permissions.
+- May trigger security warnings on some Android skins (e.g., Vivo's Funtouch OS).
+- Regex-based parsing may occasionally miss-identify messages.
+
+## Impact
+- **Security**: Requires localized SMS access. Data never leaves the device during parsing.
+- **Performance**: Scanning 50-100 messages is a sub-second operation on modern devices.
+- **UX**: One-tap synchronization.
+
+## Migration Plan
+1. Update `pubspec.yaml` to include `telephony`.
+2. Update `AndroidManifest.xml` with required permissions.
+3. Implement `SmsService` logic.
+4. Update `SmsImportScreen` UI.
+
+## Open Questions
+- Should we filter by specific sender IDs (e.g., "VM-HDFCBK") or rely on content keywords?
+- How far back in history should we sync by default? (Proposed: Last 30 days or 50 messages).
+
+## Decision Outcome
+Pending.
+
+Date: 2026-02-13
