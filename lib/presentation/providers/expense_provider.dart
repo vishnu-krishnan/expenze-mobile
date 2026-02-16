@@ -115,5 +115,7 @@ class ExpenseProvider with ChangeNotifier {
 
   double get totalPlanned =>
       _expenses.fold(0, (sum, e) => sum + e.plannedAmount);
+  Future<List<String>> getImportedSmsIds() => _repository.getImportedSmsIds();
+
   double get totalActual => _expenses.fold(0, (sum, e) => sum + e.actualAmount);
 }

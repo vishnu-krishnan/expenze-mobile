@@ -30,18 +30,25 @@ class _NotesScreenState extends State<NotesScreen> {
     final secondaryTextColor =
         AppTheme.getTextColor(context, isSecondary: true);
 
+    final isDark = themeProvider.isDarkMode;
+
     return Scaffold(
-      backgroundColor: Colors.transparent,
+      backgroundColor: isDark ? AppTheme.bgPrimaryDark : AppTheme.bgPrimary,
       body: Container(
-        decoration: themeProvider.isDarkMode
+        width: double.infinity,
+        height: double.infinity,
+        decoration: isDark
             ? AppTheme.darkBackgroundDecoration
             : AppTheme.backgroundDecoration,
         child: Column(
           children: [
             AppBar(
               title: Text('Utilities',
-                  style:
-                      TextStyle(color: textColor, fontWeight: FontWeight.bold)),
+                  style: TextStyle(
+                      color: textColor,
+                      fontWeight: FontWeight.w900,
+                      fontSize: 26,
+                      letterSpacing: -1)),
               centerTitle: true,
               backgroundColor: Colors.transparent,
               elevation: 0,
@@ -75,7 +82,9 @@ class _NotesScreenState extends State<NotesScreen> {
       floatingActionButton: FloatingActionButton(
         onPressed: () => _showNoteDialog(context),
         backgroundColor: AppTheme.primary,
-        child: const Icon(LucideIcons.plus, color: Colors.white),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+        child:
+            const Icon(LucideIcons.plus, color: AppTheme.primaryDark, size: 30),
       ),
     );
   }

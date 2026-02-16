@@ -15,7 +15,7 @@ class SmsService {
     return status.isGranted;
   }
 
-  Future<List<SmsMessage>> getRecentSms({int limit = 100}) async {
+  Future<List<SmsMessage>> getRecentSms({int months = 6}) async {
     bool granted = await Permission.sms.isGranted;
     if (!granted) {
       granted = await requestPermissions();
@@ -24,10 +24,18 @@ class SmsService {
     if (!granted) return [];
 
     try {
-      return await _query.querySms(
-        count: limit,
+      // Fetch a large enough sample. 6 months could be a lot.
+      // We take a higher count and filter by date.
+      final messages = await _query.querySms(
+        count: 1000, // Adjusted to a larger sample
         kinds: [SmsQueryKind.inbox],
       );
+
+      final cutoffDate = DateTime.now().subtract(Duration(days: months * 30));
+      return messages.where((m) {
+        if (m.date == null) return false;
+        return m.date!.isAfter(cutoffDate);
+      }).toList();
     } catch (e) {
       logger.e('Error fetching SMS: $e');
       return [];
@@ -46,17 +54,34 @@ class SmsService {
         lowerBody.contains('payment') ||
         lowerBody.contains('withdrawn') ||
         lowerBody.contains('dr to') ||
-        lowerBody.contains('transfer to');
+        lowerBody.contains('transfer to') ||
+        lowerBody.contains('txn') ||
+        lowerBody.contains('purchased') ||
+        lowerBody.contains('upi') ||
+        lowerBody.contains('bank ac');
 
-    if (!isDebit) return null;
+    // Also exclude common credit/refund patterns
+    final isCredit = lowerBody.contains('credited') ||
+        lowerBody.contains('refund') ||
+        lowerBody.contains('received') ||
+        lowerBody.contains('cashback');
 
-    // Amount Extraction Patterns
+    if (!isDebit || isCredit) return null;
+
+    // Amount Extraction Patterns - Enhanced
     final amountPatterns = [
-      RegExp(
-          r'(?:rs\.?|inr|₹|debited for rs|spent rs|amt:)\s*?([\d,]+(?:\.\d{1,2})?)',
+      // Standard formats: Rs 500.00, Rs. 500, Rs.500
+      RegExp(r'(?:rs\.?|inr|₹|amt:?)\s*?([\d,]+\.?\d{0,2})',
           caseSensitive: false),
-      RegExp(r'vpa.*?\s([\d,]+(?:\.\d{1,2})?)', caseSensitive: false),
-      RegExp(r'debited.*?([\d,]+(?:\.\d{1,2})?)', caseSensitive: false),
+      // Specific debit phrases
+      RegExp(r'debited\s*(?:for|of)?\s*(?:rs\.?|inr|₹)?\s*?([\d,]+\.?\d{0,2})',
+          caseSensitive: false),
+      // Payment phrases
+      RegExp(r'paid\s*(?:rs\.?|inr|₹)?\s*?([\d,]+\.?\d{0,2})',
+          caseSensitive: false),
+      // UPI and VPA patterns
+      RegExp(r'transferred\s*(?:rs\.?|inr|₹)?\s*?([\d,]+\.?\d{0,2})',
+          caseSensitive: false),
     ];
 
     double? amount;
@@ -64,40 +89,72 @@ class SmsService {
       final match = pattern.firstMatch(body);
       if (match != null) {
         try {
-          amount = double.parse(match.group(1)!.replaceAll(',', ''));
-          break;
+          final rawAmount = match.group(1)!.replaceAll(',', '');
+          amount = double.parse(rawAmount);
+          if (amount > 0) break;
         } catch (_) {}
       }
     }
 
     if (amount == null || amount <= 0) return null;
 
-    // Merchant Extraction Patterns
+    // Merchant Extraction Patterns - Enhanced
     final merchantPatterns = [
+      // To [Merchant]
       RegExp(
-          r'(?:to|at|for|from|merchant:?|vpa|info:)\s+([A-Za-z0-9\s&*_\-.]{3,30})',
+          r'(?:to|paid to|spent on|at|info:|at:)\s+([A-Za-z0-9\s&*_\-.]{3,40}?)(?:\s+on|\s+ref|\s+from|\s+dated|\s+at|\s+using|\.|\d)',
           caseSensitive: false),
-      RegExp(r'(?:debited to)\s+([A-Za-z0-9\s&*]{3,30})', caseSensitive: false),
-      RegExp(r'([A-Za-z0-9\s&*]{3,20})\s+ref', caseSensitive: false),
+      // Merchant: [Name]
+      RegExp(r'(?:merchant:?|vpa:?)\s*([A-Za-z0-9\s&*_\-.]{3,40})',
+          caseSensitive: false),
+      // Text between debited to and [date/ref]
+      RegExp(
+          r'debited\s+to\s+([A-Za-z0-9\s&*]{3,40})(?:\s+on|\s+ref|\s+dated|\s+at)',
+          caseSensitive: false),
+      // Start of message mentions
+      RegExp(r'([A-Za-z0-9\s&*]{3,25})\s+(?:ref|txn|id)', caseSensitive: false),
     ];
 
-    String merchant = 'Unknown Merchant';
+    String merchant = '';
     for (var pattern in merchantPatterns) {
       final match = pattern.firstMatch(body);
       if (match != null) {
-        final val = match.group(1)!.trim();
+        String val = match.group(1)!.trim();
+
+        // Remove trailing prepositions/filler words
+        val = val
+            .replaceAll(
+                RegExp(r'\s+(on|at|for|ref|from|to)$', caseSensitive: false),
+                '')
+            .trim();
+
         if (val.isNotEmpty &&
+            val.length > 2 &&
+            !val.toLowerCase().contains('account') &&
+            !val.toLowerCase().contains('bank') &&
             !val.toLowerCase().contains('debit') &&
-            !val.toLowerCase().contains('credit')) {
+            !val.toLowerCase().contains('credit') &&
+            !val.toLowerCase().contains('balance')) {
           merchant = val;
           break;
         }
       }
     }
 
-    // Clean merchant name
+    if (merchant.isEmpty) {
+      // Fallback: look for VPA or common identifiers
+      final vpaMatch =
+          RegExp(r'([a-zA-Z0-9.\-_]+@[a-zA-Z0-9.\-_]+)').firstMatch(body);
+      if (vpaMatch != null) {
+        merchant = vpaMatch.group(1)!;
+      } else {
+        merchant = 'Transaction';
+      }
+    }
+
+    // Post-processing cleanup
     merchant = merchant.replaceAll(RegExp(r'\s+'), ' ').trim();
-    if (merchant.length > 25) merchant = merchant.substring(0, 25).trim();
+    if (merchant.length > 30) merchant = merchant.substring(0, 30).trim();
 
     return {
       'amount': amount,

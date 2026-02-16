@@ -77,7 +77,7 @@ class MyApp extends StatelessWidget {
               '/reset-password': (context) {
                 final args = ModalRoute.of(context)?.settings.arguments
                     as Map<String, dynamic>?;
-                return ResetPasswordScreen(token: args?['token']);
+                return ResetPasswordScreen(username: args?['username']);
               },
               '/main': (context) => const MainNavigationWrapper(),
               '/month': (context) => const MonthPlanScreen(),

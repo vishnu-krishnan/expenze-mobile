@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../providers/theme_provider.dart';
 import '../../providers/category_provider.dart';
 
 class CategoryAddScreen extends StatefulWidget {
@@ -52,31 +53,49 @@ class _CategoryAddScreenState extends State<CategoryAddScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final themeProvider = context.watch<ThemeProvider>();
+    final isDark = themeProvider.isDarkMode;
+
     return Scaffold(
-      backgroundColor: AppTheme.bgPrimary,
-      appBar: AppBar(
-        title: const Text('Add Category'),
-      ),
-      body: Consumer<CategoryProvider>(
-        builder: (context, provider, child) {
-          return SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildSectionHeader(
-                    'Quick Suggestions', 'Pick from common categories'),
-                const SizedBox(height: 16),
-                _buildQuickAddGrid(provider),
-                const SizedBox(height: 40),
-                _buildSectionHeader(
-                    'Custom Category', 'Create your own identification'),
-                const SizedBox(height: 16),
-                _buildCustomForm(provider),
-              ],
+      backgroundColor: isDark ? AppTheme.bgPrimaryDark : AppTheme.bgPrimary,
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: isDark
+            ? AppTheme.darkBackgroundDecoration
+            : AppTheme.backgroundDecoration,
+        child: Column(
+          children: [
+            AppBar(
+              title: const Text('Add Category'),
+              backgroundColor: Colors.transparent,
+              elevation: 0,
             ),
-          );
-        },
+            Expanded(
+              child: Consumer<CategoryProvider>(
+                builder: (context, provider, child) {
+                  return SingleChildScrollView(
+                    padding: const EdgeInsets.all(24),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildSectionHeader(
+                            'Quick Suggestions', 'Pick from common categories'),
+                        const SizedBox(height: 16),
+                        _buildQuickAddGrid(provider),
+                        const SizedBox(height: 40),
+                        _buildSectionHeader('Custom Category',
+                            'Create your own identification'),
+                        const SizedBox(height: 16),
+                        _buildCustomForm(provider),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -288,7 +307,7 @@ class _CategoryAddScreenState extends State<CategoryAddScreen> {
               );
             }).toList(),
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 32),
           ElevatedButton(
             onPressed: () async {
               if (_nameController.text.isEmpty) return;

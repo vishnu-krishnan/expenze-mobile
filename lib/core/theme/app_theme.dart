@@ -4,10 +4,9 @@ import 'package:google_fonts/google_fonts.dart';
 class AppTheme {
   // User Preferred Palette
   static const Color primary = Color(0xFF79D2C1);
-  static const Color primaryDark =
-      Color(0xFF2D6C84); // Deep Blue/Teal for headings
+  static const Color primaryDark = Color(0xFF2D8272); // Dark Teal for headings
   static const Color secondary = Color(0xFF9CDDD1);
-  static const Color accent = Color(0xFF2D6C84);
+  static const Color accent = Color(0xFF2D8272);
   static const Color info = Color(0xFFC7ECE6);
 
   static const Color success = Color(0xFF10B981);
@@ -20,7 +19,7 @@ class AppTheme {
   static const Color bgCard = Colors.white;
 
   // Static constants for reference but should use BuildContext extension for dynamic themes
-  static const Color textPrimary = Color(0xFF2D6C84);
+  static const Color textPrimary = Color(0xFF2D8272);
   static const Color textSecondary = Color(0xFF475569);
   static const Color textLight = Color(0xFF94A3B8);
 
@@ -28,12 +27,10 @@ class AppTheme {
   static const Color bgPrimaryDark = Color(0xFF0F172A);
   static const Color bgSecondaryDark = Color(0xFF1E293B);
   static const Color bgCardDark = Color(0xFF1E293B);
+  static const Color border = Color(0xFFC7ECE6);
   static const Color borderDark = Color(0xFF334155);
   static const Color textPrimaryDark = Color(0xFFF8FAFC);
   static const Color textSecondaryDark = Color(0xFF94A3B8);
-
-  // Border & Depth
-  static const Color border = Color(0xFFC7ECE6);
 
   static List<BoxShadow> softShadow = [
     BoxShadow(
@@ -42,6 +39,18 @@ class AppTheme {
       offset: const Offset(0, 4),
     ),
   ];
+
+  static BoxDecoration glassDecoration(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return BoxDecoration(
+      color: isDark
+          ? Colors.white.withOpacity(0.05)
+          : Colors.white.withOpacity(0.7),
+      borderRadius: BorderRadius.circular(24),
+      border:
+          Border.all(color: (isDark ? borderDark : border).withOpacity(0.4)),
+    );
+  }
 
   // Background patterns
   static BoxDecoration get backgroundDecoration => BoxDecoration(
@@ -146,7 +155,7 @@ class AppTheme {
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
         backgroundColor: primary,
-        foregroundColor: Colors.white,
+        foregroundColor: primaryDark,
         elevation: 0,
         padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 18),
         textStyle: GoogleFonts.outfit(fontWeight: FontWeight.w600, fontSize: 16)
@@ -163,9 +172,7 @@ class AppTheme {
     useMaterial3: true,
     primaryColor: primary,
     scaffoldBackgroundColor: bgPrimaryDark,
-    textTheme: GoogleFonts.outfitTextTheme(
-      ThemeData.dark().textTheme,
-    ).copyWith(
+    textTheme: GoogleFonts.outfitTextTheme(ThemeData.dark().textTheme).copyWith(
       displayLarge: GoogleFonts.outfit(
               color: textPrimaryDark, fontWeight: FontWeight.bold)
           .copyWith(inherit: true),

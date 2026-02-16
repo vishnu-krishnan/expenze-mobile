@@ -39,20 +39,28 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final secondaryTextColor =
         AppTheme.getTextColor(context, isSecondary: true);
 
+    final isDark = context.watch<ThemeProvider>().isDarkMode;
+
     return Scaffold(
-      backgroundColor: Colors.transparent,
+      backgroundColor: isDark ? AppTheme.bgPrimaryDark : AppTheme.bgPrimary,
       body: Container(
-        decoration: context.watch<ThemeProvider>().isDarkMode
+        width: double.infinity,
+        height: double.infinity,
+        decoration: isDark
             ? AppTheme.darkBackgroundDecoration
             : AppTheme.backgroundDecoration,
         child: Column(
           children: [
             AppBar(
-              title: Text('Account Identity',
+              title: Text('User Profile',
                   style:
                       TextStyle(color: textColor, fontWeight: FontWeight.bold)),
               backgroundColor: Colors.transparent,
               elevation: 0,
+              leading: IconButton(
+                icon: Icon(LucideIcons.chevronLeft, color: textColor),
+                onPressed: () => Navigator.pop(context),
+              ),
               actions: [
                 _isEditing
                     ? IconButton(
@@ -161,13 +169,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
               textColor: textColor,
               secondaryTextColor: secondaryTextColor,
               controller: _phoneController),
-          Divider(height: 32, color: secondaryTextColor.withValues(alpha: 0.1)),
-          _buildInfoRow(
-              LucideIcons.wallet, 'Spending Limit', _budgetController.text,
-              textColor: textColor,
-              secondaryTextColor: secondaryTextColor,
-              controller: _budgetController,
-              isNumber: true),
         ],
       ),
     );
@@ -226,7 +227,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Widget _buildLogoutButton(AuthProvider auth) {
     return ElevatedButton(
-      onPressed: () => auth.logout(),
+      onPressed: () async {
+        await auth.logout();
+        if (context.mounted) {
+          Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
+        }
+      },
       style: ElevatedButton.styleFrom(
         backgroundColor: Theme.of(context).brightness == Brightness.dark
             ? AppTheme.bgCardDark

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import '../../data/services/database_helper.dart';
 
@@ -32,7 +33,9 @@ class AuthProvider with ChangeNotifier {
 
     try {
       // In 7.0.0+, initialization is mandatory before use
-      await _googleSignIn.initialize();
+      await _googleSignIn.initialize(
+        serverClientId: dotenv.maybeGet('GOOGLE_SERVER_CLIENT_ID'),
+      );
       _isGoogleAvailable = true;
     } catch (e) {
       _isGoogleAvailable = false;
@@ -78,7 +81,7 @@ class AuthProvider with ChangeNotifier {
       final dbUser = await _dbHelper.getUser(username);
 
       if (dbUser == null) {
-        _error = 'User not found. Please register first.';
+        _error = 'Account not found. Please click Sign Up to create one.';
         _isLoading = false;
         notifyListeners();
         return false;
@@ -187,6 +190,7 @@ class AuthProvider with ChangeNotifier {
         return false;
       }
 
+      // Google Sign-In 7.x flow using generic authentication
       if (!_googleSignIn.supportsAuthenticate()) {
         _error = 'Google Sign-In not supported on this platform';
         _isLoading = false;
@@ -194,69 +198,78 @@ class AuthProvider with ChangeNotifier {
         return false;
       }
 
-      // New 7.0.0+ flow: authenticate() moves to stream events
       final completer = Completer<GoogleSignInAccount?>();
       StreamSubscription? subscription;
 
       subscription = _googleSignIn.authenticationEvents.listen((event) {
         if (event is GoogleSignInAuthenticationEventSignIn) {
-          completer.complete(event.user);
-          subscription?.cancel();
+          if (!completer.isCompleted) {
+            completer.complete(event.user);
+          }
         }
       }, onError: (err) {
-        if (!completer.isCompleted) completer.completeError(err);
-        subscription?.cancel();
+        if (!completer.isCompleted) {
+          completer.completeError(err);
+        }
       });
 
-      // Start the flow. You can add scopeHint here if needed.
-      await _googleSignIn.authenticate();
+      try {
+        await _googleSignIn.authenticate();
+        // Wait for the stream to emit a user
+        final account = await completer.future.timeout(
+          const Duration(minutes: 2),
+          onTimeout: () {
+            throw TimeoutException('Sign in timed out');
+          },
+        );
 
-      // Wait for the result or timeout
-      final account = await completer.future.timeout(
-        const Duration(minutes: 5),
-        onTimeout: () {
-          subscription?.cancel();
-          throw TimeoutException('Google Sign-In timed out');
-        },
-      );
+        subscription.cancel();
 
-      if (account == null) {
+        if (account == null) {
+          _isLoading = false;
+          notifyListeners();
+          return false;
+        }
+
+        _token = 'local_google_${account.id}';
+        final username = account.displayName ?? account.email;
+
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('auth_token', _token!);
+        await prefs.setString('user_name', username);
+        await prefs.setString('user_email', account.email);
+        if (account.photoUrl != null) {
+          await prefs.setString('user_photo', account.photoUrl!);
+        }
+        await prefs.setString('auth_provider', 'google');
+
+        // Sync with local DB
+        final userId = await _dbHelper.upsertUser(
+          username: username,
+          email: account.email,
+        );
+
+        _user = {
+          'id': userId,
+          'username': username,
+          'email': account.email,
+          'photoUrl': account.photoUrl,
+          'provider': 'google',
+        };
+
+        _isLoading = false;
+        notifyListeners();
+        return true;
+      } catch (e) {
+        _error = 'Google sign-in failed: ${e.toString()}';
         _isLoading = false;
         notifyListeners();
         return false;
+      } finally {
+        subscription?.cancel();
       }
-
-      _token = 'local_google_${account.id}';
-      final username = account.displayName ?? account.email;
-
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('auth_token', _token!);
-      await prefs.setString('user_name', username);
-      await prefs.setString('user_email', account.email);
-      if (account.photoUrl != null) {
-        await prefs.setString('user_photo', account.photoUrl!);
-      }
-      await prefs.setString('auth_provider', 'google');
-
-      // Sync with local DB
-      final userId = await _dbHelper.upsertUser(
-        username: username,
-        email: account.email,
-      );
-
-      _user = {
-        'id': userId,
-        'username': username,
-        'email': account.email,
-        'photoUrl': account.photoUrl,
-        'provider': 'google',
-      };
-
-      _isLoading = false;
-      notifyListeners();
-      return true;
     } catch (e) {
-      _error = 'Google sign-in failed: ${e.toString()}';
+      _error = 'Google Init failed: ${e.toString()}';
       _isLoading = false;
       notifyListeners();
       return false;
@@ -332,6 +345,32 @@ class AuthProvider with ChangeNotifier {
     } finally {
       _isLoading = false;
       notifyListeners();
+    }
+  }
+
+  Future<bool> resetPassword(String username, String newPassword) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      final user = await _dbHelper.getUser(username);
+      if (user == null) {
+        _error = 'User not found';
+        _isLoading = false;
+        notifyListeners();
+        return false;
+      }
+
+      await _dbHelper.updatePassword(username, newPassword);
+      _isLoading = false;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _error = 'Failed to reset password';
+      _isLoading = false;
+      notifyListeners();
+      return false;
     }
   }
 

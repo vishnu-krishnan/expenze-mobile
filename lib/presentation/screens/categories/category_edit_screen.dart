@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../providers/theme_provider.dart';
 import '../../providers/category_provider.dart';
 import '../../../data/models/category.dart';
 
@@ -33,32 +34,50 @@ class _CategoryEditScreenState extends State<CategoryEditScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final themeProvider = context.watch<ThemeProvider>();
+    final isDark = themeProvider.isDarkMode;
+
     return Scaffold(
-      backgroundColor: AppTheme.bgPrimary,
-      appBar: AppBar(
-        title: const Text('Edit Category'),
-        actions: [
-          IconButton(
-            icon: const Icon(LucideIcons.trash2, color: AppTheme.danger),
-            onPressed: () => _showDeleteDialog(context),
-          ),
-        ],
-      ),
-      body: Consumer<CategoryProvider>(
-        builder: (context, provider, child) {
-          return SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildSectionHeader(
-                    'Modify Identity', 'Update how this category appears'),
-                const SizedBox(height: 24),
-                _buildEditForm(provider),
+      backgroundColor: isDark ? AppTheme.bgPrimaryDark : AppTheme.bgPrimary,
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: isDark
+            ? AppTheme.darkBackgroundDecoration
+            : AppTheme.backgroundDecoration,
+        child: Column(
+          children: [
+            AppBar(
+              title: const Text('Edit Category'),
+              backgroundColor: Colors.transparent,
+              elevation: 0,
+              actions: [
+                IconButton(
+                  icon: const Icon(LucideIcons.trash2, color: AppTheme.danger),
+                  onPressed: () => _showDeleteDialog(context),
+                ),
               ],
             ),
-          );
-        },
+            Expanded(
+              child: Consumer<CategoryProvider>(
+                builder: (context, provider, child) {
+                  return SingleChildScrollView(
+                    padding: const EdgeInsets.all(24),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildSectionHeader('Modify Identity',
+                            'Update how this category appears'),
+                        const SizedBox(height: 24),
+                        _buildEditForm(provider),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -207,7 +226,7 @@ class _CategoryEditScreenState extends State<CategoryEditScreen> {
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
                     color: isSelected
-                        ? AppTheme.primary.withValues(alpha: 0.1)
+                        ? AppTheme.primary.withOpacity(0.1)
                         : AppTheme.bgSecondary,
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
@@ -224,9 +243,6 @@ class _CategoryEditScreenState extends State<CategoryEditScreen> {
           ElevatedButton(
             onPressed: () async {
               if (_nameController.text.isEmpty) return;
-              // Assuming provider will have an updateCategory method or similar
-              // For now, we'll re-add/handle it or if not available, we'll suggest it
-              // Since the provider might not have update yet, let's check
               await provider.updateCategory(widget.category.id,
                   _nameController.text, _iconController.text);
               if (mounted) Navigator.pop(context);
@@ -261,8 +277,8 @@ class _CategoryEditScreenState extends State<CategoryEditScreen> {
             onPressed: () async {
               await provider.deleteCategory(widget.category.id);
               if (mounted) {
-                Navigator.pop(context); // Close dialog
-                Navigator.pop(context); // Go back to list
+                Navigator.pop(context);
+                Navigator.pop(context);
               }
             },
             child:

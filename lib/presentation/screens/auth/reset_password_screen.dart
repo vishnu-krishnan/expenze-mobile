@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:provider/provider.dart';
+import '../../providers/auth_provider.dart';
 import '../../../core/theme/app_theme.dart';
 
 class ResetPasswordScreen extends StatefulWidget {
-  final String? token; // Token from deep link or email
-  const ResetPasswordScreen({super.key, this.token});
+  final String? username; // Changed from token to username
+  const ResetPasswordScreen({super.key, this.username});
 
   @override
   State<ResetPasswordScreen> createState() => _ResetPasswordScreenState();
@@ -12,6 +14,7 @@ class ResetPasswordScreen extends StatefulWidget {
 
 class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   final _formKey = GlobalKey<FormState>();
+  final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
 
@@ -21,7 +24,16 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   bool _showPassword = false;
 
   @override
+  void initState() {
+    super.initState();
+    if (widget.username != null) {
+      _usernameController.text = widget.username!;
+    }
+  }
+
+  @override
   void dispose() {
+    _usernameController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
     super.dispose();
@@ -35,8 +47,9 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
       return;
     }
 
-    if (widget.token == null) {
-      setState(() => _errorMessage = 'Invalid link: No token provided');
+    final username = _usernameController.text.trim();
+    if (username.isEmpty) {
+      setState(() => _errorMessage = 'Username is required');
       return;
     }
 
@@ -46,30 +59,26 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
       _successMessage = null;
     });
 
-    setState(() {
-      _isLoading = true;
-      _errorMessage = null;
-      _successMessage = null;
-    });
+    final auth = Provider.of<AuthProvider>(context, listen: false);
 
-    try {
-      // Offline mode: Simulate a short delay then "success"
-      await Future.delayed(const Duration(seconds: 1));
+    // Check if user exists first (optional, as resetPassword handles it, but good for UX)
+    // We'll just call resetPassword directly
+    final success =
+        await auth.resetPassword(username, _passwordController.text);
 
-      if (!mounted) return;
+    if (!mounted) return;
+    setState(() => _isLoading = false);
 
+    if (success) {
       setState(() {
-        _successMessage =
-            'Passcode reset successfully! Please login with your new code.';
+        _successMessage = 'Password reset successfully! Please login.';
       });
 
       Future.delayed(const Duration(seconds: 2), () {
         if (mounted) Navigator.pushReplacementNamed(context, '/login');
       });
-    } catch (e) {
-      setState(() => _errorMessage = 'Something went wrong. Please try again.');
-    } finally {
-      if (mounted) setState(() => _isLoading = false);
+    } else {
+      setState(() => _errorMessage = auth.error ?? 'Failed to reset password');
     }
   }
 
@@ -87,36 +96,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
         ),
       ),
       body: SafeArea(
-        child: widget.token == null ? _buildInvalidToken() : _buildForm(),
-      ),
-    );
-  }
-
-  Widget _buildInvalidToken() {
-    return Padding(
-      padding: const EdgeInsets.all(24.0),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(LucideIcons.alertTriangle, size: 64, color: AppTheme.danger),
-          const SizedBox(height: 24),
-          const Text(
-            'Invalid Link',
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 12),
-          Text(
-            'No token provided. Please use the link from your email.',
-            style: TextStyle(color: AppTheme.textSecondary),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 32),
-          ElevatedButton(
-            onPressed: () => Navigator.pushReplacementNamed(context, '/login'),
-            style: AppTheme.primaryButtonStyle,
-            child: const Text('Back to Login'),
-          ),
-        ],
+        child: _buildForm(),
       ),
     );
   }
@@ -164,7 +144,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
           ),
           const SizedBox(height: 8),
           Text(
-            'Choose a strong password to protect your financial data.',
+            'Enter your username and new password.',
             style: TextStyle(fontSize: 16, color: AppTheme.textSecondary),
             textAlign: TextAlign.center,
           ),
@@ -186,6 +166,16 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
             key: _formKey,
             child: Column(
               children: [
+                if (widget.username == null)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 20),
+                    child: _buildTextField(
+                        controller: _usernameController,
+                        label: 'Username',
+                        hint: 'Enter your username',
+                        icon: LucideIcons.user,
+                        validator: (v) => v!.isEmpty ? 'Required' : null),
+                  ),
                 _buildPasswordField(
                   controller: _passwordController,
                   label: 'New Password',
@@ -202,8 +192,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                   controller: _confirmPasswordController,
                   label: 'Confirm Password',
                   hint: 'Confirm new password',
-                  showPassword:
-                      false, // Don't toggle confirm field for simplicity or matching UI
+                  showPassword: false,
                   validator: (value) => value == null ? 'Please confirm' : null,
                 ),
                 const SizedBox(height: 32),
@@ -224,6 +213,34 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String label,
+    required String hint,
+    required IconData icon,
+    String? Function(String?)? validator,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label,
+            style: const TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: AppTheme.textPrimary)),
+        const SizedBox(height: 8),
+        TextFormField(
+          controller: controller,
+          validator: validator,
+          decoration: AppTheme.inputDecoration(hint, icon).copyWith(
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          ),
+        ),
+      ],
     );
   }
 

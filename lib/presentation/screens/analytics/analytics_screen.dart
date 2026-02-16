@@ -31,69 +31,100 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
     final secondaryTextColor =
         AppTheme.getTextColor(context, isSecondary: true);
 
+    final isDark = themeProvider.isDarkMode;
+
     return Scaffold(
-      backgroundColor: Colors.transparent,
+      backgroundColor: isDark ? AppTheme.bgPrimaryDark : AppTheme.bgPrimary,
       body: Container(
-        decoration: themeProvider.isDarkMode
+        width: double.infinity,
+        height: double.infinity,
+        decoration: isDark
             ? AppTheme.darkBackgroundDecoration
             : AppTheme.backgroundDecoration,
-        child: Column(
-          children: [
-            AppBar(
-              title: Text('Spending Analytics',
-                  style:
-                      TextStyle(color: textColor, fontWeight: FontWeight.bold)),
-              elevation: 0,
-              backgroundColor: Colors.transparent,
-              centerTitle: true,
-            ),
-            Expanded(
-              child: Consumer<ExpenseProvider>(
-                builder: (context, provider, child) {
-                  if (provider.isLoading) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
-
-                  return SingleChildScrollView(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 24, vertical: 10),
-                    child: Column(
+        child: SafeArea(
+          bottom: false,
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(26, 20, 26, 20),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _buildPeriodSelector(textColor, secondaryTextColor),
-                        const SizedBox(height: 24),
-                        _buildTrendChart(
-                            provider.trends, textColor, secondaryTextColor),
-                        const SizedBox(height: 32),
-                        _buildInsightCards(textColor, secondaryTextColor),
-                        const SizedBox(height: 32),
-                        _buildCategoryBreakdown(textColor, secondaryTextColor),
-                        const SizedBox(height: 100),
+                        Text('Insights & Trends',
+                            style: TextStyle(
+                                color: secondaryTextColor,
+                                fontSize: 13,
+                                letterSpacing: 0.5)),
+                        Text('Analytics',
+                            style: TextStyle(
+                                fontSize: 26,
+                                fontWeight: FontWeight.w900,
+                                color: textColor,
+                                letterSpacing: -1)),
                       ],
                     ),
-                  );
-                },
+                    _buildPeriodSelector(textColor),
+                  ],
+                ),
               ),
-            ),
-          ],
+              Expanded(
+                child: Consumer<ExpenseProvider>(
+                  builder: (context, provider, child) {
+                    if (provider.isLoading) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+
+                    return SingleChildScrollView(
+                      padding: const EdgeInsets.symmetric(horizontal: 26),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildPremiumChartCard(provider.trends, textColor),
+                          const SizedBox(height: 24),
+                          _buildSpendingSummary(
+                              provider, textColor, secondaryTextColor),
+                          const SizedBox(height: 32),
+                          Text('Monthly Performance',
+                              style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: textColor,
+                                  letterSpacing: -0.5)),
+                          const SizedBox(height: 16),
+                          _buildPerformanceGrid(
+                              provider.trends, textColor, secondaryTextColor),
+                          const SizedBox(height: 32),
+                          const SizedBox(height: 120),
+                          const SizedBox(height: 120),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildPeriodSelector(Color textColor, Color secondaryTextColor) {
+  Widget _buildPeriodSelector(Color textColor) {
     return Container(
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
-        color: Theme.of(context).cardTheme.color,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: AppTheme.softShadow,
+        color: AppTheme.primary.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(14),
       ),
       child: Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
           _buildPeriodButton('6M', 6),
           _buildPeriodButton('1Y', 12),
-          _buildPeriodButton('3Y', 36),
+          _buildPeriodButton('5Y', 60),
         ],
       ),
     );
@@ -101,87 +132,40 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
 
   Widget _buildPeriodButton(String label, int months) {
     final isSelected = _selectedPeriod == months;
-    final secondaryTextColor =
-        AppTheme.getTextColor(context, isSecondary: true);
-
-    return Expanded(
-      child: GestureDetector(
-        onTap: () {
-          setState(() => _selectedPeriod = months);
-          context.read<ExpenseProvider>().loadTrends(months);
-        },
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 12),
-          decoration: BoxDecoration(
-            color: isSelected ? AppTheme.primary : Colors.transparent,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Text(
-            label,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: isSelected ? Colors.white : secondaryTextColor,
-              fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
-              fontSize: 14,
-            ),
+    return GestureDetector(
+      onTap: () {
+        setState(() => _selectedPeriod = months);
+        context.read<ExpenseProvider>().loadTrends(months);
+      },
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected ? AppTheme.primary : Colors.transparent,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: isSelected
+                ? AppTheme.primaryDark
+                : AppTheme.primaryDark.withOpacity(0.5),
+            fontSize: 11,
+            fontWeight: FontWeight.bold,
           ),
         ),
       ),
     );
   }
 
-  Widget _buildTrendChart(List<Map<String, dynamic>> trends, Color textColor,
-      Color secondaryTextColor) {
-    if (trends.isEmpty) {
-      return Container(
-        height: 280,
-        decoration: BoxDecoration(
-          color: Theme.of(context).cardTheme.color,
-          borderRadius: BorderRadius.circular(24),
-          boxShadow: AppTheme.softShadow,
-        ),
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(LucideIcons.trendingUp,
-                  size: 48, color: secondaryTextColor.withValues(alpha: 0.5)),
-              const SizedBox(height: 16),
-              Text(
-                'No data available',
-                style: TextStyle(color: secondaryTextColor, fontSize: 16),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-
-    final trendData = trends;
-    final spotsActual = <FlSpot>[];
-    final spotsPlanned = <FlSpot>[];
-    double maxY = 0;
-
-    for (int i = 0; i < trendData.length; i++) {
-      final actual = (trendData[i]['total_actual'] as num?)?.toDouble() ?? 0.0;
-      final planned =
-          (trendData[i]['total_planned'] as num?)?.toDouble() ?? 0.0;
-
-      spotsActual.add(FlSpot(i.toDouble(), actual));
-      spotsPlanned.add(FlSpot(i.toDouble(), planned));
-
-      if (actual > maxY) maxY = actual;
-      if (planned > maxY) maxY = planned;
-    }
-
-    if (maxY == 0) maxY = 5000;
-
+  Widget _buildPremiumChartCard(
+      List<Map<String, dynamic>> trends, Color textColor) {
     return Container(
-      height: 320,
-      padding: const EdgeInsets.all(20),
+      height: 300,
+      padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         color: Theme.of(context).cardTheme.color,
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(32),
         boxShadow: AppTheme.softShadow,
       ),
       child: Column(
@@ -190,169 +174,73 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                'Spending Trend',
-                style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: textColor),
-              ),
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  color: AppTheme.primary.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(LucideIcons.trendingUp,
-                        size: 14, color: AppTheme.primary),
-                    const SizedBox(width: 4),
-                    Text(
-                      _selectedPeriod == 6
-                          ? '6 Months'
-                          : _selectedPeriod == 12
-                              ? '1 Year'
-                              : '3 Years',
-                      style: const TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.bold,
-                          color: AppTheme.primary),
-                    ),
-                  ],
-                ),
-              ),
+              Text('Net Spending Trend',
+                  style: TextStyle(
+                      fontWeight: FontWeight.w800,
+                      fontSize: 15,
+                      color: textColor)),
+              Icon(LucideIcons.trendingUp, size: 16, color: AppTheme.primary),
             ],
           ),
-          const SizedBox(height: 32),
-          Expanded(
-            child: LineChart(
-              LineChartData(
-                gridData: FlGridData(
-                  show: true,
-                  drawVerticalLine: false,
-                  horizontalInterval: maxY > 0 ? maxY / 4 : 1000,
-                  getDrawingHorizontalLine: (value) {
-                    return FlLine(
-                      color: secondaryTextColor.withValues(alpha: 0.1),
-                      strokeWidth: 1,
-                    );
-                  },
-                ),
-                titlesData: FlTitlesData(
-                  show: true,
-                  rightTitles: const AxisTitles(
-                      sideTitles: SideTitles(showTitles: false)),
-                  topTitles: const AxisTitles(
-                      sideTitles: SideTitles(showTitles: false)),
-                  bottomTitles: AxisTitles(
-                    sideTitles: SideTitles(
-                      showTitles: true,
-                      reservedSize: 30,
-                      interval: 1,
-                      getTitlesWidget: (value, meta) {
-                        if (value.toInt() >= trendData.length)
-                          return const SizedBox();
-                        final monthKey =
-                            trendData[value.toInt()]['month_key'] as String;
-                        final parts = monthKey.split('-');
-                        if (parts.length == 2) {
-                          final month = int.parse(parts[1]);
-                          const months = [
-                            'Jan',
-                            'Feb',
-                            'Mar',
-                            'Apr',
-                            'May',
-                            'Jun',
-                            'Jul',
-                            'Aug',
-                            'Sep',
-                            'Oct',
-                            'Nov',
-                            'Dec'
-                          ];
-                          return Padding(
-                            padding: const EdgeInsets.only(top: 8),
-                            child: Text(
-                              months[month - 1][0],
-                              style: TextStyle(
-                                  color: secondaryTextColor,
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w600),
-                            ),
-                          );
-                        }
-                        return const SizedBox();
-                      },
-                    ),
-                  ),
-                  leftTitles: AxisTitles(
-                    sideTitles: SideTitles(
-                      showTitles: true,
-                      reservedSize: 42,
-                      interval: maxY > 0 ? maxY / 4 : 1000,
-                      getTitlesWidget: (value, meta) {
-                        return Text(
-                          '₹${(value / 1000).toStringAsFixed(0)}k',
-                          style: TextStyle(
-                              color: secondaryTextColor,
-                              fontSize: 10,
-                              fontWeight: FontWeight.w600),
-                        );
-                      },
-                    ),
-                  ),
-                ),
-                borderData: FlBorderData(show: false),
-                minX: 0,
-                maxX: (trendData.length - 1).toDouble() < 0
-                    ? 0
-                    : (trendData.length - 1).toDouble(),
-                minY: 0,
-                maxY: maxY * 1.2,
-                lineBarsData: [
-                  LineChartBarData(
-                    spots: spotsPlanned,
-                    isCurved: true,
-                    color: AppTheme.secondary.withValues(alpha: 0.3),
-                    barWidth: 2,
-                    isStrokeCapRound: true,
-                    dashArray: [5, 5],
-                    dotData: const FlDotData(show: false),
-                  ),
-                  LineChartBarData(
-                    spots: spotsActual,
-                    isCurved: true,
-                    gradient: const LinearGradient(
-                        colors: [AppTheme.primary, AppTheme.accent]),
-                    barWidth: 3,
-                    isStrokeCapRound: true,
-                    dotData: FlDotData(
-                      show: true,
-                      getDotPainter: (spot, percent, barData, index) {
-                        return FlDotCirclePainter(
-                          radius: 4,
-                          color: Colors.white,
-                          strokeWidth: 2,
-                          strokeColor: AppTheme.primary,
-                        );
-                      },
-                    ),
-                    belowBarData: BarAreaData(
-                      show: true,
-                      gradient: LinearGradient(
-                        colors: [
-                          AppTheme.primary.withValues(alpha: 0.15),
-                          AppTheme.primary.withValues(alpha: 0.0)
-                        ],
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                      ),
-                    ),
-                  ),
+          const SizedBox(height: 30),
+          Expanded(child: _buildLineChart(trends)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLineChart(List<Map<String, dynamic>> trends) {
+    if (trends.isEmpty) return const Center(child: Text('Not enough data'));
+
+    return LineChart(
+      LineChartData(
+        gridData: const FlGridData(show: false),
+        titlesData: FlTitlesData(
+          bottomTitles: AxisTitles(
+            sideTitles: SideTitles(
+              showTitles: true,
+              getTitlesWidget: (val, meta) {
+                if (val.toInt() >= 0 && val.toInt() < trends.length) {
+                  final key = trends[val.toInt()]['month_key'] as String;
+                  return Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: Text(key.split('-')[1],
+                        style: const TextStyle(
+                            fontSize: 10, color: AppTheme.textSecondary)),
+                  );
+                }
+                return const SizedBox();
+              },
+            ),
+          ),
+          leftTitles:
+              const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          rightTitles:
+              const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          topTitles:
+              const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+        ),
+        borderData: FlBorderData(show: false),
+        lineBarsData: [
+          LineChartBarData(
+            spots: trends.asMap().entries.map((e) {
+              return FlSpot(e.key.toDouble(),
+                  (e.value['total_actual'] as num).toDouble());
+            }).toList(),
+            isCurved: true,
+            color: AppTheme.primary,
+            barWidth: 4,
+            isStrokeCapRound: true,
+            dotData: const FlDotData(show: false),
+            belowBarData: BarAreaData(
+              show: true,
+              gradient: LinearGradient(
+                colors: [
+                  AppTheme.primary.withOpacity(0.3),
+                  AppTheme.primary.withOpacity(0)
                 ],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
               ),
             ),
           ),
@@ -361,179 +249,106 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
     );
   }
 
-  Widget _buildInsightCards(Color textColor, Color secondaryTextColor) {
-    return Consumer<ExpenseProvider>(
-      builder: (context, provider, child) {
-        return Row(
-          children: [
-            Expanded(
-              child: _buildInsightCard(
-                context,
-                'Avg Monthly',
-                '₹${provider.avgMonthlySpent.toStringAsFixed(0)}',
-                LucideIcons.barChart3,
-                AppTheme.primary,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _buildInsightCard(
-                context,
-                'Highest',
-                '₹${provider.maxMonthlySpent.toStringAsFixed(0)}',
-                LucideIcons.trendingUp,
-                AppTheme.warning,
-              ),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  Widget _buildInsightCard(BuildContext context, String label, String value,
-      IconData icon, Color color) {
-    final textColor = AppTheme.getTextColor(context);
-    final secondaryTextColor =
-        AppTheme.getTextColor(context, isSecondary: true);
-
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardTheme.color,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: AppTheme.softShadow,
+  Widget _buildPerformanceGrid(List<Map<String, dynamic>> trends,
+      Color textColor, Color secondaryTextColor) {
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        crossAxisSpacing: 16,
+        mainAxisSpacing: 16,
+        childAspectRatio: 1.4,
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Icon(icon, color: color, size: 20),
+      itemCount: trends.length > 4 ? 4 : trends.length,
+      itemBuilder: (context, index) {
+        final data = trends[trends.length - 1 - index];
+        final actual = (data['total_actual'] as num).toDouble();
+
+        return Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: Theme.of(context).cardTheme.color,
+            borderRadius: BorderRadius.circular(24),
+            boxShadow: AppTheme.softShadow,
           ),
-          const SizedBox(height: 12),
-          Text(
-            label,
-            style: TextStyle(
-                color: secondaryTextColor,
-                fontSize: 11,
-                fontWeight: FontWeight.w600),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            value,
-            style: TextStyle(
-                fontSize: 20, fontWeight: FontWeight.bold, color: textColor),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCategoryBreakdown(Color textColor, Color secondaryTextColor) {
-    return Consumer<ExpenseProvider>(
-      builder: (context, provider, child) {
-        final breakdown = provider.categoryBreakdown;
-        final totalAll = breakdown.fold<double>(0, (sum, item) {
-          final actual = (item['total_actual'] as num).toDouble();
-          final planned = (item['total_planned'] as num).toDouble();
-          return sum + (actual > 0 ? actual : planned);
-        });
-
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Top Categories',
-                style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: textColor)),
-            const SizedBox(height: 16),
-            if (breakdown.isEmpty)
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 20),
-                child: Center(
-                  child: Text('No breakdown data for this month',
-                      style: TextStyle(color: secondaryTextColor)),
-                ),
-              )
-            else
-              ...breakdown.take(5).map((item) {
-                final name = (item['category_name'] as String?) ?? 'Other';
-                final actual = (item['total_actual'] as num).toDouble();
-                final planned = (item['total_planned'] as num).toDouble();
-                final amount = actual > 0 ? actual : planned;
-                final progress = totalAll > 0 ? amount / totalAll : 0.0;
-                final emoji = (item['icon'] as String?) ?? '📁';
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: _buildCategoryItem(
-                      context, name, amount, progress, emoji),
-                );
-              }),
-          ],
-        );
-      },
-    );
-  }
-
-  Widget _buildCategoryItem(BuildContext context, String name, double amount,
-      double progress, String emoji) {
-    final textColor = AppTheme.getTextColor(context);
-    final secondaryTextColor =
-        AppTheme.getTextColor(context, isSecondary: true);
-
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardTheme.color,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: AppTheme.softShadow,
-      ),
-      child: Column(
-        children: [
-          Row(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(emoji, style: const TextStyle(fontSize: 24)),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(name,
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 15,
-                            color: textColor)),
-                    Text('₹${amount.toStringAsFixed(0)}',
-                        style:
-                            TextStyle(color: secondaryTextColor, fontSize: 13)),
-                  ],
-                ),
-              ),
-              Text(
-                '${(progress * 100).toInt()}%',
-                style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: AppTheme.primary,
-                    fontSize: 14),
-              ),
+              Text(data['month_key'],
+                  style: TextStyle(
+                      color: secondaryTextColor,
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold)),
+              const SizedBox(height: 4),
+              Text('₹${actual.toStringAsFixed(0)}',
+                  style: TextStyle(
+                      color: textColor,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w900)),
             ],
           ),
-          const SizedBox(height: 12),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(4),
-            child: LinearProgressIndicator(
-              value: progress,
-              backgroundColor: AppTheme.primary.withValues(alpha: 0.1),
-              valueColor: const AlwaysStoppedAnimation<Color>(AppTheme.primary),
-              minHeight: 6,
-            ),
+        );
+      },
+    );
+  }
+
+  Widget _buildSpendingSummary(
+      ExpenseProvider provider, Color textColor, Color secondaryTextColor) {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [AppTheme.primary, AppTheme.primaryDark],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(32),
+        boxShadow: [
+          BoxShadow(
+            color: AppTheme.primary.withOpacity(0.3),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
           ),
+        ],
+      ),
+      child: Row(
+        children: [
+          _buildSummaryItem(
+              'Average',
+              provider.trends.isEmpty
+                  ? '₹0'
+                  : '₹${(provider.trends.map((e) => e['total_actual'] as num).reduce((a, b) => a + b) / provider.trends.length).toStringAsFixed(0)}',
+              Colors.white,
+              Colors.white70),
+          Container(height: 40, width: 1, color: Colors.white24),
+          _buildSummaryItem(
+              'Highest',
+              provider.trends.isEmpty
+                  ? '₹0'
+                  : '₹${provider.trends.map((e) => e['total_actual'] as num).reduce((a, b) => a > b ? a : b).toStringAsFixed(0)}',
+              Colors.white,
+              Colors.white70),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSummaryItem(
+      String label, String value, Color textColor, Color secondaryTextColor) {
+    return Expanded(
+      child: Column(
+        children: [
+          Text(label,
+              style: TextStyle(
+                  color: secondaryTextColor,
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold)),
+          const SizedBox(height: 4),
+          Text(value,
+              style: TextStyle(
+                  color: textColor, fontSize: 20, fontWeight: FontWeight.w900)),
         ],
       ),
     );

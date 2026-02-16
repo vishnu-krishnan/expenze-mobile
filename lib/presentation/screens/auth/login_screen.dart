@@ -165,7 +165,22 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       validator: (v) => v!.isEmpty ? 'Required' : null,
                     ),
-                    const SizedBox(height: 24),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: TextButton(
+                        onPressed: () =>
+                            Navigator.pushNamed(context, '/reset-password'),
+                        child: const Text(
+                          'Forgot Password?',
+                          style: TextStyle(
+                            color: AppTheme.primary,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
 
                     ElevatedButton(
                       onPressed: _isLoading ? null : _handleLogin,
@@ -196,16 +211,30 @@ class _LoginScreenState extends State<LoginScreen> {
                       ],
                     ),
                     const SizedBox(height: 20),
-
-                    OutlinedButton.icon(
-                      onPressed: _isLoading ? null : _handleGoogleLogin,
-                      icon: const Icon(LucideIcons.chrome,
-                          color: Colors.blue, size: 20),
-                      label: const Text('Continue with Google'),
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12)),
+                    Container(
+                      height: 54,
+                      child: OutlinedButton(
+                        onPressed: _isLoading ? null : _handleGoogleLogin,
+                        style: OutlinedButton.styleFrom(
+                          side: BorderSide(color: Colors.grey.withOpacity(0.2)),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16)),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(LucideIcons.chrome,
+                                color: Colors.blue, size: 20),
+                            const SizedBox(width: 12),
+                            const Text(
+                              'Continue with Google',
+                              style: TextStyle(
+                                  color: AppTheme.textPrimary,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 14),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
 

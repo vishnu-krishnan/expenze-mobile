@@ -28,83 +28,96 @@ class _MonthPlanScreenState extends State<MonthPlanScreen> {
     final themeProvider = context.watch<ThemeProvider>();
     final textColor = AppTheme.getTextColor(context);
 
-    return Container(
-      decoration: themeProvider.isDarkMode
-          ? AppTheme.darkBackgroundDecoration
-          : AppTheme.backgroundDecoration,
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
-        appBar: AppBar(
-          title: Text(
-            'Budget Planner',
-            style: TextStyle(
-              color: textColor,
-              fontWeight: FontWeight.bold,
-              letterSpacing: -0.5,
+    final isDark = themeProvider.isDarkMode;
+
+    return Scaffold(
+      backgroundColor: isDark ? AppTheme.bgPrimaryDark : AppTheme.bgPrimary,
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: isDark
+            ? AppTheme.darkBackgroundDecoration
+            : AppTheme.backgroundDecoration,
+        child: NestedScrollView(
+          headerSliverBuilder: (context, innerBoxIsScrolled) => [
+            SliverAppBar(
+              title: Text(
+                'Spending Limit',
+                style: TextStyle(
+                  color: textColor,
+                  fontWeight: FontWeight.w900,
+                  fontSize: 26,
+                  letterSpacing: -1,
+                ),
+              ),
+              backgroundColor: Colors.transparent,
+              elevation: 0,
+              centerTitle: true,
+              floating: true,
+              pinned: true,
             ),
-          ),
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          centerTitle: true,
-        ),
-        body: Consumer2<ExpenseProvider, CategoryProvider>(
-          builder: (context, expenseProvider, categoryProvider, child) {
-            if (expenseProvider.isLoading && expenseProvider.expenses.isEmpty) {
-              return const Center(child: CircularProgressIndicator());
-            }
+          ],
+          body: Consumer2<ExpenseProvider, CategoryProvider>(
+            builder: (context, expenseProvider, categoryProvider, child) {
+              if (expenseProvider.isLoading &&
+                  expenseProvider.expenses.isEmpty) {
+                return const Center(child: CircularProgressIndicator());
+              }
 
-            return CustomScrollView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              slivers: [
-                // 1. Month Navigation
-                SliverToBoxAdapter(
-                  child: _buildMonthNavigator(expenseProvider.currentMonthKey),
-                ),
-
-                // 2. Summary Header (Vibrant)
-                SliverToBoxAdapter(
-                  child: _buildPremiumSummary(expenseProvider),
-                ),
-
-                // 3. Section Title
-                if (expenseProvider.expenses.isNotEmpty)
+              return CustomScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                slivers: [
+                  // 1. Month Navigation
                   SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(24, 24, 24, 12),
-                      child: Text(
-                        'Planned Expenses',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: textColor,
+                    child:
+                        _buildMonthNavigator(expenseProvider.currentMonthKey),
+                  ),
+
+                  // 2. Summary Header (Vibrant)
+                  SliverToBoxAdapter(
+                    child: _buildPremiumSummary(expenseProvider),
+                  ),
+
+                  // 3. Section Title
+                  if (expenseProvider.expenses.isNotEmpty)
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(24, 24, 24, 12),
+                        child: Text(
+                          'Planned Expenses',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: textColor,
+                          ),
                         ),
                       ),
                     ),
-                  ),
 
-                // 4. Expense List
-                if (expenseProvider.expenses.isEmpty)
-                  SliverFillRemaining(
-                    hasScrollBody: false,
-                    child: _buildEmptyState(),
-                  )
-                else
-                  SliverPadding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24),
-                    sliver: SliverList(
-                      delegate: SliverChildBuilderDelegate(
-                        (context, index) {
-                          final expense = expenseProvider.expenses[index];
-                          return _buildExpenseCard(expense, expenseProvider);
-                        },
-                        childCount: expenseProvider.expenses.length,
+                  // 4. Expense List
+                  if (expenseProvider.expenses.isEmpty)
+                    SliverFillRemaining(
+                      hasScrollBody: false,
+                      child: _buildEmptyState(),
+                    )
+                  else
+                    SliverPadding(
+                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                      sliver: SliverList(
+                        delegate: SliverChildBuilderDelegate(
+                          (context, index) {
+                            final expense = expenseProvider.expenses[index];
+                            return _buildExpenseCard(expense, expenseProvider);
+                          },
+                          childCount: expenseProvider.expenses.length,
+                        ),
                       ),
                     ),
-                  ),
-                const SliverToBoxAdapter(child: SizedBox(height: 100)),
-              ],
-            );
-          },
+                  const SliverToBoxAdapter(child: SizedBox(height: 100)),
+                ],
+              );
+            },
+          ),
         ),
       ),
     );
@@ -151,18 +164,19 @@ class _MonthPlanScreenState extends State<MonthPlanScreen> {
 
   Widget _buildPremiumSummary(ExpenseProvider provider) {
     final summary = provider.summary;
-    final planned = summary['planned'] ?? 0.0;
-    final actual = summary['actual'] ?? 0.0;
-    final remaining = summary['remaining'] ?? 0.0;
-    final limit = summary['limit'] ?? 0.0;
-    final target = limit > 0 ? limit : planned;
+    final planned = (summary['planned'] ?? 0.0).toDouble();
+    final actual = (summary['actual'] ?? 0.0).toDouble();
+    // Use planned amount as target for this screen (ignoring global limit)
+    final target = planned;
+    final remaining = target - actual;
+    // limit is available in summary but we ignore it here as requested
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
-          colors: [AppTheme.primary, AppTheme.accent],
+          colors: [AppTheme.primary, AppTheme.primaryDark],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -195,31 +209,35 @@ class _MonthPlanScreenState extends State<MonthPlanScreen> {
                   ),
                 ],
               ),
-              GestureDetector(
-                onTap: () => _showLimitDialog(provider),
-                child: Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: const Icon(LucideIcons.edit2,
-                      size: 16, color: Colors.white),
-                ),
-              ),
             ],
           ),
           const SizedBox(height: 24),
           Row(
             children: [
-              _buildSummaryItem(
-                  limit > 0 ? 'Limit' : 'Planned', '₹${target.toInt()}'),
+              _buildSummaryItem('Planned', '₹${target.toInt()}'),
               Container(width: 1, height: 30, color: Colors.white24),
               _buildSummaryItem('Spent', '₹${actual.toInt()}'),
               Container(width: 1, height: 30, color: Colors.white24),
               _buildSummaryItem('Progress',
                   '${target > 0 ? (actual / target * 100).toInt() : 0}%'),
             ],
+          ),
+          const SizedBox(height: 24),
+          // Progress Bar
+          ClipRRect(
+            borderRadius: BorderRadius.circular(10),
+            child: LinearProgressIndicator(
+              value: (actual / (target > 0 ? target : 1)).clamp(0.0, 1.0),
+              backgroundColor: Colors.white.withOpacity(0.2),
+              valueColor: AlwaysStoppedAnimation<Color>(
+                (actual / (target > 0 ? target : 1)) > 1.0
+                    ? const Color(0xFFFF5252) // Red
+                    : (actual / (target > 0 ? target : 1)) > 0.75
+                        ? const Color(0xFFFFAB40) // Orange
+                        : Colors.white,
+              ),
+              minHeight: 8,
+            ),
           ),
         ],
       ),
@@ -238,53 +256,6 @@ class _MonthPlanScreenState extends State<MonthPlanScreen> {
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
                   fontSize: 16)),
-        ],
-      ),
-    );
-  }
-
-  void _showLimitDialog(ExpenseProvider provider) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final controller = TextEditingController(
-        text: provider.summary['limit']! > 0
-            ? provider.summary['limit']!.toStringAsFixed(0)
-            : '');
-
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Monthly Budget Limit',
-            style: TextStyle(fontWeight: FontWeight.bold)),
-        backgroundColor: isDark ? AppTheme.bgCardDark : Colors.white,
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text('Set a total spending limit for this month.'),
-            const SizedBox(height: 16),
-            TextField(
-              controller: controller,
-              keyboardType: TextInputType.number,
-              autofocus: true,
-              decoration: AppTheme.inputDecoration(
-                  'Amount', LucideIcons.indianRupee,
-                  context: context),
-              style: TextStyle(color: AppTheme.getTextColor(context)),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel')),
-          ElevatedButton(
-            onPressed: () {
-              final limit = double.tryParse(controller.text) ?? 0;
-              provider.updateMonthlyLimit(limit);
-              Navigator.pop(context);
-            },
-            child: const Text('Save'),
-          ),
         ],
       ),
     );
@@ -363,6 +334,11 @@ class _MonthPlanScreenState extends State<MonthPlanScreen> {
                   ],
                 ),
               ),
+              IconButton(
+                icon: Icon(LucideIcons.edit3,
+                    size: 18, color: secondaryTextColor),
+                onPressed: () => _showEditExpenseDialog(context, expense),
+              ),
               Checkbox(
                 value: expense.isPaid,
                 onChanged: (val) => _showPaidDialog(expense, provider),
@@ -440,6 +416,113 @@ class _MonthPlanScreenState extends State<MonthPlanScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  void _showEditExpenseDialog(BuildContext context, Expense expense) {
+    // Logic similar to add expense but with pre-filled data
+    final nameController = TextEditingController(text: expense.name);
+    final amountController =
+        TextEditingController(text: expense.plannedAmount.toStringAsFixed(0));
+    int? selectedCategoryId = expense.categoryId;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => StatefulBuilder(builder: (context, setModalState) {
+        final isDark = Theme.of(context).brightness == Brightness.dark;
+        final modalBgColor = isDark ? AppTheme.bgCardDark : Colors.white;
+        final textColor = AppTheme.getTextColor(context);
+        final categories = context.read<CategoryProvider>().categories;
+
+        return Container(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom + 40,
+            top: 32,
+            left: 32,
+            right: 32,
+          ),
+          decoration: BoxDecoration(
+            color: modalBgColor,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(40)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Edit Expense',
+                  style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.w900,
+                      color: textColor)),
+              const SizedBox(height: 32),
+              DropdownButtonFormField<int>(
+                value: selectedCategoryId,
+                dropdownColor: modalBgColor,
+                items: categories
+                    .map((c) => DropdownMenuItem(
+                        value: c.id,
+                        child:
+                            Text(c.name, style: TextStyle(color: textColor))))
+                    .toList(),
+                onChanged: (val) =>
+                    setModalState(() => selectedCategoryId = val),
+                decoration: AppTheme.inputDecoration(
+                    'Category', LucideIcons.layoutGrid,
+                    context: context),
+              ),
+              const SizedBox(height: 20),
+              TextField(
+                controller: nameController,
+                decoration: AppTheme.inputDecoration(
+                    'Description', LucideIcons.edit3,
+                    context: context),
+                style: TextStyle(color: textColor),
+              ),
+              const SizedBox(height: 20),
+              TextField(
+                controller: amountController,
+                keyboardType: TextInputType.number,
+                decoration: AppTheme.inputDecoration(
+                    'Amount', LucideIcons.target,
+                    context: context),
+                style: TextStyle(color: textColor),
+              ),
+              const SizedBox(height: 40),
+              SizedBox(
+                width: double.infinity,
+                height: 56,
+                child: ElevatedButton(
+                  onPressed: () async {
+                    if (nameController.text.isEmpty ||
+                        selectedCategoryId == null ||
+                        amountController.text.isEmpty) return;
+
+                    final updated = expense.copyWith(
+                      categoryId: selectedCategoryId,
+                      name: nameController.text,
+                      plannedAmount:
+                          double.tryParse(amountController.text) ?? 0,
+                    );
+
+                    await context
+                        .read<ExpenseProvider>()
+                        .updateExpense(updated);
+                    if (mounted) Navigator.pop(context);
+                  },
+                  style: ElevatedButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(18))),
+                  child: const Text('Update Plan',
+                      style:
+                          TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                ),
+              ),
+            ],
+          ),
+        );
+      }),
     );
   }
 }

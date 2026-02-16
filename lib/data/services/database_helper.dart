@@ -19,7 +19,7 @@ class DatabaseHelper {
 
     return await openDatabase(
       path,
-      version: 9,
+      version: 11,
       onCreate: _createDB,
       onUpgrade: _onUpgrade,
     );
@@ -85,6 +85,15 @@ class DatabaseHelper {
         await db.execute(
             'ALTER TABLE regular_payments ADD COLUMN duration_months INTEGER');
       } catch (_) {}
+    }
+    if (oldVersion < 10) {
+      try {
+        await db.execute(
+            'ALTER TABLE regular_payments ADD COLUMN duration_months INTEGER');
+      } catch (_) {}
+    }
+    if (oldVersion < 11) {
+      await _insertDefaultCategories(db);
     }
   }
 
@@ -167,6 +176,7 @@ class DatabaseHelper {
         is_active INTEGER DEFAULT 1,
         status TEXT,
         status_description TEXT,
+        duration_months INTEGER,
         synced INTEGER DEFAULT 0,
         created_at TEXT,
         updated_at TEXT,
@@ -219,23 +229,44 @@ class DatabaseHelper {
       )
     ''');
 
-    // Insert default categories
+    // Finalize DB creation
+    await _insertDefaultCategories(db);
+  }
+
+  Future<void> _insertDefaultCategories(Database db) async {
     final now = DateTime.now().toIso8601String();
     final categories = [
-      {'name': 'Food & Dining', 'icon': '🍔', 'color': '#0d9488'},
+      {'name': 'Food & Dining', 'icon': '🍕', 'color': '#0d9488'},
       {'name': 'Transportation', 'icon': '🚗', 'color': '#3b82f6'},
       {'name': 'Shopping', 'icon': '🛍️', 'color': '#f59e0b'},
       {'name': 'Bills & Utilities', 'icon': '💡', 'color': '#ef4444'},
       {'name': 'Entertainment', 'icon': '🎬', 'color': '#8b5cf6'},
       {'name': 'Healthcare', 'icon': '🏥', 'color': '#ec4899'},
+      {'name': 'Recharge', 'icon': '📱', 'color': '#0ea5e9'},
+      {'name': 'Petrol/Fuel', 'icon': '⛽', 'color': '#f97316'},
+      {'name': 'Travel', 'icon': '✈️', 'color': '#6366f1'},
+      {'name': 'Education', 'icon': '📚', 'color': '#8b5cf6'},
+      {'name': 'Groceries', 'icon': '🛒', 'color': '#10b981'},
+      {'name': 'Investment', 'icon': '📈', 'color': '#22c55e'},
+      {'name': 'Rent', 'icon': '🏠', 'color': '#64748b'},
+      {'name': 'Other', 'icon': '📦', 'color': '#94a3b8'},
     ];
 
     for (var cat in categories) {
-      await db.insert('categories', {
-        ...cat,
-        'synced': 0,
-        'created_at': now,
-      });
+      // Check if category already exists by name to avoid duplicates during upgrade
+      final List<Map<String, dynamic>> existing = await db.query(
+        'categories',
+        where: 'name = ?',
+        whereArgs: [cat['name']],
+      );
+
+      if (existing.isEmpty) {
+        await db.insert('categories', {
+          ...cat,
+          'synced': 0,
+          'created_at': now,
+        });
+      }
     }
   }
 
@@ -326,5 +357,15 @@ class DatabaseHelper {
         },
         where: 'id = ?',
         whereArgs: [id]);
+  }
+
+  Future<void> updatePassword(String username, String newPassword) async {
+    final db = await instance.database;
+    await db.update(
+      'users',
+      {'password': newPassword, 'updated_at': DateTime.now().toIso8601String()},
+      where: 'username = ?',
+      whereArgs: [username],
+    );
   }
 }

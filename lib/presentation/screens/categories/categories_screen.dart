@@ -23,85 +23,76 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
     final secondaryTextColor =
         AppTheme.getTextColor(context, isSecondary: true);
 
+    final isDark = themeProvider.isDarkMode;
+
     return Scaffold(
-      backgroundColor: Colors.transparent,
+      backgroundColor: isDark ? AppTheme.bgPrimaryDark : AppTheme.bgPrimary,
       body: Container(
-        decoration: themeProvider.isDarkMode
+        width: double.infinity,
+        height: double.infinity,
+        decoration: isDark
             ? AppTheme.darkBackgroundDecoration
             : AppTheme.backgroundDecoration,
-        child: Column(
-          children: [
-            AppBar(
-              title: Text('Categories',
-                  style:
-                      TextStyle(color: textColor, fontWeight: FontWeight.bold)),
-              backgroundColor: Colors.transparent,
-              elevation: 0,
-              centerTitle: true,
-            ),
-            Expanded(
-              child: Consumer<CategoryProvider>(
-                builder: (context, provider, child) {
-                  if (provider.isLoading) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
-
-                  if (provider.categories.isEmpty) {
-                    return _buildEmptyState(secondaryTextColor);
-                  }
-
-                  return CustomScrollView(
-                    slivers: [
-                      SliverToBoxAdapter(
-                        child: Padding(
-                          padding: const EdgeInsets.fromLTRB(24, 16, 24, 8),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Spending Categories',
-                                style: TextStyle(
-                                    fontSize: 24,
-                                    fontWeight: FontWeight.bold,
-                                    color: textColor),
-                              ),
-                              Text(
-                                'Organize your finances by category',
-                                style: TextStyle(
-                                    color: secondaryTextColor, fontSize: 13),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      SliverPadding(
-                        padding: const EdgeInsets.all(24),
-                        sliver: SliverList(
-                          delegate: SliverChildBuilderDelegate(
-                            (context, index) {
-                              final cat = provider.categories[index];
-                              return _buildCategoryItem(
-                                  context, cat, textColor, secondaryTextColor);
-                            },
-                            childCount: provider.categories.length,
-                          ),
-                        ),
-                      ),
-                    ],
-                  );
-                },
+        child: SafeArea(
+          bottom: false,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(26, 20, 26, 24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Organization',
+                        style: TextStyle(
+                            color: secondaryTextColor,
+                            fontSize: 13,
+                            letterSpacing: 0.5)),
+                    Text('Categories',
+                        style: TextStyle(
+                            fontSize: 26,
+                            fontWeight: FontWeight.w900,
+                            color: textColor,
+                            letterSpacing: -1)),
+                  ],
+                ),
               ),
-            ),
-          ],
+              Expanded(
+                child: Consumer<CategoryProvider>(
+                  builder: (context, provider, child) {
+                    if (provider.isLoading) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+
+                    if (provider.categories.isEmpty) {
+                      return _buildEmptyState(secondaryTextColor);
+                    }
+
+                    return ListView.builder(
+                      padding: const EdgeInsets.fromLTRB(26, 0, 26, 120),
+                      itemCount: provider.categories.length,
+                      itemBuilder: (context, index) {
+                        final cat = provider.categories[index];
+                        return _buildCategoryCard(
+                            context, cat, textColor, secondaryTextColor);
+                      },
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const CategoryAddScreen()),
-        ),
+        heroTag: 'categories_fab',
+        onPressed: () => Navigator.push(context,
+            MaterialPageRoute(builder: (context) => const CategoryAddScreen())),
         backgroundColor: AppTheme.primary,
-        child: const Icon(LucideIcons.plus, color: Colors.white),
+        elevation: 8,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+        child:
+            const Icon(LucideIcons.plus, color: AppTheme.primaryDark, size: 28),
       ),
     );
   }
@@ -109,78 +100,99 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
   Widget _buildEmptyState(Color secondaryTextColor) {
     return Center(
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(LucideIcons.folderOpen,
-              size: 64, color: secondaryTextColor.withValues(alpha: 0.5)),
-          const SizedBox(height: 16),
-          Text(
-            'No Categories Found',
-            style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: secondaryTextColor),
+          Container(
+            padding: const EdgeInsets.all(32),
+            decoration: BoxDecoration(
+              color: AppTheme.primary.withOpacity(0.05),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(LucideIcons.layoutGrid,
+                size: 64, color: AppTheme.primary.withOpacity(0.4)),
           ),
-          const SizedBox(height: 8),
-          Text(
-            'Start by adding some categories\nto track your expenses.',
-            textAlign: TextAlign.center,
-            style: TextStyle(color: secondaryTextColor),
-          ),
+          const SizedBox(height: 24),
+          Text('No categories found',
+              style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: secondaryTextColor)),
         ],
       ),
     );
   }
 
-  Widget _buildCategoryItem(BuildContext context, Category cat, Color textColor,
+  Widget _buildCategoryCard(BuildContext context, Category cat, Color textColor,
       Color secondaryTextColor) {
-    return GestureDetector(
-      onTap: () => Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => CategoryEditScreen(category: cat)),
+    final color =
+        Color(int.parse((cat.color ?? '#79D2C1').replaceFirst('#', '0xff')));
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardTheme.color,
+        borderRadius: BorderRadius.circular(28),
+        boxShadow: AppTheme.softShadow,
       ),
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 12),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        decoration: BoxDecoration(
-          color: Theme.of(context).cardTheme.color,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: AppTheme.softShadow,
-          border: Border.all(color: AppTheme.border.withValues(alpha: 0.1)),
+      child: ListTile(
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        leading: Container(
+          height: 52,
+          width: 52,
+          decoration: BoxDecoration(
+            color: color.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(16),
+          ),
+          alignment: Alignment.center,
+          child: Text(cat.icon ?? '📁', style: const TextStyle(fontSize: 24)),
         ),
-        child: Row(
+        title: Text(cat.name,
+            style: TextStyle(
+                fontWeight: FontWeight.w900, fontSize: 16, color: textColor)),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: AppTheme.primary.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Text(
-                cat.icon ?? '📁',
-                style: const TextStyle(fontSize: 18),
-              ),
+            IconButton(
+              icon: Icon(LucideIcons.edit3,
+                  size: 18, color: secondaryTextColor.withOpacity(0.6)),
+              onPressed: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => CategoryEditScreen(category: cat))),
             ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    cat.name,
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 15,
-                      color: textColor,
-                    ),
-                  ),
-                ],
-              ),
+            IconButton(
+              icon: const Icon(LucideIcons.trash2,
+                  size: 18, color: AppTheme.danger),
+              onPressed: () => _confirmDelete(context, cat),
             ),
-            Icon(LucideIcons.chevronRight, size: 16, color: secondaryTextColor),
           ],
         ),
+      ),
+    );
+  }
+
+  void _confirmDelete(BuildContext context, Category cat) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Category',
+            style: TextStyle(fontWeight: FontWeight.w900)),
+        content: Text('Are you sure you want to delete "${cat.name}"?'),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel')),
+          ElevatedButton(
+            onPressed: () {
+              context.read<CategoryProvider>().deleteCategory(cat.id);
+              Navigator.pop(context);
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: AppTheme.danger),
+            child: const Text('Delete'),
+          ),
+        ],
       ),
     );
   }

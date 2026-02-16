@@ -327,4 +327,17 @@ class ExpenseRepository {
       whereArgs: [syncQueueId],
     );
   }
+
+  // Get list of imported SMS IDs
+  Future<List<String>> getImportedSmsIds() async {
+    final db = await _dbHelper.database;
+    final result = await db.query(
+      'expenses',
+      columns: ['notes'],
+      where: "notes LIKE 'SMS_ID:%'",
+    );
+    return result
+        .map((e) => (e['notes'] as String).replaceFirst('SMS_ID:', ''))
+        .toList();
+  }
 }

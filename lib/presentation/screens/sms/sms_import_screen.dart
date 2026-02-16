@@ -17,6 +17,7 @@ class DetectedExpense {
   double amount;
   int? categoryId;
   String priority;
+  final DateTime? date;
   bool isSaving;
   bool isSuccess;
 
@@ -27,6 +28,7 @@ class DetectedExpense {
     required this.amount,
     this.categoryId,
     this.priority = 'MEDIUM',
+    this.date,
     this.isSaving = false,
     this.isSuccess = false,
   });
@@ -65,17 +67,25 @@ class _SmsImportScreenState extends State<SmsImportScreen>
     setState(() => _isLoading = true);
 
     try {
-      final messages = await _smsService.getRecentSms(limit: 100);
+      final importedIds =
+          await context.read<ExpenseProvider>().getImportedSmsIds();
+      final messages = await _smsService.getRecentSms(months: 6);
       final List<DetectedExpense> newExpenses = [];
 
       for (var msg in messages) {
+        final smsId = 'sms-${msg.id ?? DateTime.now().millisecondsSinceEpoch}';
+
+        // Skip if already imported
+        if (importedIds.contains(smsId)) continue;
+
         final parsed = _smsService.parseExpenseFromSms(msg.body ?? '');
         if (parsed != null) {
           newExpenses.add(DetectedExpense(
-            id: 'sms-${msg.id ?? DateTime.now().millisecondsSinceEpoch}',
+            id: smsId,
             raw: parsed['raw'],
             name: parsed['merchant'],
             amount: parsed['amount'],
+            date: msg.date,
           ));
         }
       }
@@ -192,25 +202,29 @@ class _SmsImportScreenState extends State<SmsImportScreen>
 
   Future<void> _importAll() async {
     final provider = context.read<ExpenseProvider>();
-    final currentMonth = provider.currentMonthKey;
 
     int successCount = 0;
     for (var i = 0; i < _detectedExpenses.length; i++) {
       final item = _detectedExpenses[i];
-      if (item.categoryId == null || item.amount == 0 || item.isSuccess)
-        continue;
+      if (item.amount == 0 || item.isSuccess) continue;
 
       setState(() => _detectedExpenses[i].isSaving = true);
       try {
+        final date = item.date ?? DateTime.now();
+        // Format month key as YYYY-MM
+        final monthKey =
+            "${date.year}-${date.month.toString().padLeft(2, '0')}";
+
         final expense = Expense(
-          monthKey: currentMonth,
+          monthKey: monthKey,
           categoryId: item.categoryId,
           name: item.name,
           plannedAmount: item.amount,
           actualAmount: item.amount,
           priority: item.priority,
           isPaid: true,
-          paidDate: DateTime.now().toIso8601String(),
+          paidDate: date.toIso8601String(),
+          notes: 'SMS_ID:${item.id}',
         );
         await provider.addExpense(expense);
         setState(() => _detectedExpenses[i].isSuccess = true);
@@ -236,38 +250,69 @@ class _SmsImportScreenState extends State<SmsImportScreen>
   @override
   Widget build(BuildContext context) {
     final themeProvider = context.watch<ThemeProvider>();
+    final isDark = themeProvider.isDarkMode;
     final textColor = AppTheme.getTextColor(context);
     final secondaryTextColor =
         AppTheme.getTextColor(context, isSecondary: true);
 
     return Scaffold(
-      backgroundColor: Colors.transparent,
+      backgroundColor: isDark ? AppTheme.bgPrimaryDark : AppTheme.bgPrimary,
       body: Container(
-        decoration: themeProvider.isDarkMode
+        width: double.infinity,
+        height: double.infinity,
+        decoration: isDark
             ? AppTheme.darkBackgroundDecoration
             : AppTheme.backgroundDecoration,
         child: Column(
           children: [
-            AppBar(
-              title: Text('Smart SMS Import',
-                  style:
-                      TextStyle(color: textColor, fontWeight: FontWeight.bold)),
-              backgroundColor: Colors.transparent,
-              elevation: 0,
-              centerTitle: true,
+            SafeArea(
+              bottom: false,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(26, 20, 26, 0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Smart Import',
+                            style: TextStyle(
+                                color: secondaryTextColor,
+                                fontSize: 13,
+                                letterSpacing: 0.5)),
+                        Text('SMS Scanner',
+                            style: TextStyle(
+                                fontSize: 26,
+                                fontWeight: FontWeight.w900,
+                                color: textColor,
+                                letterSpacing: -1)),
+                      ],
+                    ),
+                    IconButton(
+                        onPressed: () => Navigator.pop(context),
+                        icon: Icon(LucideIcons.x, color: secondaryTextColor))
+                  ],
+                ),
+              ),
             ),
             TabBar(
               controller: _tabController,
               indicatorColor: AppTheme.primary,
+              indicatorWeight: 3,
+              dividerColor: Colors.transparent,
               labelColor: AppTheme.primary,
               unselectedLabelColor: secondaryTextColor,
+              labelStyle:
+                  const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+              unselectedLabelStyle:
+                  const TextStyle(fontWeight: FontWeight.normal, fontSize: 13),
               tabs: const [
                 Tab(
                     text: 'Auto Sync',
-                    icon: Icon(LucideIcons.refreshCw, size: 20)),
+                    icon: Icon(LucideIcons.refreshCw, size: 18)),
                 Tab(
                     text: 'Manual Paste',
-                    icon: Icon(LucideIcons.clipboard, size: 20)),
+                    icon: Icon(LucideIcons.clipboard, size: 18)),
               ],
             ),
             Expanded(
@@ -286,10 +331,12 @@ class _SmsImportScreenState extends State<SmsImportScreen>
           ? FloatingActionButton.extended(
               onPressed: _importAll,
               backgroundColor: AppTheme.primary,
-              icon: const Icon(LucideIcons.checkSquare, color: Colors.white),
+              icon: const Icon(LucideIcons.checkSquare,
+                  color: AppTheme.primaryDark),
               label: const Text('Import All',
                   style: TextStyle(
-                      color: Colors.white, fontWeight: FontWeight.bold)),
+                      color: AppTheme.primaryDark,
+                      fontWeight: FontWeight.bold)),
             )
           : null,
     );
@@ -301,11 +348,12 @@ class _SmsImportScreenState extends State<SmsImportScreen>
         Padding(
           padding: const EdgeInsets.all(24),
           child: Container(
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
               color: Theme.of(context).cardTheme.color,
-              borderRadius: BorderRadius.circular(24),
+              borderRadius: BorderRadius.circular(28),
               boxShadow: AppTheme.softShadow,
+              border: Border.all(color: AppTheme.primary.withOpacity(0.1)),
             ),
             child: Column(
               children: [
@@ -330,12 +378,20 @@ class _SmsImportScreenState extends State<SmsImportScreen>
                   width: double.infinity,
                   child: ElevatedButton.icon(
                     onPressed: _isLoading ? null : _syncFromInbox,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppTheme.primary,
+                      foregroundColor: AppTheme.primaryDark,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                    ),
                     icon: _isLoading
                         ? const SizedBox(
                             width: 18,
                             height: 18,
                             child: CircularProgressIndicator(
-                                strokeWidth: 2, color: Colors.white))
+                                strokeWidth: 2, color: AppTheme.primaryDark))
                         : const Icon(LucideIcons.zap, size: 18),
                     label: Text(_isLoading ? 'Scanning...' : 'Start Auto Scan'),
                   ),
@@ -401,7 +457,8 @@ class _SmsImportScreenState extends State<SmsImportScreen>
                         icon: const Icon(LucideIcons.sparkles, size: 18),
                         label: const Text('AI Analysis'),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.deepPurple,
+                          backgroundColor: AppTheme.primary,
+                          foregroundColor: AppTheme.primaryDark,
                           padding: const EdgeInsets.symmetric(vertical: 14),
                         ),
                       ),

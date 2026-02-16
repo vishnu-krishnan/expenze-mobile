@@ -1,4 +1,4 @@
-package com.example.expenze_mobile
+package com.onebit.expenze
 
 import io.flutter.embedding.android.FlutterActivity
 

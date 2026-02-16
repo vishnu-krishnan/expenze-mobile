@@ -679,3 +679,54 @@ Relocated the Dark Mode toggle from the Profile screen to a newly created dedica
 - **Maintainability**: Clearer separation of concerns makes it easier to add future global settings (notifications, currency, etc.).
 
 Date: 2026-02-16
+
+## [2026-02-16] Auth & Settings Navigation Refinement
+
+**Change Type:** Minor
+
+**Decision Made:**
+Refined the authentication experience and streamlined the settings navigation. Moved User Profile management under the Settings screen and updated branding nomenclature from "Account Identity" to "User Profile".
+
+**Implementation:**
+1. **Authentication Improvements**:
+    - Renamed "Direct Setup" to "**Sign Up**" for better clarity.
+    - Enhanced the "**Continue with Google**" button with a more premium, rounded appearance.
+    - Improved "**Account not found**" error messages to guide users directly toward registration.
+2. **Navigation Reorganization**:
+    - **Settings Integration**: Added a dedicated "User Profile" entry inside the Settings screen.
+    - **Bottom Bar Optimization**: Removed the dedicated Profile tab from the bottom navigation bar, moving to a cleaner 4-tab system (Home, Analytics, Bills, Settings).
+3. **Profile Screen Update**:
+    - Renamed screen title from "**Account Identity**" to "**User Profile**".
+    - Added back-navigation support to allow seamless return to the Settings menu.
+
+**Impact:**
+- **UX**: Steadier onboarding flow with standard terminology (Sign Up vs Direct Setup).
+- **Navigation**: Reduced visual clutter in the main navigation bar while keeping settings centralized.
+- **Branding**: Professionalized the profile management section.
+
+Date: 2026-02-16
+
+## [2026-02-16] UI Total Revamp & Auth Resolution
+
+**Change Type:** Major | Patch
+
+**Decision Made:**
+Executed a total visual overhaul to align with modern "premium" mobile trends and resolved critical infrastructure issues (Hero conflicts and Google Auth configuration).
+
+**Implementation:**
+1. **Infrastructure & Auth Fixes**:
+    - **Google Sign-In**: Updated `AuthProvider` to use `GoogleSignIn.instance.initialize()` with `serverClientId` support from `.env`.
+    - **Hero Animation Fix**: Assigned unique `heroTag`s to all `FloatingActionButton`s to resolve the "multiple heroes share the same tag" crash.
+    - **Configuration**: Added `GOOGLE_SERVER_CLIENT_ID` placeholder and documentation to `.env`.
+2. **Visual Overhaul**:
+    - **Floating Bottom Bar**: Replaced the standard navigation bar with a glassmorphic, floating container featuring backdrop blur and animated icons.
+    - **Dashboard Refinement**: Redesigned the spending summary as a high-contrast gradient "Wallet Card" with integrated progress bars and micro-interactions.
+    - **Theming**: Transitioned the primary palette to a modern Indigo (`#6366F1`) and Emerald (`#10B981`) combination. Improved typography through consistent application of Google Fonts (Outfit).
+    - **Functional Polish**: Revamped Category lists, Analytics charts, and Subscription cards for better visual hierarchy and readability.
+
+**Impact:**
+- **Stability**: Fixed a fatal app crash related to navigation heroes and Google authentication.
+- **UX/Premium Feel**: The app now feels like a high-end financial tool rather than a generic utility.
+- **Branding**: Established a consistent, vibrant design language across all core screens.
+
+Date: 2026-02-16
