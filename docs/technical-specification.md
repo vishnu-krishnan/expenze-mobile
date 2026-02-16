@@ -1,79 +1,37 @@
-# Technical Specification - Offline-First Financial Tracking
+# Technical Specification - Data Connectivity & Business Logic
 
-## System Overview
-The Expenze Mobile application is built using Flutter and follows a Clean Architecture pattern. It utilizes local persistence layers (SQLite and SharedPreferences) to ensure 100% functionality without internet dependencies.
+Date: 2026-02-16
 
-## Architecture Diagram (ASCII)
-```
-[ Presentation Layer ]
-      |
-  [ Providers/Bloc ] <--- [ AuthState, UIState ]
-      |
-[ Data Layer ]
-      |
-  [ Repository ] <---------+
-      |                   |
-[ Database Service ]   [ Cache Service ]
-(SQLite)               (SharedPreferences)
-```
+System overview
+A Flutter-based financial tracking system using Provider for state management and SQLite for local persistence.
 
-## Component Breakdown
-- **AuthProvider:** Manages session lifecycle, SharedPreferences tokens, and user profile persistence.
-- **ExpenseProvider:** Handles logic for monthly spending, summaries, and interactions with ExpenseRepository.
-- **ExpenseRepository:** Abstracts SQLite CRUD operations for the `expenses` table.
-- **DatabaseHelper:** Singleton managing database creation, versioning, and migrations.
+Architecture diagram (ASCII)
 
-## Data Flow
-1. UI triggers Action (e.g., Add Expense).
-2. Provider calls Repository.
-3. Repository maps Model to Map and executes SQL via DatabaseHelper.
-4. DatabaseHelper returns result.
-5. Provider updates local state and calls `notifyListeners()`.
-6. UI rebuilds with updated data.
+[ UI Layer ] <---- [ Provider ] <---- [ Repository ] <---- [ SQLite ]
+(Dashboard,         (State,             (Queries,           (tables:
+ Analytics)          Logic)              ORM)                expenses, 
+                                                              categories)
 
-## API Contracts (None)
-Core operations are local. Remote authentication (Google) uses the `google_sign_in` plugin which returns a unique ID for local user mapping.
+Component breakdown
+1. ExpenseRepository: Handles complex SQL aggregations for trends (AVG, MAX, SUM).
+2. ExpenseProvider: Synchronizes data between screens; manages 'avgMonthlySpent' and 'maxMonthlySpent' state.
+3. DashboardScreen: Implementation of dynamic category builders and navigation hooks.
+4. AnalyticsScreen: Integration with fl_chart using real-time data series.
 
-## Validation Rules
-- Expense Amount: Must be positive decimal.
-- Category: Must exist in local `categories` table.
-- Date: Defaults to current timestamp but must be ISO8601 compliant.
+Data flow
+- CRUD Operation -> Repository -> DB
+- DB Update -> Repository -> Provider -> UI Rebuild
 
-## Error Handling
-- Database Failures: Wrapped in try-catch with UI feedback via Provider `error` state.
-- Form Validation: Material Design validation in `TextFormField` hooks.
+API contracts
+- getTrends(int months): List<Map<String, dynamic>>
+- getAnalyticsSummary(int months): Map<String, double>
+- getCategoryBreakdown(String monthKey): List<Map<String, dynamic>>
 
-## Schema Changes
-`regular_payments` table (Version 2):
-- Added `notes` (TEXT)
-- Added `start_date` (TEXT)
-- Added `end_date` (TEXT)
-- Added `frequency` (TEXT)
+Security model
+- Local SQLite database with no external network exposure for financial data.
+- Input validation on all amount and date fields.
 
-## Security Model
-- Local session token in SharedPreferences.
-- DB cleanup logic for factory reset scenarios.
-- Google Auth for identity verification.
-
-## Performance Analysis
-- SQLite query optimization via proper indexing.
-- Lazy data loading for monthly views.
-- 0ms network latency for all core operations.
-
-## Scalability Plan
-- Implementation of pagination for expense lists.
-- SQL indexing for search and filter performance.
-
-## Monitoring Plan
-- Structured logging using `logger` package.
-- Local error logging for debugging (Future).
-
-## Deployment Plan
-- Google Play Store deployment via CI/CD.
-- App Bundle optimization.
-
-## Rollback Plan
-- Versioned database migrations allow schema rollback if necessary.
-- Git-based code rollback.
-
-Date: 2026-02-12
+Testing plan
+- Validate total calculations against manual sum of entries.
+- Verify trend line orientation (Oldest -> Newest).
+- Verify navigation links from Dashboard to sub-screens.

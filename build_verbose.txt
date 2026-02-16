@@ -1,0 +1,894 @@
+[ +163 ms] executing: uname -m
+[  +62 ms] Exit code 0 from: uname -m
+[   +1 ms] x86_64
+[ +452 ms] Artifact Instance of 'AndroidGenSnapshotArtifacts' is not required, skipping update.
+[   +4 ms] Artifact Instance of 'AndroidInternalBuildArtifacts' is not required, skipping update.
+[   +7 ms] Artifact Instance of 'IOSEngineArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'FlutterWebSdk' is not required, skipping update.
+[        ] Artifact Instance of 'LegacyCanvasKitRemover' is not required, skipping update.
+[  +45 ms] Artifact Instance of 'WindowsEngineArtifacts' is not required, skipping update.
+[   +2 ms] Artifact Instance of 'MacOSEngineArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'LinuxEngineArtifacts' is not required, skipping update.
+[   +4 ms] Artifact Instance of 'LinuxFuchsiaSDKArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'MacOSFuchsiaSDKArtifacts' is not required, skipping update.
+[   +5 ms] Artifact Instance of 'FlutterRunnerSDKArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'FlutterRunnerDebugSymbols' is not required, skipping update.
+[ +373 ms] Artifact Instance of 'MaterialFonts' is not required, skipping update.
+[        ] Artifact Instance of 'GradleWrapper' is not required, skipping update.
+[   +9 ms] Artifact Instance of 'AndroidInternalBuildArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'IOSEngineArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'FlutterWebSdk' is not required, skipping update.
+[        ] Artifact Instance of 'LegacyCanvasKitRemover' is not required, skipping update.
+[        ] Artifact Instance of 'FlutterSdk' is not required, skipping update.
+[        ] Artifact Instance of 'WindowsEngineArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'MacOSEngineArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'LinuxEngineArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'LinuxFuchsiaSDKArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'MacOSFuchsiaSDKArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'FlutterRunnerSDKArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'FlutterRunnerDebugSymbols' is not required, skipping update.
+[        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'FontSubsetArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'PubDependencies' is not required, skipping update.
+[+1571 ms] Skipping pub get: version match.
+[ +232 ms] Found plugin another_telephony at /home/seq_vishnu/.pub-cache/hosted/pub.dev/another_telephony-0.4.1/
+[ +382 ms] Found plugin google_sign_in at /home/seq_vishnu/.pub-cache/hosted/pub.dev/google_sign_in-7.1.1/
+[  +14 ms] Found plugin google_sign_in_android at /home/seq_vishnu/.pub-cache/hosted/pub.dev/google_sign_in_android-7.0.3/
+[  +30 ms] Found plugin google_sign_in_ios at /home/seq_vishnu/.pub-cache/hosted/pub.dev/google_sign_in_ios-6.1.0/
+[  +45 ms] Found plugin google_sign_in_web at /home/seq_vishnu/.pub-cache/hosted/pub.dev/google_sign_in_web-1.0.0/
+[ +216 ms] Found plugin path_provider at /home/seq_vishnu/.pub-cache/hosted/pub.dev/path_provider-2.1.5/
+[  +13 ms] Found plugin path_provider_android at /home/seq_vishnu/.pub-cache/hosted/pub.dev/path_provider_android-2.2.17/
+[  +13 ms] Found plugin path_provider_foundation at /home/seq_vishnu/.pub-cache/hosted/pub.dev/path_provider_foundation-2.4.1/
+[  +27 ms] Found plugin path_provider_linux at /home/seq_vishnu/.pub-cache/hosted/pub.dev/path_provider_linux-2.2.1/
+[  +21 ms] Found plugin path_provider_windows at /home/seq_vishnu/.pub-cache/hosted/pub.dev/path_provider_windows-2.3.0/
+[  +18 ms] Found plugin permission_handler at /home/seq_vishnu/.pub-cache/hosted/pub.dev/permission_handler-12.0.1/
+[   +8 ms] Found plugin permission_handler_android at /home/seq_vishnu/.pub-cache/hosted/pub.dev/permission_handler_android-13.0.1/
+[   +8 ms] Found plugin permission_handler_apple at /home/seq_vishnu/.pub-cache/hosted/pub.dev/permission_handler_apple-9.4.7/
+[   +9 ms] Found plugin permission_handler_html at /home/seq_vishnu/.pub-cache/hosted/pub.dev/permission_handler_html-0.1.3+5/
+[  +13 ms] Found plugin permission_handler_windows at /home/seq_vishnu/.pub-cache/hosted/pub.dev/permission_handler_windows-0.2.1/
+[  +48 ms] Found plugin shared_preferences at /home/seq_vishnu/.pub-cache/hosted/pub.dev/shared_preferences-2.5.3/
+[  +10 ms] Found plugin shared_preferences_android at /home/seq_vishnu/.pub-cache/hosted/pub.dev/shared_preferences_android-2.4.11/
+[   +7 ms] Found plugin shared_preferences_foundation at /home/seq_vishnu/.pub-cache/hosted/pub.dev/shared_preferences_foundation-2.5.4/
+[   +7 ms] Found plugin shared_preferences_linux at /home/seq_vishnu/.pub-cache/hosted/pub.dev/shared_preferences_linux-2.4.1/
+[  +12 ms] Found plugin shared_preferences_web at /home/seq_vishnu/.pub-cache/hosted/pub.dev/shared_preferences_web-2.4.3/
+[   +6 ms] Found plugin shared_preferences_windows at /home/seq_vishnu/.pub-cache/hosted/pub.dev/shared_preferences_windows-2.4.1/
+[  +13 ms] Found plugin sqflite at /home/seq_vishnu/.pub-cache/hosted/pub.dev/sqflite-2.4.1/
+[   +7 ms] Found plugin sqflite_android at /home/seq_vishnu/.pub-cache/hosted/pub.dev/sqflite_android-2.4.0/
+[  +14 ms] Found plugin sqflite_darwin at /home/seq_vishnu/.pub-cache/hosted/pub.dev/sqflite_darwin-2.4.1+1/
+[ +189 ms] Found plugin another_telephony at /home/seq_vishnu/.pub-cache/hosted/pub.dev/another_telephony-0.4.1/
+[  +73 ms] Found plugin google_sign_in at /home/seq_vishnu/.pub-cache/hosted/pub.dev/google_sign_in-7.1.1/
+[   +4 ms] Found plugin google_sign_in_android at /home/seq_vishnu/.pub-cache/hosted/pub.dev/google_sign_in_android-7.0.3/
+[   +6 ms] Found plugin google_sign_in_ios at /home/seq_vishnu/.pub-cache/hosted/pub.dev/google_sign_in_ios-6.1.0/
+[   +8 ms] Found plugin google_sign_in_web at /home/seq_vishnu/.pub-cache/hosted/pub.dev/google_sign_in_web-1.0.0/
+[  +51 ms] Found plugin path_provider at /home/seq_vishnu/.pub-cache/hosted/pub.dev/path_provider-2.1.5/
+[   +4 ms] Found plugin path_provider_android at /home/seq_vishnu/.pub-cache/hosted/pub.dev/path_provider_android-2.2.17/
+[   +3 ms] Found plugin path_provider_foundation at /home/seq_vishnu/.pub-cache/hosted/pub.dev/path_provider_foundation-2.4.1/
+[   +4 ms] Found plugin path_provider_linux at /home/seq_vishnu/.pub-cache/hosted/pub.dev/path_provider_linux-2.2.1/
+[   +6 ms] Found plugin path_provider_windows at /home/seq_vishnu/.pub-cache/hosted/pub.dev/path_provider_windows-2.3.0/
+[   +4 ms] Found plugin permission_handler at /home/seq_vishnu/.pub-cache/hosted/pub.dev/permission_handler-12.0.1/
+[   +3 ms] Found plugin permission_handler_android at /home/seq_vishnu/.pub-cache/hosted/pub.dev/permission_handler_android-13.0.1/
+[   +2 ms] Found plugin permission_handler_apple at /home/seq_vishnu/.pub-cache/hosted/pub.dev/permission_handler_apple-9.4.7/
+[   +3 ms] Found plugin permission_handler_html at /home/seq_vishnu/.pub-cache/hosted/pub.dev/permission_handler_html-0.1.3+5/
+[   +5 ms] Found plugin permission_handler_windows at /home/seq_vishnu/.pub-cache/hosted/pub.dev/permission_handler_windows-0.2.1/
+[  +14 ms] Found plugin shared_preferences at /home/seq_vishnu/.pub-cache/hosted/pub.dev/shared_preferences-2.5.3/
+[   +3 ms] Found plugin shared_preferences_android at /home/seq_vishnu/.pub-cache/hosted/pub.dev/shared_preferences_android-2.4.11/
+[   +3 ms] Found plugin shared_preferences_foundation at /home/seq_vishnu/.pub-cache/hosted/pub.dev/shared_preferences_foundation-2.5.4/
+[   +3 ms] Found plugin shared_preferences_linux at /home/seq_vishnu/.pub-cache/hosted/pub.dev/shared_preferences_linux-2.4.1/
+[   +5 ms] Found plugin shared_preferences_web at /home/seq_vishnu/.pub-cache/hosted/pub.dev/shared_preferences_web-2.4.3/
+[   +3 ms] Found plugin shared_preferences_windows at /home/seq_vishnu/.pub-cache/hosted/pub.dev/shared_preferences_windows-2.4.1/
+[   +7 ms] Found plugin sqflite at /home/seq_vishnu/.pub-cache/hosted/pub.dev/sqflite-2.4.1/
+[   +4 ms] Found plugin sqflite_android at /home/seq_vishnu/.pub-cache/hosted/pub.dev/sqflite_android-2.4.0/
+[   +8 ms] Found plugin sqflite_darwin at /home/seq_vishnu/.pub-cache/hosted/pub.dev/sqflite_darwin-2.4.1+1/
+[ +122 ms] Found plugin another_telephony at /home/seq_vishnu/.pub-cache/hosted/pub.dev/another_telephony-0.4.1/
+[  +49 ms] Found plugin google_sign_in at /home/seq_vishnu/.pub-cache/hosted/pub.dev/google_sign_in-7.1.1/
+[   +2 ms] Found plugin google_sign_in_android at /home/seq_vishnu/.pub-cache/hosted/pub.dev/google_sign_in_android-7.0.3/
+[   +3 ms] Found plugin google_sign_in_ios at /home/seq_vishnu/.pub-cache/hosted/pub.dev/google_sign_in_ios-6.1.0/
+[   +8 ms] Found plugin google_sign_in_web at /home/seq_vishnu/.pub-cache/hosted/pub.dev/google_sign_in_web-1.0.0/
+[  +45 ms] Found plugin path_provider at /home/seq_vishnu/.pub-cache/hosted/pub.dev/path_provider-2.1.5/
+[   +3 ms] Found plugin path_provider_android at /home/seq_vishnu/.pub-cache/hosted/pub.dev/path_provider_android-2.2.17/
+[   +3 ms] Found plugin path_provider_foundation at /home/seq_vishnu/.pub-cache/hosted/pub.dev/path_provider_foundation-2.4.1/
+[   +3 ms] Found plugin path_provider_linux at /home/seq_vishnu/.pub-cache/hosted/pub.dev/path_provider_linux-2.2.1/
+[   +5 ms] Found plugin path_provider_windows at /home/seq_vishnu/.pub-cache/hosted/pub.dev/path_provider_windows-2.3.0/
+[   +2 ms] Found plugin permission_handler at /home/seq_vishnu/.pub-cache/hosted/pub.dev/permission_handler-12.0.1/
+[   +2 ms] Found plugin permission_handler_android at /home/seq_vishnu/.pub-cache/hosted/pub.dev/permission_handler_android-13.0.1/
+[   +5 ms] Found plugin permission_handler_apple at /home/seq_vishnu/.pub-cache/hosted/pub.dev/permission_handler_apple-9.4.7/
+[   +3 ms] Found plugin permission_handler_html at /home/seq_vishnu/.pub-cache/hosted/pub.dev/permission_handler_html-0.1.3+5/
+[   +5 ms] Found plugin permission_handler_windows at /home/seq_vishnu/.pub-cache/hosted/pub.dev/permission_handler_windows-0.2.1/
+[  +12 ms] Found plugin shared_preferences at /home/seq_vishnu/.pub-cache/hosted/pub.dev/shared_preferences-2.5.3/
+[   +2 ms] Found plugin shared_preferences_android at /home/seq_vishnu/.pub-cache/hosted/pub.dev/shared_preferences_android-2.4.11/
+[   +2 ms] Found plugin shared_preferences_foundation at /home/seq_vishnu/.pub-cache/hosted/pub.dev/shared_preferences_foundation-2.5.4/
+[   +2 ms] Found plugin shared_preferences_linux at /home/seq_vishnu/.pub-cache/hosted/pub.dev/shared_preferences_linux-2.4.1/
+[   +5 ms] Found plugin shared_preferences_web at /home/seq_vishnu/.pub-cache/hosted/pub.dev/shared_preferences_web-2.4.3/
+[   +3 ms] Found plugin shared_preferences_windows at /home/seq_vishnu/.pub-cache/hosted/pub.dev/shared_preferences_windows-2.4.1/
+[   +5 ms] Found plugin sqflite at /home/seq_vishnu/.pub-cache/hosted/pub.dev/sqflite-2.4.1/
+[   +3 ms] Found plugin sqflite_android at /home/seq_vishnu/.pub-cache/hosted/pub.dev/sqflite_android-2.4.0/
+[   +5 ms] Found plugin sqflite_darwin at /home/seq_vishnu/.pub-cache/hosted/pub.dev/sqflite_darwin-2.4.1+1/
+[  +54 ms] Generating /home/seq_vishnu/WORK/RnD/expenze-mobile/android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java
+[ +285 ms] Support for Android x86 targets will be removed in the next stable release after 3.27. See https://github.com/flutter/flutter/issues/157543 for details.
+[  +14 ms] Android Studio version could not be detected, skipping Gradle-Java version compatibility check.
+[   +7 ms] CMake project not found, skipping support Android 15 16k page size migration.
+[  +21 ms] Using gradle from /home/seq_vishnu/WORK/RnD/expenze-mobile/android/gradlew.
+[  +14 ms] Running Gradle task 'assembleDebug'...
+[  +16 ms] executing: [/home/seq_vishnu/WORK/RnD/expenze-mobile/android/] /home/seq_vishnu/WORK/RnD/expenze-mobile/android/gradlew --full-stacktrace --info -Pverbose=true -Ptarget-platform=android-arm,android-arm64,android-x86,android-x64 -Ptarget=lib/main.dart -Pbase-application-name=android.app.Application -Pdart-obfuscation=false -Ptrack-widget-creation=true -Ptree-shake-icons=false assembleDebug
+[+1541 ms] Initialized native services in: /home/seq_vishnu/.gradle/native
+[   +1 ms] Initialized jansi services in: /home/seq_vishnu/.gradle/native
+[ +214 ms] Received JVM installation metadata from '/usr/lib/jvm/java-21-openjdk-amd64': {JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64, JAVA_VERSION=21.0.10, JAVA_VENDOR=Ubuntu, RUNTIME_NAME=OpenJDK Runtime Environment, RUNTIME_VERSION=21.0.10+7-Ubuntu-124.04, VM_NAME=OpenJDK 64-Bit Server VM, VM_VERSION=21.0.10+7-Ubuntu-124.04, VM_VENDOR=Ubuntu, OS_ARCH=amd64}
+[ +300 ms] Found daemon DaemonInfo{pid=8356, address=[2ebdb367-24e1-4140-8460-4ce6b37f1968 port:45295, addresses:[/127.0.0.1]], state=Idle, lastBusy=1770983595017, context=DefaultDaemonContext[uid=a36fca08-259c-4efc-b389-e347ffc87c19,javaHome=/usr/lib/jvm/java-21-openjdk-amd64,daemonRegistryDir=/home/seq_vishnu/.gradle/daemon,pid=8356,idleTimeout=10800000,priority=NORMAL,applyInstrumentationAgent=true,daemonOpts=-XX:MaxMetaspaceSize=2G,-XX:+HeapDumpOnOutOfMemoryError,--add-opens=java.base/java.util=ALL-UNNAMED,--add-opens=java.base/java.lang=ALL-UNNAMED,--add-opens=java.base/java.lang.invoke=ALL-UNNAMED,--add-opens=java.prefs/java.util.prefs=ALL-UNNAMED,--add-opens=java.base/java.nio.charset=ALL-UNNAMED,--add-opens=java.base/java.net=ALL-UNNAMED,--add-opens=java.base/java.util.concurrent.atomic=ALL-UNNAMED,-Xmx4G,-Dfile.encoding=utf8,-Duser.country=US,-Duser.language=en,-Duser.variant]} however its context does not match the desired criteria.
+[        ] At least one daemon option is different.
+[   +1 ms] Wanted: DefaultDaemonContext[uid=null,javaHome=/usr/lib/jvm/java-21-openjdk-amd64,daemonRegistryDir=/home/seq_vishnu/.gradle/daemon,pid=17265,idleTimeout=null,priority=NORMAL,applyInstrumentationAgent=true,daemonOpts=-XX:MaxMetaspaceSize=2G,-XX:+HeapDumpOnOutOfMemoryError,--add-opens=java.base/java.util=ALL-UNNAMED,--add-opens=java.base/java.lang=ALL-UNNAMED,--add-opens=java.base/java.lang.invoke=ALL-UNNAMED,--add-opens=java.prefs/java.util.prefs=ALL-UNNAMED,--add-opens=java.base/java.nio.charset=ALL-UNNAMED,--add-opens=java.base/java.net=ALL-UNNAMED,--add-opens=java.base/java.util.concurrent.atomic=ALL-UNNAMED,-Xmx4G,-Dfile.encoding=UTF-8,-Duser.country=US,-Duser.language=en,-Duser.variant]
+[   +1 ms] Actual: DefaultDaemonContext[uid=a36fca08-259c-4efc-b389-e347ffc87c19,javaHome=/usr/lib/jvm/java-21-openjdk-amd64,daemonRegistryDir=/home/seq_vishnu/.gradle/daemon,pid=8356,idleTimeout=10800000,priority=NORMAL,applyInstrumentationAgent=true,daemonOpts=-XX:MaxMetaspaceSize=2G,-XX:+HeapDumpOnOutOfMemoryError,--add-opens=java.base/java.util=ALL-UNNAMED,--add-opens=java.base/java.lang=ALL-UNNAMED,--add-opens=java.base/java.lang.invoke=ALL-UNNAMED,--add-opens=java.prefs/java.util.prefs=ALL-UNNAMED,--add-opens=java.base/java.nio.charset=ALL-UNNAMED,--add-opens=java.base/java.net=ALL-UNNAMED,--add-opens=java.base/java.util.concurrent.atomic=ALL-UNNAMED,-Xmx4G,-Dfile.encoding=utf8,-Duser.country=US,-Duser.language=en,-Duser.variant]
+[        ]   Looking for a different daemon...
+[   +1 ms] Found daemon DaemonInfo{pid=10687, address=[5de1034e-7c4b-49e0-b433-66e41e233924 port:36929, addresses:[/127.0.0.1]], state=Idle, lastBusy=1770983867593, context=DefaultDaemonContext[uid=a80174ec-7b4b-4da8-aaca-4e8c197cc2df,javaHome=/usr/lib/jvm/java-17-openjdk-amd64,daemonRegistryDir=/home/seq_vishnu/.gradle/daemon,pid=10687,idleTimeout=10800000,priority=NORMAL,applyInstrumentationAgent=true,daemonOpts=-XX:MaxMetaspaceSize=2G,-XX:+HeapDumpOnOutOfMemoryError,--add-opens=java.base/java.util=ALL-UNNAMED,--add-opens=java.base/java.lang=ALL-UNNAMED,--add-opens=java.base/java.lang.invoke=ALL-UNNAMED,--add-opens=java.prefs/java.util.prefs=ALL-UNNAMED,--add-opens=java.base/java.nio.charset=ALL-UNNAMED,--add-opens=java.base/java.net=ALL-UNNAMED,--add-opens=java.base/java.util.concurrent.atomic=ALL-UNNAMED,-Xmx4G,-Dfile.encoding=utf8,-Duser.country=US,-Duser.language=en,-Duser.variant]} however its context does not match the desired criteria.
+[   +1 ms] Java home is different.
+[   +1 ms] Wanted: DefaultDaemonContext[uid=null,javaHome=/usr/lib/jvm/java-21-openjdk-amd64,daemonRegistryDir=/home/seq_vishnu/.gradle/daemon,pid=17265,idleTimeout=null,priority=NORMAL,applyInstrumentationAgent=true,daemonOpts=-XX:MaxMetaspaceSize=2G,-XX:+HeapDumpOnOutOfMemoryError,--add-opens=java.base/java.util=ALL-UNNAMED,--add-opens=java.base/java.lang=ALL-UNNAMED,--add-opens=java.base/java.lang.invoke=ALL-UNNAMED,--add-opens=java.prefs/java.util.prefs=ALL-UNNAMED,--add-opens=java.base/java.nio.charset=ALL-UNNAMED,--add-opens=java.base/java.net=ALL-UNNAMED,--add-opens=java.base/java.util.concurrent.atomic=ALL-UNNAMED,-Xmx4G,-Dfile.encoding=UTF-8,-Duser.country=US,-Duser.language=en,-Duser.variant]
+[   +1 ms] Actual: DefaultDaemonContext[uid=a80174ec-7b4b-4da8-aaca-4e8c197cc2df,javaHome=/usr/lib/jvm/java-17-openjdk-amd64,daemonRegistryDir=/home/seq_vishnu/.gradle/daemon,pid=10687,idleTimeout=10800000,priority=NORMAL,applyInstrumentationAgent=true,daemonOpts=-XX:MaxMetaspaceSize=2G,-XX:+HeapDumpOnOutOfMemoryError,--add-opens=java.base/java.util=ALL-UNNAMED,--add-opens=java.base/java.lang=ALL-UNNAMED,--add-opens=java.base/java.lang.invoke=ALL-UNNAMED,--add-opens=java.prefs/java.util.prefs=ALL-UNNAMED,--add-opens=java.base/java.nio.charset=ALL-UNNAMED,--add-opens=java.base/java.net=ALL-UNNAMED,--add-opens=java.base/java.util.concurrent.atomic=ALL-UNNAMED,-Xmx4G,-Dfile.encoding=utf8,-Duser.country=US,-Duser.language=en,-Duser.variant]
+[        ]   Looking for a different daemon...
+[  +88 ms] The client will now receive all logging from the daemon (pid: 14713). The daemon log file: /home/seq_vishnu/.gradle/daemon/8.4/daemon-14713.out.log
+[   +1 ms] Starting 7th build in daemon [uptime: 7 mins 9.988 secs, performance: 100%, GC rate: 0.00/s, heap usage: 0% of 4 GiB, non-heap usage: 7% of 2 GiB]
+[   +1 ms] Using 8 worker leases.
+[   +1 ms] Now considering [/home/seq_vishnu/WORK/RnD/expenze-mobile/android, /home/seq_vishnu/flutter/packages/flutter_tools/gradle] as hierarchies to watch
+[        ] Watching the file system is configured to be enabled if available
+[        ] File system watching is active
+[        ] Starting Build
+[        ] Now considering [/home/seq_vishnu/flutter/packages/flutter_tools/gradle, /home/seq_vishnu/WORK/RnD/expenze-mobile/android] as hierarchies to watch
+[  +96 ms] > Configure project :gradle
+[   +1 ms] Evaluating project ':gradle' using build file '/home/seq_vishnu/flutter/packages/flutter_tools/gradle/build.gradle.kts'.
+[        ] Caching disabled for Kotlin DSL accessors for project ':gradle' because:
+[        ]   Build cache is disabled
+[        ] Skipping Kotlin DSL accessors for project ':gradle' as it is up-to-date.
+[  +92 ms] Resolve mutations for :gradle:compileJava (Thread[#445,Execution worker,5,main]) started.
+[        ] :gradle:compileJava (Thread[#445,Execution worker,5,main]) started.
+[        ] > Task :gradle:compileJava NO-SOURCE
+[        ] Skipping task ':gradle:compileJava' as it has no source files and no previous output files.
+[        ] Resolve mutations for :gradle:compileGroovy (Thread[#445,Execution worker,5,main]) started.
+[        ] :gradle:compileGroovy (Thread[#445,Execution worker,5,main]) started.
+[        ] > Task :gradle:compileGroovy UP-TO-DATE
+[        ] Caching disabled for task ':gradle:compileGroovy' because:
+[        ]   Build cache is disabled
+[        ] Skipping task ':gradle:compileGroovy' as it is up-to-date.
+[        ] Resolve mutations for :gradle:pluginDescriptors (Thread[#445,Execution worker,5,main]) started.
+[        ] :gradle:pluginDescriptors (Thread[#445,Execution worker,5,main]) started.
+[   +1 ms] > Task :gradle:pluginDescriptors UP-TO-DATE
+[        ] Caching disabled for task ':gradle:pluginDescriptors' because:
+[        ]   Build cache is disabled
+[        ] Skipping task ':gradle:pluginDescriptors' as it is up-to-date.
+[        ] Resolve mutations for :gradle:processResources (Thread[#445,Execution worker,5,main]) started.
+[        ] :gradle:processResources (Thread[#445,Execution worker,5,main]) started.
+[        ] > Task :gradle:processResources UP-TO-DATE
+[        ] Caching disabled for task ':gradle:processResources' because:
+[        ]   Build cache is disabled
+[        ] Skipping task ':gradle:processResources' as it is up-to-date.
+[        ] Resolve mutations for :gradle:classes (Thread[#445,Execution worker,5,main]) started.
+[        ] :gradle:classes (Thread[#450,Execution worker Thread 6,5,main]) started.
+[        ] > Task :gradle:classes UP-TO-DATE
+[        ] Skipping task ':gradle:classes' as it has no actions.
+[        ] Resolve mutations for :gradle:jar (Thread[#450,Execution worker Thread 6,5,main]) started.
+[        ] :gradle:jar (Thread[#450,Execution worker Thread 6,5,main]) started.
+[        ] > Task :gradle:jar UP-TO-DATE
+[        ] Caching disabled for task ':gradle:jar' because:
+[        ]   Build cache is disabled
+[        ] Skipping task ':gradle:jar' as it is up-to-date.
+[ +282 ms] Settings evaluated using settings file '/home/seq_vishnu/WORK/RnD/expenze-mobile/android/settings.gradle'.
+[   +1 ms] Projects loaded. Root project using build file '/home/seq_vishnu/WORK/RnD/expenze-mobile/android/build.gradle'.
+[        ] Included projects: [root project 'android', project ':app']
+[        ] > Configure project :
+[        ] Evaluating root project 'android' using build file '/home/seq_vishnu/WORK/RnD/expenze-mobile/android/build.gradle'.
+[ +597 ms] > Configure project :app
+[   +2 ms] Evaluating project ':app' using build file '/home/seq_vishnu/WORK/RnD/expenze-mobile/android/app/build.gradle'.
+[        ] WARNING: The option setting 'android.defaults.buildfeatures.buildconfig=true' is deprecated.
+[        ] The current default is 'false'.
+[        ] It will be removed in version 9.0 of the Android Gradle plugin.
+[        ] You can resolve this warning in Android Studio via `Refactor` > `Migrate BuildConfig to Gradle Build Files`
+[        ] Using default execution profile
+[        ] Using Kotlin Gradle Plugin gradle81 variant
+[        ] Parsed shrinker version: 8.3.36
+[        ] All projects evaluated.
+[        ] Task name matched 'assembleDebug'
+[        ] Selected primary task 'assembleDebug' from project :
+[  +95 ms] WARNING: We recommend using a newer Android Gradle plugin to use compileSdk = 35
+[        ] This Android Gradle plugin (8.3.0) was tested up to compileSdk = 34.
+[   +3 ms] You are strongly encouraged to update your project to use a newer
+[        ] Android Gradle plugin that has been tested with compileSdk = 35.
+[        ] If you are already using the latest version of the Android Gradle plugin,
+[   +5 ms] you may need to wait until a newer version with support for compileSdk = 35 is available.
+[        ] To suppress this warning, add/update
+[        ]     android.suppressUnsupportedCompileSdk=35
+[        ] to this project's gradle.properties.
+[  +90 ms] Tasks to be executed: [task ':app:preBuild', task ':app:preDebugBuild', task ':app:mergeDebugNativeDebugMetadata', task ':app:generateDebugBuildConfig', task ':app:compileFlutterBuildDebug', task ':app:packJniLibsflutterBuildDebug', task ':app:checkDebugAarMetadata', task ':app:cleanMergeDebugAssets', task ':app:mergeDebugShaders', task ':app:compileDebugShaders', task ':app:generateDebugAssets', task ':app:mergeDebugAssets', task ':app:copyFlutterAssetsDebug', task ':app:generateDebugResValues', task ':app:mapDebugSourceSetPaths', task ':app:generateDebugResources', task ':app:mergeDebugResources', task ':app:createDebugCompatibleScreenManifests', task ':app:extractDeepLinksDebug', task ':app:processDebugMainManifest', task ':app:processDebugManifest', task ':app:processDebugManifestForPackage', task ':app:processDebugResources', task ':app:compileDebugKotlin', task ':app:javaPreCompileDebug', task ':app:compileDebugJavaWithJavac', task ':app:compressDebugAssets', task ':app:desugarDebugFileDependencies', task ':app:dexBuilderDebug', task ':app:mergeDebugGlobalSynthetics', task ':app:processDebugJavaRes', task ':app:mergeDebugJavaResource', task ':app:checkDebugDuplicateClasses', task ':app:mergeExtDexDebug', task ':app:mergeLibDexDebug', task ':app:mergeProjectDexDebug', task ':app:mergeDebugJniLibFolders', task ':app:mergeDebugNativeLibs', task ':app:stripDebugDebugSymbols', task ':app:validateSigningDebug', task ':app:writeDebugAppMetadata', task ':app:writeDebugSigningConfigVersions', task ':app:packageDebug', task ':app:createDebugApkListingFileRedirect', task ':app:assembleDebug']
+[   +4 ms] Tasks that were excluded: []
+[        ] Resolve mutations for :app:preBuild (Thread[#452,Execution worker Thread 7,5,main]) started.
+[   +4 ms] :app:preBuild (Thread[#452,Execution worker Thread 7,5,main]) started.
+[        ] > Task :app:preBuild UP-TO-DATE
+[        ] Skipping task ':app:preBuild' as it has no actions.
+[        ] Resolve mutations for :app:preDebugBuild (Thread[#452,Execution worker Thread 7,5,main]) started.
+[        ] :app:preDebugBuild (Thread[#444,included builds,5,main]) started.
+[   +4 ms] > Task :app:preDebugBuild UP-TO-DATE
+[   +1 ms] Skipping task ':app:preDebugBuild' as it has no actions.
+[        ] Resolve mutations for :app:mergeDebugNativeDebugMetadata (Thread[#444,included builds,5,main]) started.
+[        ] :app:mergeDebugNativeDebugMetadata (Thread[#444,included builds,5,main]) started.
+[        ] > Task :app:mergeDebugNativeDebugMetadata NO-SOURCE
+[        ] Skipping task ':app:mergeDebugNativeDebugMetadata' as it has no source files and no previous output files.
+[        ] Resolve mutations for :app:generateDebugBuildConfig (Thread[#444,included builds,5,main]) started.
+[   +4 ms] :app:generateDebugBuildConfig (Thread[#448,Execution worker Thread 4,5,main]) started.
+[  +71 ms] > Task :app:generateDebugBuildConfig UP-TO-DATE
+[        ] Caching disabled for task ':app:generateDebugBuildConfig' because:
+[        ]   Build cache is disabled
+[        ] Skipping task ':app:generateDebugBuildConfig' as it is up-to-date.
+[        ] Resolve mutations for :app:compileFlutterBuildDebug (Thread[#448,Execution worker Thread 4,5,main]) started.
+[        ] :app:compileFlutterBuildDebug (Thread[#444,included builds,5,main]) started.
+[+1992 ms] > Task :app:compileFlutterBuildDebug
+[        ] Caching disabled for task ':app:compileFlutterBuildDebug' because:
+[        ]   Build cache is disabled
+[        ] Task ':app:compileFlutterBuildDebug' is not up-to-date because:
+[        ]   Value of input property 'fileSystemScheme' has changed for task ':app:compileFlutterBuildDebug'
+[        ]   Value of input property 'targetPath' has changed for task ':app:compileFlutterBuildDebug'
+[        ]   Value of input property 'targetPlatformValues' has changed for task ':app:compileFlutterBuildDebug'
+[        ] Starting process 'command '/home/seq_vishnu/flutter/bin/flutter''. Working directory: /home/seq_vishnu/WORK/RnD/expenze-mobile Command: /home/seq_vishnu/flutter/bin/flutter --verbose assemble --no-version-check --depfile /home/seq_vishnu/WORK/RnD/expenze-mobile/build/app/intermediates/flutter/debug/flutter_build.d --output /home/seq_vishnu/WORK/RnD/expenze-mobile/build/app/intermediates/flutter/debug -dTargetFile=lib/main.dart -dTargetPlatform=android -dBuildMode=debug -dTrackWidgetCreation=true -dFlavor= -dAndroidArchs=android-arm android-arm64 android-x86 android-x64 -dMinSdkVersion=24 debug_android_application
+[        ] Successfully started process 'command '/home/seq_vishnu/flutter/bin/flutter''
+[        ] [  +74 ms] executing: uname -m
+[        ] [  +31 ms] Exit code 0 from: uname -m
+[        ] [   +1 ms] x86_64
+[        ] [ +150 ms] Artifact Instance of 'AndroidGenSnapshotArtifacts' is not required, skipping update.
+[        ] [   +1 ms] Artifact Instance of 'AndroidInternalBuildArtifacts' is not required, skipping update.
+[        ] [        ] Artifact Instance of 'IOSEngineArtifacts' is not required, skipping update.
+[        ] [        ] Artifact Instance of 'FlutterWebSdk' is not required, skipping update.
+[        ] [        ] Artifact Instance of 'LegacyCanvasKitRemover' is not required, skipping update.
+[        ] [   +7 ms] Artifact Instance of 'WindowsEngineArtifacts' is not required, skipping update.
+[        ] [        ] Artifact Instance of 'MacOSEngineArtifacts' is not required, skipping update.
+[        ] [        ] Artifact Instance of 'LinuxEngineArtifacts' is not required, skipping update.
+[        ] [        ] Artifact Instance of 'LinuxFuchsiaSDKArtifacts' is not required, skipping update.
+[        ] [        ] Artifact Instance of 'MacOSFuchsiaSDKArtifacts' is not required, skipping update.
+[        ] [        ] Artifact Instance of 'FlutterRunnerSDKArtifacts' is not required, skipping update.
+[        ] [        ] Artifact Instance of 'FlutterRunnerDebugSymbols' is not required, skipping update.
+[        ] [ +391 ms] Artifact Instance of 'MaterialFonts' is not required, skipping update.
+[        ] [        ] Artifact Instance of 'GradleWrapper' is not required, skipping update.
+[        ] [   +7 ms] Artifact Instance of 'AndroidInternalBuildArtifacts' is not required, skipping update.
+[        ] [        ] Artifact Instance of 'IOSEngineArtifacts' is not required, skipping update.
+[        ] [        ] Artifact Instance of 'FlutterWebSdk' is not required, skipping update.
+[        ] [        ] Artifact Instance of 'LegacyCanvasKitRemover' is not required, skipping update.
+[        ] [        ] Artifact Instance of 'FlutterSdk' is not required, skipping update.
+[        ] [        ] Artifact Instance of 'WindowsEngineArtifacts' is not required, skipping update.
+[        ] [        ] Artifact Instance of 'MacOSEngineArtifacts' is not required, skipping update.
+[        ] [        ] Artifact Instance of 'LinuxEngineArtifacts' is not required, skipping update.
+[        ] [        ] Artifact Instance of 'LinuxFuchsiaSDKArtifacts' is not required, skipping update.
+[        ] [        ] Artifact Instance of 'MacOSFuchsiaSDKArtifacts' is not required, skipping update.
+[        ] [        ] Artifact Instance of 'FlutterRunnerSDKArtifacts' is not required, skipping update.
+[        ] [        ] Artifact Instance of 'FlutterRunnerDebugSymbols' is not required, skipping update.
+[        ] [        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ] [        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ] [        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ] [        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ] [        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ] [        ] Artifact Instance of 'FontSubsetArtifacts' is not required, skipping update.
+[        ] [        ] Artifact Instance of 'PubDependencies' is not required, skipping update.
+[        ] [ +128 ms] Initializing file store
+[        ] [  +71 ms] Skipping target: gen_localizations
+[        ] [  +35 ms] gen_dart_plugin_registrant: Starting due to {InvalidatedReasonKind.inputChanged: The following inputs have updated contents: /home/seq_vishnu/WORK/RnD/expenze-mobile/.dart_tool/package_config_subset}
+[        ] [ +121 ms] Found plugin another_telephony at /home/seq_vishnu/.pub-cache/hosted/pub.dev/another_telephony-0.4.1/
+[        ] [ +234 ms] Found plugin google_sign_in at /home/seq_vishnu/.pub-cache/hosted/pub.dev/google_sign_in-7.1.1/
+[        ] [   +7 ms] Found plugin google_sign_in_android at /home/seq_vishnu/.pub-cache/hosted/pub.dev/google_sign_in_android-7.0.3/
+[        ] [   +6 ms] Found plugin google_sign_in_ios at /home/seq_vishnu/.pub-cache/hosted/pub.dev/google_sign_in_ios-6.1.0/
+[        ] [  +39 ms] Found plugin google_sign_in_web at /home/seq_vishnu/.pub-cache/hosted/pub.dev/google_sign_in_web-1.0.0/
+[        ] [  +71 ms] Found plugin path_provider at /home/seq_vishnu/.pub-cache/hosted/pub.dev/path_provider-2.1.5/
+[        ] [   +4 ms] Found plugin path_provider_android at /home/seq_vishnu/.pub-cache/hosted/pub.dev/path_provider_android-2.2.17/
+[        ] [   +6 ms] Found plugin path_provider_foundation at /home/seq_vishnu/.pub-cache/hosted/pub.dev/path_provider_foundation-2.4.1/
+[        ] [   +4 ms] Found plugin path_provider_linux at /home/seq_vishnu/.pub-cache/hosted/pub.dev/path_provider_linux-2.2.1/
+[        ] [  +14 ms] Found plugin path_provider_windows at /home/seq_vishnu/.pub-cache/hosted/pub.dev/path_provider_windows-2.3.0/
+[        ] [   +6 ms] Found plugin permission_handler at /home/seq_vishnu/.pub-cache/hosted/pub.dev/permission_handler-12.0.1/
+[        ] [   +4 ms] Found plugin permission_handler_android at /home/seq_vishnu/.pub-cache/hosted/pub.dev/permission_handler_android-13.0.1/
+[        ] [   +3 ms] Found plugin permission_handler_apple at /home/seq_vishnu/.pub-cache/hosted/pub.dev/permission_handler_apple-9.4.7/
+[        ] [   +4 ms] Found plugin permission_handler_html at /home/seq_vishnu/.pub-cache/hosted/pub.dev/permission_handler_html-0.1.3+5/
+[        ] [   +8 ms] Found plugin permission_handler_windows at /home/seq_vishnu/.pub-cache/hosted/pub.dev/permission_handler_windows-0.2.1/
+[        ] [  +22 ms] Found plugin shared_preferences at /home/seq_vishnu/.pub-cache/hosted/pub.dev/shared_preferences-2.5.3/
+[        ] [   +3 ms] Found plugin shared_preferences_android at /home/seq_vishnu/.pub-cache/hosted/pub.dev/shared_preferences_android-2.4.11/
+[        ] [   +3 ms] Found plugin shared_preferences_foundation at /home/seq_vishnu/.pub-cache/hosted/pub.dev/shared_preferences_foundation-2.5.4/
+[   +1 ms] [   +3 ms] Found plugin shared_preferences_linux at /home/seq_vishnu/.pub-cache/hosted/pub.dev/shared_preferences_linux-2.4.1/
+[        ] [   +5 ms] Found plugin shared_preferences_web at /home/seq_vishnu/.pub-cache/hosted/pub.dev/shared_preferences_web-2.4.3/
+[        ] [   +3 ms] Found plugin shared_preferences_windows at /home/seq_vishnu/.pub-cache/hosted/pub.dev/shared_preferences_windows-2.4.1/
+[        ] [   +6 ms] Found plugin sqflite at /home/seq_vishnu/.pub-cache/hosted/pub.dev/sqflite-2.4.1/
+[        ] [   +4 ms] Found plugin sqflite_android at /home/seq_vishnu/.pub-cache/hosted/pub.dev/sqflite_android-2.4.0/
+[        ] [   +6 ms] Found plugin sqflite_darwin at /home/seq_vishnu/.pub-cache/hosted/pub.dev/sqflite_darwin-2.4.1+1/
+[        ] [ +129 ms] gen_dart_plugin_registrant: Complete
+[        ] [   +3 ms] kernel_snapshot_program: Starting due to {}
+[        ] [  +25 ms] /home/seq_vishnu/flutter/bin/cache/dart-sdk/bin/dartaotruntime /home/seq_vishnu/flutter/bin/cache/dart-sdk/bin/snapshots/frontend_server_aot.dart.snapshot --sdk-root /home/seq_vishnu/flutter/bin/cache/artifacts/engine/common/flutter_patched_sdk/ --target=flutter --no-print-incremental-dependencies -Ddart.vm.profile=false -Ddart.vm.product=false --enable-asserts --track-widget-creation --no-link-platform --packages /home/seq_vishnu/WORK/RnD/expenze-mobile/.dart_tool/package_config.json --output-dill /home/seq_vishnu/WORK/RnD/expenze-mobile/.dart_tool/flutter_build/81c61ac1abeef31e9c6111a03ddce057/program.dill --depfile /home/seq_vishnu/WORK/RnD/expenze-mobile/.dart_tool/flutter_build/81c61ac1abeef31e9c6111a03ddce057/kernel_snapshot_program.d --incremental --initialize-from-dill /home/seq_vishnu/WORK/RnD/expenze-mobile/.dart_tool/flutter_build/81c61ac1abeef31e9c6111a03ddce057/program.dill --source file:///home/seq_vishnu/WORK/RnD/expenze-mobile/.dart_tool/flutter_build/dart_plugin_registrant.dart --source package:flutter/src/dart_plugin_registrant.dart -Dflutter.dart_plugin_registrant=file:///home/seq_vishnu/WORK/RnD/expenze-mobile/.dart_tool/flutter_build/dart_plugin_registrant.dart --verbosity=error package:expenze_mobile/main.dart
+[+28774 ms] [+28848 ms] kernel_snapshot_program: Complete
+[+3199 ms] [+3140 ms] native_assets: Starting due to {}
+[ +101 ms] [ +106 ms] No packages with native assets. Skipping native assets compilation.
+[        ] [        ] Writing native assets yaml to file:///home/seq_vishnu/WORK/RnD/expenze-mobile/.dart_tool/flutter_build/81c61ac1abeef31e9c6111a03ddce057/native_assets.yaml.
+[   +4 ms] [  +36 ms] Writing /home/seq_vishnu/WORK/RnD/expenze-mobile/.dart_tool/flutter_build/81c61ac1abeef31e9c6111a03ddce057/native_assets.yaml done.
+[        ] [   +3 ms] native_assets: Complete
+[        ] [   +9 ms] kernel_snapshot_native_assets: Starting due to {InvalidatedReasonKind.inputChanged: The following inputs have updated contents: /home/seq_vishnu/WORK/RnD/expenze-mobile/.dart_tool/flutter_build/81c61ac1abeef31e9c6111a03ddce057/native_assets.yaml,/home/seq_vishnu/WORK/RnD/expenze-mobile/.dart_tool/package_config_subset,/home/seq_vishnu/flutter/packages/flutter_tools/lib/src/build_system/targets/common.dart,/home/seq_vishnu/flutter/bin/internal/engine.version,/home/seq_vishnu/flutter/bin/internal/engine.version,/home/seq_vishnu/flutter/bin/internal/engine.version,/home/seq_vishnu/flutter/bin/internal/engine.version}
+[        ] [   +6 ms] kernel_snapshot_native_assets: Complete
+[   +1 ms] [   +5 ms] kernel_snapshot: Starting due to {InvalidatedReasonKind.inputChanged: The following inputs have updated contents: /home/seq_vishnu/WORK/RnD/expenze-mobile/.dart_tool/flutter_build/81c61ac1abeef31e9c6111a03ddce057/program.dill,/home/seq_vishnu/WORK/RnD/expenze-mobile/.dart_tool/flutter_build/81c61ac1abeef31e9c6111a03ddce057/native_assets.dill}
+[  +90 ms] [  +70 ms] kernel_snapshot: Complete
+[        ] [   +1 ms] debug_android_application: Starting due to {}
+[ +599 ms] [ +589 ms] Manifest contained wildcard assets. Inserting missing file into build graph to force rerun. for more information see #56466.
+[        ] [  +25 ms] shaderc command: [/home/seq_vishnu/flutter/bin/cache/artifacts/engine/linux-x64/impellerc, --sksl, --runtime-stage-gles, --runtime-stage-vulkan, --iplr, --sl=/home/seq_vishnu/WORK/RnD/expenze-mobile/build/app/intermediates/flutter/debug/flutter_assets/shaders/ink_sparkle.frag, --spirv=/home/seq_vishnu/WORK/RnD/expenze-mobile/build/app/intermediates/flutter/debug/flutter_assets/shaders/ink_sparkle.frag.spirv, --input=/home/seq_vishnu/flutter/packages/flutter/lib/src/material/shaders/ink_sparkle.frag, --input-type=frag, --include=/home/seq_vishnu/flutter/packages/flutter/lib/src/material/shaders, --include=/home/seq_vishnu/flutter/bin/cache/artifacts/engine/linux-x64/shader_lib]
+[+1898 ms] [+1895 ms] debug_android_application: Complete
+[+2700 ms] [+2641 ms] Persisting file store
+[        ] [  +30 ms] Done persisting file store
+[        ] [  +29 ms] build succeeded.
+[  +98 ms] [  +43 ms] "flutter assemble" took 38,915ms.
+[ +199 ms] [ +243 ms] ensureAnalyticsSent: 199ms
+[        ] [        ] Running 1 shutdown hook
+[        ] [        ] Shutdown hooks complete
+[        ] [  +15 ms] exiting with code 0
+[ +400 ms] Resolve mutations for :app:packJniLibsflutterBuildDebug (Thread[#444,included builds,5,main]) started.
+[   +3 ms] :app:packJniLibsflutterBuildDebug (Thread[#444,included builds,5,main]) started.
+[   +3 ms] > Task :app:packJniLibsflutterBuildDebug
+[   +1 ms] Caching disabled for task ':app:packJniLibsflutterBuildDebug' because:
+[        ]   Build cache is disabled
+[   +1 ms] Task ':app:packJniLibsflutterBuildDebug' is not up-to-date because:
+[        ]   Input property 'rootSpec$1$3.caseSensitive' has been added for task ':app:packJniLibsflutterBuildDebug'
+[   +1 ms]   Input property 'rootSpec$1$3.destPath' has been added for task ':app:packJniLibsflutterBuildDebug'
+[   +1 ms]   Input property 'rootSpec$1$3.dirPermissions' has been added for task ':app:packJniLibsflutterBuildDebug'
+[   +1 ms] file or directory '/home/seq_vishnu/WORK/RnD/expenze-mobile/build/app/intermediates/flutter/debug/armeabi-v7a', not found
+[        ] file or directory '/home/seq_vishnu/WORK/RnD/expenze-mobile/build/native_assets/android/jniLibs/lib/armeabi-v7a', not found
+[        ] file or directory '/home/seq_vishnu/WORK/RnD/expenze-mobile/build/app/intermediates/flutter/debug/arm64-v8a', not found
+[   +1 ms] file or directory '/home/seq_vishnu/WORK/RnD/expenze-mobile/build/native_assets/android/jniLibs/lib/arm64-v8a', not found
+[        ] file or directory '/home/seq_vishnu/WORK/RnD/expenze-mobile/build/app/intermediates/flutter/debug/x86', not found
+[        ] file or directory '/home/seq_vishnu/WORK/RnD/expenze-mobile/build/native_assets/android/jniLibs/lib/x86', not found
+[        ] file or directory '/home/seq_vishnu/WORK/RnD/expenze-mobile/build/app/intermediates/flutter/debug/x86_64', not found
+[        ] file or directory '/home/seq_vishnu/WORK/RnD/expenze-mobile/build/native_assets/android/jniLibs/lib/x86_64', not found
+[        ] Resolve mutations for :app:checkDebugAarMetadata (Thread[#444,included builds,5,main]) started.
+[        ] :app:checkDebugAarMetadata (Thread[#444,included builds,5,main]) started.
+[  +77 ms] > Task :app:checkDebugAarMetadata UP-TO-DATE
+[   +1 ms] Caching disabled for task ':app:checkDebugAarMetadata' because:
+[        ]   Build cache is disabled
+[        ] Skipping task ':app:checkDebugAarMetadata' as it is up-to-date.
+[        ] Resolve mutations for :app:cleanMergeDebugAssets (Thread[#444,included builds,5,main]) started.
+[        ] :app:cleanMergeDebugAssets (Thread[#444,included builds,5,main]) started.
+[        ] > Task :app:cleanMergeDebugAssets
+[        ] Caching disabled for task ':app:cleanMergeDebugAssets' because:
+[        ]   Build cache is disabled
+[        ] Task ':app:cleanMergeDebugAssets' is not up-to-date because:
+[        ]   Task has not declared any outputs despite executing actions.
+[   +1 ms] Resolve mutations for :app:mergeDebugShaders (Thread[#444,included builds,5,main]) started.
+[   +2 ms] :app:mergeDebugShaders (Thread[#444,included builds,5,main]) started.
+[        ] > Task :app:mergeDebugShaders UP-TO-DATE
+[        ] Caching disabled for task ':app:mergeDebugShaders' because:
+[        ]   Build cache is disabled
+[        ] Skipping task ':app:mergeDebugShaders' as it is up-to-date.
+[        ] Resolve mutations for :app:compileDebugShaders (Thread[#444,included builds,5,main]) started.
+[        ] :app:compileDebugShaders (Thread[#444,included builds,5,main]) started.
+[        ] > Task :app:compileDebugShaders NO-SOURCE
+[        ] Skipping task ':app:compileDebugShaders' as it has no source files and no previous output files.
+[        ] Resolve mutations for :app:generateDebugAssets (Thread[#444,included builds,5,main]) started.
+[   +1 ms] :app:generateDebugAssets (Thread[#444,included builds,5,main]) started.
+[   +1 ms] > Task :app:generateDebugAssets UP-TO-DATE
+[   +1 ms] Skipping task ':app:generateDebugAssets' as it has no actions.
+[        ] Resolve mutations for :app:mergeDebugAssets (Thread[#444,included builds,5,main]) started.
+[        ] :app:mergeDebugAssets (Thread[#444,included builds,5,main]) started.
+[  +78 ms] > Task :app:mergeDebugAssets
+[        ] Caching disabled for task ':app:mergeDebugAssets' because:
+[        ]   Build cache is disabled
+[        ] Task ':app:mergeDebugAssets' is not up-to-date because:
+[   +2 ms]   Output property 'outputDir' file /home/seq_vishnu/WORK/RnD/expenze-mobile/build/app/intermediates/assets/debug/mergeDebugAssets has been removed.
+[        ] The input changes require a full rebuild for incremental task ':app:mergeDebugAssets'.
+[        ] Resolve mutations for :app:copyFlutterAssetsDebug (Thread[#444,included builds,5,main]) started.
+[        ] :app:copyFlutterAssetsDebug (Thread[#444,included builds,5,main]) started.
+[ +597 ms] > Task :app:copyFlutterAssetsDebug
+[        ] Caching disabled for task ':app:copyFlutterAssetsDebug' because:
+[        ]   Build cache is disabled
+[        ] Task ':app:copyFlutterAssetsDebug' is not up-to-date because:
+[        ]   Output property 'destinationDir' file /home/seq_vishnu/WORK/RnD/expenze-mobile/build/app/intermediates/assets/debug/mergeDebugAssets/flutter_assets has been removed.
+[        ]   Output property 'destinationDir' file /home/seq_vishnu/WORK/RnD/expenze-mobile/build/app/intermediates/assets/debug/mergeDebugAssets/flutter_assets/AssetManifest.bin has been removed.
+[        ]   Output property 'destinationDir' file /home/seq_vishnu/WORK/RnD/expenze-mobile/build/app/intermediates/assets/debug/mergeDebugAssets/flutter_assets/AssetManifest.json has been removed.
+[        ] Resolve mutations for :app:generateDebugResValues (Thread[#444,included builds,5,main]) started.
+[   +1 ms] :app:generateDebugResValues (Thread[#444,included builds,5,main]) started.
+[   +2 ms] > Task :app:generateDebugResValues UP-TO-DATE
+[        ] Caching disabled for task ':app:generateDebugResValues' because:
+[        ]   Build cache is disabled
+[        ] Skipping task ':app:generateDebugResValues' as it is up-to-date.
+[   +1 ms] Resolve mutations for :app:mapDebugSourceSetPaths (Thread[#444,included builds,5,main]) started.
+[        ] :app:mapDebugSourceSetPaths (Thread[#444,included builds,5,main]) started.
+[   +1 ms] > Task :app:mapDebugSourceSetPaths UP-TO-DATE
+[        ] Caching disabled for task ':app:mapDebugSourceSetPaths' because:
+[        ]   Build cache is disabled
+[        ] Skipping task ':app:mapDebugSourceSetPaths' as it is up-to-date.
+[        ] Resolve mutations for :app:generateDebugResources (Thread[#444,included builds,5,main]) started.
+[        ] :app:generateDebugResources (Thread[#444,included builds,5,main]) started.
+[        ] > Task :app:generateDebugResources UP-TO-DATE
+[        ] Caching disabled for task ':app:generateDebugResources' because:
+[        ]   Build cache is disabled
+[   +1 ms] Skipping task ':app:generateDebugResources' as it is up-to-date.
+[        ] Resolve mutations for :app:mergeDebugResources (Thread[#444,included builds,5,main]) started.
+[        ] :app:mergeDebugResources (Thread[#444,included builds,5,main]) started.
+[        ] > Task :app:mergeDebugResources UP-TO-DATE
+[   +2 ms] Caching disabled for task ':app:mergeDebugResources' because:
+[        ]   Build cache is disabled
+[        ] Skipping task ':app:mergeDebugResources' as it is up-to-date.
+[        ] Resolve mutations for :app:createDebugCompatibleScreenManifests (Thread[#446,Execution worker Thread 2,5,main]) started.
+[        ] :app:createDebugCompatibleScreenManifests (Thread[#446,Execution worker Thread 2,5,main]) started.
+[        ] > Task :app:createDebugCompatibleScreenManifests UP-TO-DATE
+[   +1 ms] Caching disabled for task ':app:createDebugCompatibleScreenManifests' because:
+[   +1 ms]   Build cache is disabled
+[   +1 ms] Skipping task ':app:createDebugCompatibleScreenManifests' as it is up-to-date.
+[        ] Resolve mutations for :app:extractDeepLinksDebug (Thread[#444,included builds,5,main]) started.
+[        ] :app:extractDeepLinksDebug (Thread[#444,included builds,5,main]) started.
+[   +1 ms] > Task :app:extractDeepLinksDebug UP-TO-DATE
+[        ] Caching disabled for task ':app:extractDeepLinksDebug' because:
+[        ]   Build cache is disabled
+[        ] Skipping task ':app:extractDeepLinksDebug' as it is up-to-date.
+[        ] Resolve mutations for :app:processDebugMainManifest (Thread[#444,included builds,5,main]) started.
+[   +3 ms] :app:processDebugMainManifest (Thread[#444,included builds,5,main]) started.
+[   +2 ms] > Task :app:processDebugMainManifest UP-TO-DATE
+[   +2 ms] Caching disabled for task ':app:processDebugMainManifest' because:
+[   +2 ms]   Build cache is disabled
+[   +1 ms] Skipping task ':app:processDebugMainManifest' as it is up-to-date.
+[   +1 ms] Resolve mutations for :app:processDebugManifest (Thread[#444,included builds,5,main]) started.
+[  +48 ms] :app:processDebugManifest (Thread[#444,included builds,5,main]) started.
+[   +1 ms] > Task :app:processDebugManifest UP-TO-DATE
+[        ] Caching disabled for task ':app:processDebugManifest' because:
+[        ]   Build cache is disabled
+[   +1 ms] Skipping task ':app:processDebugManifest' as it is up-to-date.
+[        ] Resolve mutations for :app:processDebugManifestForPackage (Thread[#444,included builds,5,main]) started.
+[   +5 ms] :app:processDebugManifestForPackage (Thread[#444,included builds,5,main]) started.
+[        ] > Task :app:processDebugManifestForPackage UP-TO-DATE
+[   +3 ms] Caching disabled for task ':app:processDebugManifestForPackage' because:
+[        ]   Build cache is disabled
+[        ] Skipping task ':app:processDebugManifestForPackage' as it is up-to-date.
+[        ] Resolve mutations for :app:processDebugResources (Thread[#444,included builds,5,main]) started.
+[   +2 ms] :app:processDebugResources (Thread[#444,included builds,5,main]) started.
+[   +2 ms] > Task :app:processDebugResources UP-TO-DATE
+[        ] Caching disabled for task ':app:processDebugResources' because:
+[        ]   Build cache is disabled
+[   +1 ms] Skipping task ':app:processDebugResources' as it is up-to-date.
+[        ] Resolve mutations for :app:compileDebugKotlin (Thread[#444,included builds,5,main]) started.
+[   +3 ms] :app:compileDebugKotlin (Thread[#444,included builds,5,main]) started.
+[   +2 ms] > Task :app:compileDebugKotlin NO-SOURCE
+[   +1 ms] Skipping task ':app:compileDebugKotlin' as it has no source files and no previous output files.
+[        ] Resolve mutations for :app:javaPreCompileDebug (Thread[#444,included builds,5,main]) started.
+[        ] :app:javaPreCompileDebug (Thread[#444,included builds,5,main]) started.
+[        ] > Task :app:javaPreCompileDebug UP-TO-DATE
+[        ] Caching disabled for task ':app:javaPreCompileDebug' because:
+[        ]   Build cache is disabled
+[        ] Skipping task ':app:javaPreCompileDebug' as it is up-to-date.
+[        ] Resolve mutations for :app:compileDebugJavaWithJavac (Thread[#444,included builds,5,main]) started.
+[        ] :app:compileDebugJavaWithJavac (Thread[#444,included builds,5,main]) started.
+[ +570 ms] > Task :app:compileDebugJavaWithJavac FAILED
+[   +6 ms] Watching 40 directories to track changes
+[   +5 ms] Transforming libs.jar with JetifyTransform
+[   +2 ms] Caching disabled for JetifyTransform: /home/seq_vishnu/WORK/RnD/expenze-mobile/build/app/intermediates/flutter/debug/libs.jar because:
+[        ]   Build cache is disabled
+[   +2 ms] JetifyTransform: /home/seq_vishnu/WORK/RnD/expenze-mobile/build/app/intermediates/flutter/debug/libs.jar is not up-to-date because:
+[   +1 ms]   No history is available.
+[        ] Transforming armeabi_v7a_debug-1.0.0-cb4b5fff73850b2e42bd4de7cb9a4310a78ac40d.jar (io.flutter:armeabi_v7a_debug:1.0.0-cb4b5fff73850b2e42bd4de7cb9a4310a78ac40d) with JetifyTransform
+[   +1 ms] Transforming annotations-13.0.jar (org.jetbrains:annotations:13.0) with JetifyTransform
+[   +1 ms] Transforming annotations-13.0.jar (org.jetbrains:annotations:13.0) with IdentityTransform
+[   +1 ms] Caching disabled for JetifyTransform: /home/seq_vishnu/.gradle/caches/modules-2/files-2.1/io.flutter/armeabi_v7a_debug/1.0.0-cb4b5fff73850b2e42bd4de7cb9a4310a78ac40d/8e1f9b31390167d29642ec1173c3069ec0999867/armeabi_v7a_debug-1.0.0-cb4b5fff73850b2e42bd4de7cb9a4310a78ac40d.jar because:
+[   +1 ms]   Build cache is disabled
+[   +1 ms] Skipping JetifyTransform: /home/seq_vishnu/.gradle/caches/modules-2/files-2.1/io.flutter/armeabi_v7a_debug/1.0.0-cb4b5fff73850b2e42bd4de7cb9a4310a78ac40d/8e1f9b31390167d29642ec1173c3069ec0999867/armeabi_v7a_debug-1.0.0-cb4b5fff73850b2e42bd4de7cb9a4310a78ac40d.jar as it is up-to-date.
+[   +1 ms] Transforming armeabi_v7a_debug-1.0.0-cb4b5fff73850b2e42bd4de7cb9a4310a78ac40d.jar (io.flutter:armeabi_v7a_debug:1.0.0-cb4b5fff73850b2e42bd4de7cb9a4310a78ac40d) with IdentityTransform
+[   +1 ms] Transforming x86_64_debug-1.0.0-cb4b5fff73850b2e42bd4de7cb9a4310a78ac40d.jar (io.flutter:x86_64_debug:1.0.0-cb4b5fff73850b2e42bd4de7cb9a4310a78ac40d) with JetifyTransform
+[   +1 ms] Caching disabled for IdentityTransform: /home/seq_vishnu/.gradle/caches/transforms-3/22c1091123e489af53c87e1989c647c6/transformed/jetified-armeabi_v7a_debug-1.0.0-cb4b5fff73850b2e42bd4de7cb9a4310a78ac40d.jar because:
+[   +1 ms]   Build cache is disabled
+[   +2 ms] Skipping IdentityTransform: /home/seq_vishnu/.gradle/caches/transforms-3/22c1091123e489af53c87e1989c647c6/transformed/jetified-armeabi_v7a_debug-1.0.0-cb4b5fff73850b2e42bd4de7cb9a4310a78ac40d.jar as it is up-to-date.
+[   +1 ms] Caching disabled for JetifyTransform: /home/seq_vishnu/.gradle/caches/modules-2/files-2.1/io.flutter/x86_64_debug/1.0.0-cb4b5fff73850b2e42bd4de7cb9a4310a78ac40d/a076730b67ef0ef441c51ee9523e91395c3914a2/x86_64_debug-1.0.0-cb4b5fff73850b2e42bd4de7cb9a4310a78ac40d.jar because:
+[        ]   Build cache is disabled
+[   +1 ms] Skipping JetifyTransform: /home/seq_vishnu/.gradle/caches/modules-2/files-2.1/io.flutter/x86_64_debug/1.0.0-cb4b5fff73850b2e42bd4de7cb9a4310a78ac40d/a076730b67ef0ef441c51ee9523e91395c3914a2/x86_64_debug-1.0.0-cb4b5fff73850b2e42bd4de7cb9a4310a78ac40d.jar as it is up-to-date.
+[   +1 ms] Transforming kotlin-stdlib-jdk7-1.9.0.jar (org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.9.0) with JetifyTransform
+[   +1 ms] Transforming kotlin-stdlib-jdk7-1.9.0.jar (org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.9.0) with IdentityTransform
+[        ] Transforming x86_64_debug-1.0.0-cb4b5fff73850b2e42bd4de7cb9a4310a78ac40d.jar (io.flutter:x86_64_debug:1.0.0-cb4b5fff73850b2e42bd4de7cb9a4310a78ac40d) with IdentityTransform
+[        ] Transforming kotlin-stdlib-jdk8-1.9.0.jar (org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.0) with JetifyTransform
+[        ] Transforming kotlin-stdlib-jdk8-1.9.0.jar (org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.0) with IdentityTransform
+[        ] Transforming x86_debug-1.0.0-cb4b5fff73850b2e42bd4de7cb9a4310a78ac40d.jar (io.flutter:x86_debug:1.0.0-cb4b5fff73850b2e42bd4de7cb9a4310a78ac40d) with JetifyTransform
+[        ] Transforming annotation-jvm-1.7.1.jar (androidx.annotation:annotation-jvm:1.7.1) with JetifyTransform
+[        ] Transforming annotation-jvm-1.7.1.jar (androidx.annotation:annotation-jvm:1.7.1) with IdentityTransform
+[   +1 ms] Caching disabled for IdentityTransform: /home/seq_vishnu/.gradle/caches/transforms-3/cec01aedf4aea24b82bc6a4383bc7c97/transformed/jetified-x86_64_debug-1.0.0-cb4b5fff73850b2e42bd4de7cb9a4310a78ac40d.jar because:
+[        ]   Build cache is disabled
+[   +1 ms] Transforming libs.jar with IdentityTransform
+[   +1 ms] Skipping IdentityTransform: /home/seq_vishnu/.gradle/caches/transforms-3/cec01aedf4aea24b82bc6a4383bc7c97/transformed/jetified-x86_64_debug-1.0.0-cb4b5fff73850b2e42bd4de7cb9a4310a78ac40d.jar as it is up-to-date.
+[        ] Transforming kotlin-stdlib-1.9.0.jar (org.jetbrains.kotlin:kotlin-stdlib:1.9.0) with JetifyTransform
+[   +1 ms] Caching disabled for JetifyTransform: /home/seq_vishnu/.gradle/caches/modules-2/files-2.1/io.flutter/x86_debug/1.0.0-cb4b5fff73850b2e42bd4de7cb9a4310a78ac40d/28012592a35f2df5ccd1a1292a2eab90329aa11a/x86_debug-1.0.0-cb4b5fff73850b2e42bd4de7cb9a4310a78ac40d.jar because:
+[        ]   Build cache is disabled
+[   +1 ms] Transforming kotlin-stdlib-1.9.0.jar (org.jetbrains.kotlin:kotlin-stdlib:1.9.0) with IdentityTransform
+[   +1 ms] Transforming kotlin-stdlib-common-1.9.0.jar (org.jetbrains.kotlin:kotlin-stdlib-common:1.9.0) with JetifyTransform
+[        ] Transforming kotlin-stdlib-common-1.9.0.jar (org.jetbrains.kotlin:kotlin-stdlib-common:1.9.0) with IdentityTransform
+[   +1 ms] Transforming arm64_v8a_debug-1.0.0-cb4b5fff73850b2e42bd4de7cb9a4310a78ac40d.jar (io.flutter:arm64_v8a_debug:1.0.0-cb4b5fff73850b2e42bd4de7cb9a4310a78ac40d) with JetifyTransform
+[   +1 ms] Transforming arm64_v8a_debug-1.0.0-cb4b5fff73850b2e42bd4de7cb9a4310a78ac40d.jar (io.flutter:arm64_v8a_debug:1.0.0-cb4b5fff73850b2e42bd4de7cb9a4310a78ac40d) with IdentityTransform
+[   +1 ms] Skipping JetifyTransform: /home/seq_vishnu/.gradle/caches/modules-2/files-2.1/io.flutter/x86_debug/1.0.0-cb4b5fff73850b2e42bd4de7cb9a4310a78ac40d/28012592a35f2df5ccd1a1292a2eab90329aa11a/x86_debug-1.0.0-cb4b5fff73850b2e42bd4de7cb9a4310a78ac40d.jar as it is up-to-date.
+[        ] Transforming x86_debug-1.0.0-cb4b5fff73850b2e42bd4de7cb9a4310a78ac40d.jar (io.flutter:x86_debug:1.0.0-cb4b5fff73850b2e42bd4de7cb9a4310a78ac40d) with IdentityTransform
+[        ] Caching disabled for IdentityTransform: /home/seq_vishnu/.gradle/caches/transforms-3/cacebb076f5049bb82f63f2c311686c5/transformed/jetified-libs.jar because:
+[        ]   Build cache is disabled
+[        ] IdentityTransform: /home/seq_vishnu/.gradle/caches/transforms-3/cacebb076f5049bb82f63f2c311686c5/transformed/jetified-libs.jar is not up-to-date because:
+[        ]   No history is available.
+[        ] Caching disabled for IdentityTransform: /home/seq_vishnu/.gradle/caches/transforms-3/cdd7d1a8d4ad57360ebfe44186dd6750/transformed/jetified-x86_debug-1.0.0-cb4b5fff73850b2e42bd4de7cb9a4310a78ac40d.jar because:
+[   +1 ms]   Build cache is disabled
+[   +1 ms] Skipping IdentityTransform: /home/seq_vishnu/.gradle/caches/transforms-3/cdd7d1a8d4ad57360ebfe44186dd6750/transformed/jetified-x86_debug-1.0.0-cb4b5fff73850b2e42bd4de7cb9a4310a78ac40d.jar as it is up-to-date.
+[   +1 ms] Transforming core-for-system-modules.jar with JdkImageTransform
+[   +2 ms] Transforming core-for-system-modules.jar with JdkImageTransform
+[   +1 ms] Transforming core-for-system-modules.jar with JdkImageTransform
+[   +1 ms] Transforming core-for-system-modules.jar with JdkImageTransform
+[   +1 ms] Transforming libs.jar with JetifyTransform
+[   +2 ms] Transforming libs.jar with IdentityTransform
+[   +1 ms] Transforming core-for-system-modules.jar with JdkImageTransform
+[        ] Transforming core-for-system-modules.jar with JdkImageTransform
+[   +1 ms] Caching disabled for task ':app:compileDebugJavaWithJavac' because:
+[   +1 ms]   Build cache is disabled
+[   +3 ms] Task ':app:compileDebugJavaWithJavac' is not up-to-date because:
+[        ]   Task has failed previously.
+[   +2 ms] The input changes require a full rebuild for incremental task ':app:compileDebugJavaWithJavac'.
+[        ] Transforming libs.jar with JetifyTransform
+[        ] Transforming libs.jar with IdentityTransform
+[   +2 ms] Transforming core-for-system-modules.jar with JdkImageTransform
+[   +1 ms] Full recompilation is required because no incremental change information is available. This is usually caused by clean builds or changing compiler arguments.
+[   +1 ms] Compiling with toolchain '/usr/lib/jvm/java-21-openjdk-amd64'.
+[   +1 ms] file or directory '/home/seq_vishnu/WORK/RnD/expenze-mobile/android/app/src/debug/java', not found
+[   +2 ms] Compiling with JDK Java compiler API.
+[   +4 ms] /home/seq_vishnu/WORK/RnD/expenze-mobile/android/app/src/main/java/com/expenze/mobile/MainActivity.java:3: error: package io.flutter.embedding.android does not exist
+[   +9 ms] import io.flutter.embedding.android.FlutterActivity;
+[   +3 ms]                                    ^
+[   +1 ms] /home/seq_vishnu/WORK/RnD/expenze-mobile/android/app/src/main/java/com/expenze/mobile/MainActivity.java:5: error: cannot find symbol
+[   +5 ms] public class MainActivity extends FlutterActivity {
+[   +1 ms]                                   ^
+[   +1 ms]   symbol: class FlutterActivity
+[        ] /home/seq_vishnu/WORK/RnD/expenze-mobile/android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java:5: error: cannot find symbol
+[        ] import io.flutter.Log;
+[   +3 ms]                  ^
+[   +1 ms]   symbol:   class Log
+[   +2 ms]   location: package io.flutter
+[   +1 ms] /home/seq_vishnu/WORK/RnD/expenze-mobile/android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java:7: error: package io.flutter.embedding.engine does not exist
+[   +1 ms] import io.flutter.embedding.engine.FlutterEngine;
+[   +1 ms]                                   ^
+[        ] /home/seq_vishnu/WORK/RnD/expenze-mobile/android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java:17: error: cannot find symbol
+[        ]   public static void registerWith(@NonNull FlutterEngine flutterEngine) {
+[        ]                                            ^
+[        ]   symbol:   class FlutterEngine
+[   +2 ms]   location: class GeneratedPluginRegistrant
+[   +9 ms] /home/seq_vishnu/WORK/RnD/expenze-mobile/android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java:19: error: package com.shounakmulay.telephony does not exist
+[   +2 ms]       flutterEngine.getPlugins().add(new com.shounakmulay.telephony.TelephonyPlugin());
+[   +2 ms]                                                                    ^
+[   +1 ms] /home/seq_vishnu/WORK/RnD/expenze-mobile/android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java:21: error: cannot find symbol
+[   +2 ms]       Log.e(TAG, "Error registering plugin another_telephony, com.shounakmulay.telephony.TelephonyPlugin", e);
+[   +1 ms]       ^
+[   +2 ms]   symbol:   variable Log
+[   +1 ms]   location: class GeneratedPluginRegistrant
+[   +4 ms] /home/seq_vishnu/WORK/RnD/expenze-mobile/android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java:24: error: package io.flutter.plugins.googlesignin does not exist
+[   +1 ms]       flutterEngine.getPlugins().add(new io.flutter.plugins.googlesignin.GoogleSignInPlugin());
+[   +2 ms]                                                                         ^
+[   +2 ms] /home/seq_vishnu/WORK/RnD/expenze-mobile/android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java:26: error: cannot find symbol
+[   +2 ms]       Log.e(TAG, "Error registering plugin google_sign_in_android, io.flutter.plugins.googlesignin.GoogleSignInPlugin", e);
+[   +1 ms]       ^
+[        ]   symbol:   variable Log
+[        ]   location: class GeneratedPluginRegistrant
+[        ] /home/seq_vishnu/WORK/RnD/expenze-mobile/android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java:29: error: package io.flutter.plugins.pathprovider does not exist
+[   +2 ms]       flutterEngine.getPlugins().add(new io.flutter.plugins.pathprovider.PathProviderPlugin());
+[   +1 ms]                                                                         ^
+[        ] /home/seq_vishnu/WORK/RnD/expenze-mobile/android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java:31: error: cannot find symbol
+[   +1 ms]       Log.e(TAG, "Error registering plugin path_provider_android, io.flutter.plugins.pathprovider.PathProviderPlugin", e);
+[        ]       ^
+[        ]   symbol:   variable Log
+[        ]   location: class GeneratedPluginRegistrant
+[        ] /home/seq_vishnu/WORK/RnD/expenze-mobile/android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java:34: error: package com.baseflow.permissionhandler does not exist
+[        ]       flutterEngine.getPlugins().add(new com.baseflow.permissionhandler.PermissionHandlerPlugin());
+[        ]                                                                        ^
+[   +1 ms] /home/seq_vishnu/WORK/RnD/expenze-mobile/android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java:36: error: cannot find symbol
+[   +1 ms]       Log.e(TAG, "Error registering plugin permission_handler_android, com.baseflow.permissionhandler.PermissionHandlerPlugin", e);
+[   +1 ms]       ^
+[        ]   symbol:   variable Log
+[        ]   location: class GeneratedPluginRegistrant
+[        ] /home/seq_vishnu/WORK/RnD/expenze-mobile/android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java:39: error: package io.flutter.plugins.sharedpreferences does not exist
+[   +2 ms]       flutterEngine.getPlugins().add(new io.flutter.plugins.sharedpreferences.SharedPreferencesPlugin());
+[   +1 ms]                                                                              ^
+[   +1 ms] /home/seq_vishnu/WORK/RnD/expenze-mobile/android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java:41: error: cannot find symbol
+[   +1 ms]       Log.e(TAG, "Error registering plugin shared_preferences_android, io.flutter.plugins.sharedpreferences.SharedPreferencesPlugin", e);
+[   +1 ms]       ^
+[        ]   symbol:   variable Log
+[        ]   location: class GeneratedPluginRegistrant
+[        ] /home/seq_vishnu/WORK/RnD/expenze-mobile/android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java:44: error: package com.tekartik.sqflite does not exist
+[        ]       flutterEngine.getPlugins().add(new com.tekartik.sqflite.SqflitePlugin());
+[        ]                                                              ^
+[        ] /home/seq_vishnu/WORK/RnD/expenze-mobile/android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java:46: error: cannot find symbol
+[   +1 ms]       Log.e(TAG, "Error registering plugin sqflite_android, com.tekartik.sqflite.SqflitePlugin", e);
+[   +2 ms]       ^
+[   +1 ms]   symbol:   variable Log
+[        ]   location: class GeneratedPluginRegistrant
+[   +1 ms] 17 errors
+[        ] FAILURE: Build failed with an exception.
+[        ] * What went wrong:
+[        ] Execution failed for task ':app:compileDebugJavaWithJavac'.
+[   +1 ms] > Compilation failed; see the compiler error output for details.
+[        ] * Try:
+[        ] > Run with --scan to get full insights.
+[        ] * Exception is:
+[        ] org.gradle.api.tasks.TaskExecutionException: Execution failed for task ':app:compileDebugJavaWithJavac'.
+[   +1 ms] 	at org.gradle.api.internal.tasks.execution.ExecuteActionsTaskExecuter.lambda$executeIfValid$1(ExecuteActionsTaskExecuter.java:148)
+[   +1 ms] 	at org.gradle.internal.Try$Failure.ifSuccessfulOrElse(Try.java:282)
+[   +2 ms] 	at org.gradle.api.internal.tasks.execution.ExecuteActionsTaskExecuter.executeIfValid(ExecuteActionsTaskExecuter.java:146)
+[   +1 ms] 	at org.gradle.api.internal.tasks.execution.ExecuteActionsTaskExecuter.execute(ExecuteActionsTaskExecuter.java:134)
+[        ] 	at org.gradle.api.internal.tasks.execution.FinalizePropertiesTaskExecuter.execute(FinalizePropertiesTaskExecuter.java:46)
+[        ] 	at org.gradle.api.internal.tasks.execution.ResolveTaskExecutionModeExecuter.execute(ResolveTaskExecutionModeExecuter.java:51)
+[        ] 	at org.gradle.api.internal.tasks.execution.SkipTaskWithNoActionsExecuter.execute(SkipTaskWithNoActionsExecuter.java:57)
+[   +1 ms] 	at org.gradle.api.internal.tasks.execution.SkipOnlyIfTaskExecuter.execute(SkipOnlyIfTaskExecuter.java:74)
+[   +1 ms] 	at org.gradle.api.internal.tasks.execution.CatchExceptionTaskExecuter.execute(CatchExceptionTaskExecuter.java:36)
+[        ] 	at org.gradle.api.internal.tasks.execution.EventFiringTaskExecuter$1.executeTask(EventFiringTaskExecuter.java:77)
+[        ] 	at org.gradle.api.internal.tasks.execution.EventFiringTaskExecuter$1.call(EventFiringTaskExecuter.java:55)
+[   +1 ms] 	at org.gradle.api.internal.tasks.execution.EventFiringTaskExecuter$1.call(EventFiringTaskExecuter.java:52)
+[   +1 ms] 	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:204)
+[   +1 ms] 	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:199)
+[   +1 ms] 	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:66)
+[   +1 ms] 	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:59)
+[   +1 ms] 	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:157)
+[   +2 ms] 	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:59)
+[   +1 ms] 	at org.gradle.internal.operations.DefaultBuildOperationRunner.call(DefaultBuildOperationRunner.java:53)
+[   +1 ms] 	at org.gradle.internal.operations.DefaultBuildOperationExecutor.call(DefaultBuildOperationExecutor.java:78)
+[   +1 ms] 	at org.gradle.api.internal.tasks.execution.EventFiringTaskExecuter.execute(EventFiringTaskExecuter.java:52)
+[   +1 ms] 	at org.gradle.execution.plan.LocalTaskNodeExecutor.execute(LocalTaskNodeExecutor.java:42)
+[   +1 ms] 	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph$InvokeNodeExecutorsAction.execute(DefaultTaskExecutionGraph.java:331)
+[   +1 ms] 	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph$InvokeNodeExecutorsAction.execute(DefaultTaskExecutionGraph.java:318)
+[   +1 ms] 	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph$BuildOperationAwareExecutionAction.lambda$execute$0(DefaultTaskExecutionGraph.java:314)
+[   +1 ms] 	at org.gradle.internal.operations.CurrentBuildOperationRef.with(CurrentBuildOperationRef.java:80)
+[   +1 ms] 	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph$BuildOperationAwareExecutionAction.execute(DefaultTaskExecutionGraph.java:314)
+[   +2 ms] 	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph$BuildOperationAwareExecutionAction.execute(DefaultTaskExecutionGraph.java:303)
+[   +1 ms] 	at org.gradle.execution.plan.DefaultPlanExecutor$ExecutorWorker.execute(DefaultPlanExecutor.java:463)
+[   +8 ms] 	at org.gradle.execution.plan.DefaultPlanExecutor$ExecutorWorker.run(DefaultPlanExecutor.java:380)
+[   +3 ms] 	at org.gradle.execution.plan.DefaultPlanExecutor.process(DefaultPlanExecutor.java:116)
+[   +2 ms] 	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph.executeWithServices(DefaultTaskExecutionGraph.java:138)
+[        ] 	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph.execute(DefaultTaskExecutionGraph.java:123)
+[   +6 ms] 	at org.gradle.execution.SelectedTaskExecutionAction.execute(SelectedTaskExecutionAction.java:35)
+[   +1 ms] 	at org.gradle.execution.DryRunBuildExecutionAction.execute(DryRunBuildExecutionAction.java:51)
+[  +11 ms] 	at org.gradle.execution.BuildOperationFiringBuildWorkerExecutor$ExecuteTasks.call(BuildOperationFiringBuildWorkerExecutor.java:54)
+[   +9 ms] 	at org.gradle.execution.BuildOperationFiringBuildWorkerExecutor$ExecuteTasks.call(BuildOperationFiringBuildWorkerExecutor.java:43)
+[   +3 ms] 	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:204)
+[  +10 ms] 	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:199)
+[   +4 ms] 	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:66)
+[   +4 ms] 	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:59)
+[   +2 ms] 	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:157)
+[   +3 ms] 	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:59)
+[   +1 ms] 	at org.gradle.internal.operations.DefaultBuildOperationRunner.call(DefaultBuildOperationRunner.java:53)
+[   +1 ms] 	at org.gradle.internal.operations.DefaultBuildOperationExecutor.call(DefaultBuildOperationExecutor.java:78)
+[   +1 ms] 	at org.gradle.execution.BuildOperationFiringBuildWorkerExecutor.execute(BuildOperationFiringBuildWorkerExecutor.java:40)
+[   +2 ms] 	at org.gradle.internal.build.DefaultBuildLifecycleController.lambda$executeTasks$10(DefaultBuildLifecycleController.java:313)
+[        ] 	at org.gradle.internal.model.StateTransitionController.doTransition(StateTransitionController.java:266)
+[   +2 ms] 	at org.gradle.internal.model.StateTransitionController.lambda$tryTransition$8(StateTransitionController.java:177)
+[   +2 ms] 	at org.gradle.internal.work.DefaultSynchronizer.withLock(DefaultSynchronizer.java:44)
+[   +3 ms] 	at org.gradle.internal.model.StateTransitionController.tryTransition(StateTransitionController.java:177)
+[   +1 ms] 	at org.gradle.internal.build.DefaultBuildLifecycleController.executeTasks(DefaultBuildLifecycleController.java:304)
+[   +1 ms] 	at org.gradle.internal.build.DefaultBuildWorkGraphController$DefaultBuildWorkGraph.runWork(DefaultBuildWorkGraphController.java:220)
+[   +1 ms] 	at org.gradle.internal.work.DefaultWorkerLeaseService.withLocks(DefaultWorkerLeaseService.java:264)
+[   +1 ms] 	at org.gradle.internal.work.DefaultWorkerLeaseService.runAsWorkerThread(DefaultWorkerLeaseService.java:128)
+[   +2 ms] 	at org.gradle.composite.internal.DefaultBuildController.doRun(DefaultBuildController.java:181)
+[   +2 ms] 	at org.gradle.composite.internal.DefaultBuildController.access$000(DefaultBuildController.java:50)
+[   +1 ms] 	at org.gradle.composite.internal.DefaultBuildController$BuildOpRunnable.lambda$run$0(DefaultBuildController.java:198)
+[   +1 ms] 	at org.gradle.internal.operations.CurrentBuildOperationRef.with(CurrentBuildOperationRef.java:80)
+[   +1 ms] 	at org.gradle.composite.internal.DefaultBuildController$BuildOpRunnable.run(DefaultBuildController.java:198)
+[   +1 ms] 	at java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:572)
+[   +1 ms] 	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317)
+[        ] 	at org.gradle.internal.concurrent.ExecutorPolicy$CatchAndRecordFailures.onExecute(ExecutorPolicy.java:64)
+[        ] 	at org.gradle.internal.concurrent.AbstractManagedExecutor$1.run(AbstractManagedExecutor.java:47)
+[        ] 	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)
+[   +1 ms] 	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)
+[   +1 ms] 	at java.base/java.lang.Thread.run(Thread.java:1583)
+[   +3 ms] Caused by: org.gradle.api.internal.tasks.compile.CompilationFailedException: Compilation failed; see the compiler error output for details.
+[   +3 ms] 	at org.gradle.api.internal.tasks.compile.JdkJavaCompiler.execute(JdkJavaCompiler.java:57)
+[   +1 ms] 	at org.gradle.api.internal.tasks.compile.JdkJavaCompiler.execute(JdkJavaCompiler.java:39)
+[        ] 	at org.gradle.api.internal.tasks.compile.NormalizingJavaCompiler.delegateAndHandleErrors(NormalizingJavaCompiler.java:98)
+[        ] 	at org.gradle.api.internal.tasks.compile.NormalizingJavaCompiler.execute(NormalizingJavaCompiler.java:52)
+[   +1 ms] 	at org.gradle.api.internal.tasks.compile.NormalizingJavaCompiler.execute(NormalizingJavaCompiler.java:38)
+[   +1 ms] 	at org.gradle.api.internal.tasks.compile.AnnotationProcessorDiscoveringCompiler.execute(AnnotationProcessorDiscoveringCompiler.java:51)
+[   +1 ms] 	at org.gradle.api.internal.tasks.compile.AnnotationProcessorDiscoveringCompiler.execute(AnnotationProcessorDiscoveringCompiler.java:37)
+[   +1 ms] 	at org.gradle.api.internal.tasks.compile.ModuleApplicationNameWritingCompiler.execute(ModuleApplicationNameWritingCompiler.java:46)
+[   +1 ms] 	at org.gradle.api.internal.tasks.compile.ModuleApplicationNameWritingCompiler.execute(ModuleApplicationNameWritingCompiler.java:36)
+[   +1 ms] 	at org.gradle.jvm.toolchain.internal.DefaultToolchainJavaCompiler.execute(DefaultToolchainJavaCompiler.java:57)
+[   +2 ms] 	at org.gradle.api.tasks.compile.JavaCompile.lambda$createToolchainCompiler$3(JavaCompile.java:202)
+[   +1 ms] 	at org.gradle.api.internal.tasks.compile.CleaningJavaCompiler.execute(CleaningJavaCompiler.java:53)
+[   +1 ms] 	at org.gradle.api.internal.tasks.compile.incremental.IncrementalCompilerFactory.lambda$createRebuildAllCompiler$0(IncrementalCompilerFactory.java:52)
+[        ] 	at org.gradle.api.internal.tasks.compile.incremental.SelectiveCompiler.execute(SelectiveCompiler.java:70)
+[   +1 ms] 	at org.gradle.api.internal.tasks.compile.incremental.SelectiveCompiler.execute(SelectiveCompiler.java:44)
+[   +1 ms] 	at org.gradle.api.internal.tasks.compile.incremental.IncrementalResultStoringCompiler.execute(IncrementalResultStoringCompiler.java:66)
+[   +1 ms] 	at org.gradle.api.internal.tasks.compile.incremental.IncrementalResultStoringCompiler.execute(IncrementalResultStoringCompiler.java:52)
+[   +1 ms] 	at org.gradle.api.internal.tasks.compile.CompileJavaBuildOperationReportingCompiler$1.call(CompileJavaBuildOperationReportingCompiler.java:64)
+[   +1 ms] 	at org.gradle.api.internal.tasks.compile.CompileJavaBuildOperationReportingCompiler$1.call(CompileJavaBuildOperationReportingCompiler.java:48)
+[   +1 ms] 	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:204)
+[   +1 ms] 	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:199)
+[        ] 	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:66)
+[   +2 ms] 	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:59)
+[   +2 ms] 	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:157)
+[        ] 	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:59)
+[        ] 	at org.gradle.internal.operations.DefaultBuildOperationRunner.call(DefaultBuildOperationRunner.java:53)
+[   +1 ms] 	at org.gradle.internal.operations.DefaultBuildOperationExecutor.call(DefaultBuildOperationExecutor.java:78)
+[   +1 ms] 	at org.gradle.api.internal.tasks.compile.CompileJavaBuildOperationReportingCompiler.execute(CompileJavaBuildOperationReportingCompiler.java:48)
+[   +1 ms] 	at org.gradle.api.tasks.compile.JavaCompile.performCompilation(JavaCompile.java:220)
+[   +1 ms] 	at org.gradle.api.tasks.compile.JavaCompile.performIncrementalCompilation(JavaCompile.java:161)
+[   +1 ms] 	at org.gradle.api.tasks.compile.JavaCompile.compile(JavaCompile.java:146)
+[   +1 ms] 	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+[   +1 ms] 	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+[   +1 ms] 	at org.gradle.internal.reflect.JavaMethod.invoke(JavaMethod.java:125)
+[        ] 	at org.gradle.api.internal.project.taskfactory.IncrementalTaskAction.doExecute(IncrementalTaskAction.java:45)
+[        ] 	at org.gradle.api.internal.project.taskfactory.StandardTaskAction.execute(StandardTaskAction.java:51)
+[   +2 ms] 	at org.gradle.api.internal.project.taskfactory.IncrementalTaskAction.execute(IncrementalTaskAction.java:26)
+[   +1 ms] 	at org.gradle.api.internal.project.taskfactory.StandardTaskAction.execute(StandardTaskAction.java:29)
+[   +1 ms] 	at org.gradle.api.internal.tasks.execution.TaskExecution$3.run(TaskExecution.java:248)
+[        ] 	at org.gradle.internal.operations.DefaultBuildOperationRunner$1.execute(DefaultBuildOperationRunner.java:29)
+[   +1 ms] 	at org.gradle.internal.operations.DefaultBuildOperationRunner$1.execute(DefaultBuildOperationRunner.java:26)
+[   +1 ms] 	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:66)
+[   +1 ms] 	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:59)
+[        ] 	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:157)
+[        ] 	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:59)
+[   +1 ms] 	at org.gradle.internal.operations.DefaultBuildOperationRunner.run(DefaultBuildOperationRunner.java:47)
+[   +1 ms] 	at org.gradle.internal.operations.DefaultBuildOperationExecutor.run(DefaultBuildOperationExecutor.java:73)
+[   +1 ms] 	at org.gradle.api.internal.tasks.execution.TaskExecution.executeAction(TaskExecution.java:233)
+[   +1 ms] 	at org.gradle.api.internal.tasks.execution.TaskExecution.executeActions(TaskExecution.java:216)
+[   +1 ms] 	at org.gradle.api.internal.tasks.execution.TaskExecution.executeWithPreviousOutputFiles(TaskExecution.java:199)
+[   +1 ms] 	at org.gradle.api.internal.tasks.execution.TaskExecution.execute(TaskExecution.java:166)
+[   +1 ms] 	at org.gradle.internal.execution.steps.ExecuteStep.executeInternal(ExecuteStep.java:105)
+[   +1 ms] 	at org.gradle.internal.execution.steps.ExecuteStep.access$000(ExecuteStep.java:44)
+[   +1 ms] 	at org.gradle.internal.execution.steps.ExecuteStep$1.call(ExecuteStep.java:59)
+[   +1 ms] 	at org.gradle.internal.execution.steps.ExecuteStep$1.call(ExecuteStep.java:56)
+[        ] 	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:204)
+[   +1 ms] 	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:199)
+[   +1 ms] 	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:66)
+[   +1 ms] 	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:59)
+[   +1 ms] 	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:157)
+[   +1 ms] 	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:59)
+[        ] 	at org.gradle.internal.operations.DefaultBuildOperationRunner.call(DefaultBuildOperationRunner.java:53)
+[   +2 ms] 	at org.gradle.internal.operations.DefaultBuildOperationExecutor.call(DefaultBuildOperationExecutor.java:78)
+[   +2 ms] 	at org.gradle.internal.execution.steps.ExecuteStep.execute(ExecuteStep.java:56)
+[   +2 ms] 	at org.gradle.internal.execution.steps.ExecuteStep.execute(ExecuteStep.java:44)
+[   +1 ms] 	at org.gradle.internal.execution.steps.RemovePreviousOutputsStep.execute(RemovePreviousOutputsStep.java:67)
+[   +1 ms] 	at org.gradle.internal.execution.steps.RemovePreviousOutputsStep.execute(RemovePreviousOutputsStep.java:37)
+[   +1 ms] 	at org.gradle.internal.execution.steps.CancelExecutionStep.execute(CancelExecutionStep.java:41)
+[        ] 	at org.gradle.internal.execution.steps.TimeoutStep.executeWithoutTimeout(TimeoutStep.java:74)
+[        ] 	at org.gradle.internal.execution.steps.TimeoutStep.execute(TimeoutStep.java:55)
+[        ] 	at org.gradle.internal.execution.steps.CreateOutputsStep.execute(CreateOutputsStep.java:50)
+[   +1 ms] 	at org.gradle.internal.execution.steps.CreateOutputsStep.execute(CreateOutputsStep.java:28)
+[   +3 ms] 	at org.gradle.internal.execution.steps.CaptureStateAfterExecutionStep.executeDelegateBroadcastingChanges(CaptureStateAfterExecutionStep.java:100)
+[   +1 ms] 	at org.gradle.internal.execution.steps.CaptureStateAfterExecutionStep.execute(CaptureStateAfterExecutionStep.java:72)
+[        ] 	at org.gradle.internal.execution.steps.CaptureStateAfterExecutionStep.execute(CaptureStateAfterExecutionStep.java:50)
+[   +1 ms] 	at org.gradle.internal.execution.steps.ResolveInputChangesStep.execute(ResolveInputChangesStep.java:40)
+[   +1 ms] 	at org.gradle.internal.execution.steps.ResolveInputChangesStep.execute(ResolveInputChangesStep.java:29)
+[   +1 ms] 	at org.gradle.internal.execution.steps.BuildCacheStep.executeWithoutCache(BuildCacheStep.java:179)
+[   +1 ms] 	at org.gradle.internal.execution.steps.BuildCacheStep.lambda$execute$1(BuildCacheStep.java:70)
+[   +1 ms] 	at org.gradle.internal.Either$Right.fold(Either.java:175)
+[   +1 ms] 	at org.gradle.internal.execution.caching.CachingState.fold(CachingState.java:59)
+[   +1 ms] 	at org.gradle.internal.execution.steps.BuildCacheStep.execute(BuildCacheStep.java:68)
+[        ] 	at org.gradle.internal.execution.steps.BuildCacheStep.execute(BuildCacheStep.java:46)
+[   +2 ms] 	at org.gradle.internal.execution.steps.StoreExecutionStateStep.execute(StoreExecutionStateStep.java:36)
+[   +2 ms] 	at org.gradle.internal.execution.steps.StoreExecutionStateStep.execute(StoreExecutionStateStep.java:25)
+[   +2 ms] 	at org.gradle.internal.execution.steps.RecordOutputsStep.execute(RecordOutputsStep.java:36)
+[   +1 ms] 	at org.gradle.internal.execution.steps.RecordOutputsStep.execute(RecordOutputsStep.java:22)
+[   +1 ms] 	at org.gradle.internal.execution.steps.SkipUpToDateStep.executeBecause(SkipUpToDateStep.java:91)
+[   +1 ms] 	at org.gradle.internal.execution.steps.SkipUpToDateStep.lambda$execute$2(SkipUpToDateStep.java:55)
+[        ] 	at java.base/java.util.Optional.orElseGet(Optional.java:364)
+[        ] 	at org.gradle.internal.execution.steps.SkipUpToDateStep.execute(SkipUpToDateStep.java:55)
+[        ] 	at org.gradle.internal.execution.steps.SkipUpToDateStep.execute(SkipUpToDateStep.java:37)
+[        ] 	at org.gradle.internal.execution.steps.ResolveChangesStep.execute(ResolveChangesStep.java:65)
+[   +1 ms] 	at org.gradle.internal.execution.steps.ResolveChangesStep.execute(ResolveChangesStep.java:36)
+[   +1 ms] 	at org.gradle.internal.execution.steps.legacy.MarkSnapshottingInputsFinishedStep.execute(MarkSnapshottingInputsFinishedStep.java:37)
+[   +1 ms] 	at org.gradle.internal.execution.steps.legacy.MarkSnapshottingInputsFinishedStep.execute(MarkSnapshottingInputsFinishedStep.java:27)
+[   +2 ms] 	at org.gradle.internal.execution.steps.ResolveCachingStateStep.execute(ResolveCachingStateStep.java:77)
+[   +1 ms] 	at org.gradle.internal.execution.steps.ResolveCachingStateStep.execute(ResolveCachingStateStep.java:38)
+[   +4 ms] 	at org.gradle.internal.execution.steps.ValidateStep.execute(ValidateStep.java:108)
+[   +2 ms] 	at org.gradle.internal.execution.steps.ValidateStep.execute(ValidateStep.java:55)
+[   +2 ms] 	at org.gradle.internal.execution.steps.CaptureStateBeforeExecutionStep.execute(CaptureStateBeforeExecutionStep.java:71)
+[   +1 ms] 	at org.gradle.internal.execution.steps.CaptureStateBeforeExecutionStep.execute(CaptureStateBeforeExecutionStep.java:45)
+[   +1 ms] 	at org.gradle.internal.execution.steps.SkipEmptyWorkStep.executeWithNonEmptySources(SkipEmptyWorkStep.java:177)
+[   +1 ms] 	at org.gradle.internal.execution.steps.SkipEmptyWorkStep.execute(SkipEmptyWorkStep.java:86)
+[   +2 ms] 	at org.gradle.internal.execution.steps.SkipEmptyWorkStep.execute(SkipEmptyWorkStep.java:53)
+[        ] 	at org.gradle.internal.execution.steps.RemoveUntrackedExecutionStateStep.execute(RemoveUntrackedExecutionStateStep.java:32)
+[   +1 ms] 	at org.gradle.internal.execution.steps.RemoveUntrackedExecutionStateStep.execute(RemoveUntrackedExecutionStateStep.java:21)
+[   +2 ms] 	at org.gradle.internal.execution.steps.legacy.MarkSnapshottingInputsStartedStep.execute(MarkSnapshottingInputsStartedStep.java:38)
+[   +1 ms] 	at org.gradle.internal.execution.steps.LoadPreviousExecutionStateStep.execute(LoadPreviousExecutionStateStep.java:36)
+[   +1 ms] 	at org.gradle.internal.execution.steps.LoadPreviousExecutionStateStep.execute(LoadPreviousExecutionStateStep.java:23)
+[   +1 ms] 	at org.gradle.internal.execution.steps.CleanupStaleOutputsStep.execute(CleanupStaleOutputsStep.java:75)
+[   +1 ms] 	at org.gradle.internal.execution.steps.CleanupStaleOutputsStep.execute(CleanupStaleOutputsStep.java:41)
+[   +1 ms] 	at org.gradle.internal.execution.steps.ExecuteWorkBuildOperationFiringStep.lambda$execute$2(ExecuteWorkBuildOperationFiringStep.java:66)
+[   +1 ms] 	at java.base/java.util.Optional.orElseGet(Optional.java:364)
+[        ] 	at org.gradle.internal.execution.steps.ExecuteWorkBuildOperationFiringStep.execute(ExecuteWorkBuildOperationFiringStep.java:66)
+[   +1 ms] 	at org.gradle.internal.execution.steps.ExecuteWorkBuildOperationFiringStep.execute(ExecuteWorkBuildOperationFiringStep.java:38)
+[   +2 ms] 	at org.gradle.internal.execution.steps.AssignWorkspaceStep.lambda$execute$0(AssignWorkspaceStep.java:32)
+[   +1 ms] 	at org.gradle.api.internal.tasks.execution.TaskExecution$4.withWorkspace(TaskExecution.java:293)
+[   +1 ms] 	at org.gradle.internal.execution.steps.AssignWorkspaceStep.execute(AssignWorkspaceStep.java:30)
+[   +1 ms] 	at org.gradle.internal.execution.steps.AssignWorkspaceStep.execute(AssignWorkspaceStep.java:21)
+[   +1 ms] 	at org.gradle.internal.execution.steps.IdentityCacheStep.execute(IdentityCacheStep.java:37)
+[        ] 	at org.gradle.internal.execution.steps.IdentityCacheStep.execute(IdentityCacheStep.java:27)
+[        ] 	at org.gradle.internal.execution.steps.IdentifyStep.execute(IdentifyStep.java:47)
+[        ] 	at org.gradle.internal.execution.steps.IdentifyStep.execute(IdentifyStep.java:34)
+[        ] 	at org.gradle.internal.execution.impl.DefaultExecutionEngine$1.execute(DefaultExecutionEngine.java:64)
+[        ] 	at org.gradle.api.internal.tasks.execution.ExecuteActionsTaskExecuter.executeIfValid(ExecuteActionsTaskExecuter.java:145)
+[        ] 	at org.gradle.api.internal.tasks.execution.ExecuteActionsTaskExecuter.execute(ExecuteActionsTaskExecuter.java:134)
+[   +1 ms] 	at org.gradle.api.internal.tasks.execution.FinalizePropertiesTaskExecuter.execute(FinalizePropertiesTaskExecuter.java:46)
+[        ] 	at org.gradle.api.internal.tasks.execution.ResolveTaskExecutionModeExecuter.execute(ResolveTaskExecutionModeExecuter.java:51)
+[   +1 ms] 	at org.gradle.api.internal.tasks.execution.SkipTaskWithNoActionsExecuter.execute(SkipTaskWithNoActionsExecuter.java:57)
+[   +1 ms] 	at org.gradle.api.internal.tasks.execution.SkipOnlyIfTaskExecuter.execute(SkipOnlyIfTaskExecuter.java:74)
+[   +2 ms] 	at org.gradle.api.internal.tasks.execution.CatchExceptionTaskExecuter.execute(CatchExceptionTaskExecuter.java:36)
+[   +1 ms] 	at org.gradle.api.internal.tasks.execution.EventFiringTaskExecuter$1.executeTask(EventFiringTaskExecuter.java:77)
+[   +1 ms] 	at org.gradle.api.internal.tasks.execution.EventFiringTaskExecuter$1.call(EventFiringTaskExecuter.java:55)
+[   +1 ms] 	at org.gradle.api.internal.tasks.execution.EventFiringTaskExecuter$1.call(EventFiringTaskExecuter.java:52)
+[   +1 ms] 	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:204)
+[   +1 ms] 	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:199)
+[   +1 ms] 	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:66)
+[   +1 ms] 	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:59)
+[   +1 ms] 	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:157)
+[   +1 ms] 	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:59)
+[   +1 ms] 	at org.gradle.internal.operations.DefaultBuildOperationRunner.call(DefaultBuildOperationRunner.java:53)
+[   +1 ms] 	at org.gradle.internal.operations.DefaultBuildOperationExecutor.call(DefaultBuildOperationExecutor.java:78)
+[   +2 ms] 	at org.gradle.api.internal.tasks.execution.EventFiringTaskExecuter.execute(EventFiringTaskExecuter.java:52)
+[   +2 ms] 	at org.gradle.execution.plan.LocalTaskNodeExecutor.execute(LocalTaskNodeExecutor.java:42)
+[   +1 ms] 	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph$InvokeNodeExecutorsAction.execute(DefaultTaskExecutionGraph.java:331)
+[        ] 	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph$InvokeNodeExecutorsAction.execute(DefaultTaskExecutionGraph.java:318)
+[        ] 	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph$BuildOperationAwareExecutionAction.lambda$execute$0(DefaultTaskExecutionGraph.java:314)
+[        ] 	at org.gradle.internal.operations.CurrentBuildOperationRef.with(CurrentBuildOperationRef.java:80)
+[   +1 ms] 	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph$BuildOperationAwareExecutionAction.execute(DefaultTaskExecutionGraph.java:314)
+[   +1 ms] 	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph$BuildOperationAwareExecutionAction.execute(DefaultTaskExecutionGraph.java:303)
+[   +1 ms] 	at org.gradle.execution.plan.DefaultPlanExecutor$ExecutorWorker.execute(DefaultPlanExecutor.java:463)
+[   +1 ms] 	at org.gradle.execution.plan.DefaultPlanExecutor$ExecutorWorker.run(DefaultPlanExecutor.java:380)
+[   +1 ms] 	at org.gradle.execution.plan.DefaultPlanExecutor.process(DefaultPlanExecutor.java:116)
+[   +1 ms] 	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph.executeWithServices(DefaultTaskExecutionGraph.java:138)
+[   +2 ms] 	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph.execute(DefaultTaskExecutionGraph.java:123)
+[   +1 ms] 	at org.gradle.execution.SelectedTaskExecutionAction.execute(SelectedTaskExecutionAction.java:35)
+[   +1 ms] 	at org.gradle.execution.DryRunBuildExecutionAction.execute(DryRunBuildExecutionAction.java:51)
+[   +1 ms] 	at org.gradle.execution.BuildOperationFiringBuildWorkerExecutor$ExecuteTasks.call(BuildOperationFiringBuildWorkerExecutor.java:54)
+[   +1 ms] 	at org.gradle.execution.BuildOperationFiringBuildWorkerExecutor$ExecuteTasks.call(BuildOperationFiringBuildWorkerExecutor.java:43)
+[   +1 ms] 	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:204)
+[   +1 ms] 	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:199)
+[   +1 ms] 	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:66)
+[   +1 ms] 	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:59)
+[   +1 ms] 	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:157)
+[   +2 ms] 	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:59)
+[   +2 ms] 	at org.gradle.internal.operations.DefaultBuildOperationRunner.call(DefaultBuildOperationRunner.java:53)
+[        ] 	at org.gradle.internal.operations.DefaultBuildOperationExecutor.call(DefaultBuildOperationExecutor.java:78)
+[        ] 	at org.gradle.execution.BuildOperationFiringBuildWorkerExecutor.execute(BuildOperationFiringBuildWorkerExecutor.java:40)
+[   +1 ms] 	at org.gradle.internal.build.DefaultBuildLifecycleController.lambda$executeTasks$10(DefaultBuildLifecycleController.java:313)
+[   +1 ms] 	at org.gradle.internal.model.StateTransitionController.doTransition(StateTransitionController.java:266)
+[   +1 ms] 	at org.gradle.internal.model.StateTransitionController.lambda$tryTransition$8(StateTransitionController.java:177)
+[   +1 ms] 	at org.gradle.internal.work.DefaultSynchronizer.withLock(DefaultSynchronizer.java:44)
+[   +1 ms] 	at org.gradle.internal.model.StateTransitionController.tryTransition(StateTransitionController.java:177)
+[   +2 ms] 	at org.gradle.internal.build.DefaultBuildLifecycleController.executeTasks(DefaultBuildLifecycleController.java:304)
+[   +1 ms] 	at org.gradle.internal.build.DefaultBuildWorkGraphController$DefaultBuildWorkGraph.runWork(DefaultBuildWorkGraphController.java:220)
+[   +3 ms] 	at org.gradle.internal.work.DefaultWorkerLeaseService.withLocks(DefaultWorkerLeaseService.java:264)
+[   +2 ms] 	at org.gradle.internal.work.DefaultWorkerLeaseService.runAsWorkerThread(DefaultWorkerLeaseService.java:128)
+[   +1 ms] 	at org.gradle.composite.internal.DefaultBuildController.doRun(DefaultBuildController.java:181)
+[   +1 ms] 	at org.gradle.composite.internal.DefaultBuildController.access$000(DefaultBuildController.java:50)
+[   +1 ms] 	at org.gradle.composite.internal.DefaultBuildController$BuildOpRunnable.lambda$run$0(DefaultBuildController.java:198)
+[   +1 ms] 	at org.gradle.internal.operations.CurrentBuildOperationRef.with(CurrentBuildOperationRef.java:80)
+[   +1 ms] 	at org.gradle.composite.internal.DefaultBuildController$BuildOpRunnable.run(DefaultBuildController.java:198)
+[        ] 	at java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:572)
+[   +1 ms] 	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317)
+[   +1 ms] 	at org.gradle.internal.concurrent.ExecutorPolicy$CatchAndRecordFailures.onExecute(ExecutorPolicy.java:64)
+[   +2 ms] 	at org.gradle.internal.concurrent.AbstractManagedExecutor$1.run(AbstractManagedExecutor.java:47)
+[   +1 ms] 	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)
+[   +1 ms] 	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)
+[        ] 	at java.base/java.lang.Thread.run(Thread.java:1583)
+[   +2 ms] BUILD FAILED in 44s
+[  +21 ms] 24 actionable tasks: 6 executed, 18 up-to-date
+[ +818 ms] Running Gradle task 'assembleDebug'... (completed in 46.6s)
+[  +44 ms] "flutter apk" took 51,231ms.
+[  +48 ms] Gradle task assembleDebug failed with exit code 1
+[        ] 
+           #0      throwToolExit (package:flutter_tools/src/base/common.dart:10:3)
+           #1      AndroidGradleBuilder.buildGradleApp (package:flutter_tools/src/android/gradle.dart:514:9)
+           <asynchronous suspension>
+           #2      AndroidGradleBuilder.buildApk (package:flutter_tools/src/android/gradle.dart:233:5)
+           <asynchronous suspension>
+           #3      BuildApkCommand.runCommand (package:flutter_tools/src/commands/build_apk.dart:146:5)
+           <asynchronous suspension>
+           #4      FlutterCommand.run.<anonymous closure> (package:flutter_tools/src/runner/flutter_command.dart:1450:27)
+           <asynchronous suspension>
+           #5      AppContext.run.<anonymous closure> (package:flutter_tools/src/base/context.dart:153:19)
+           <asynchronous suspension>
+           #6      CommandRunner.runCommand (package:args/command_runner.dart:212:13)
+           <asynchronous suspension>
+           #7      FlutterCommandRunner.runCommand.<anonymous closure> (package:flutter_tools/src/runner/flutter_command_runner.dart:421:9)
+           <asynchronous suspension>
+           #8      AppContext.run.<anonymous closure> (package:flutter_tools/src/base/context.dart:153:19)
+           <asynchronous suspension>
+           #9      FlutterCommandRunner.runCommand (package:flutter_tools/src/runner/flutter_command_runner.dart:364:5)
+           <asynchronous suspension>
+           #10     run.<anonymous closure>.<anonymous closure> (package:flutter_tools/runner.dart:131:9)
+           <asynchronous suspension>
+           #11     AppContext.run.<anonymous closure> (package:flutter_tools/src/base/context.dart:153:19)
+           <asynchronous suspension>
+           #12     main (package:flutter_tools/executable.dart:94:3)
+           <asynchronous suspension>
+
+
+[ +232 ms] ensureAnalyticsSent: 211ms
+[        ] Running 1 shutdown hook
+[   +2 ms] Shutdown hooks complete
+[  +18 ms] exiting with code 1

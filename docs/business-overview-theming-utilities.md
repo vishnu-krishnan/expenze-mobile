@@ -1,0 +1,41 @@
+# Business Overview - Dark Mode & Utility Suite
+
+### Problem
+The application lacked personalization for users who prefer dark aesthetics or work in low-light environments. Additionally, while the app tracked expenses, it lacked general-purpose tools for tracking financial thoughts, planned purchases, or bill reminders that don't fit into the structured "Regular Payments" or "Expenses" categories.
+
+### Objective
+Improve user engagement and accessibility by implementing a premium system-wide dark mode and adding a "Utility" section containing a versatile Notes and Reminders system.
+
+### Feature summary
+- **Adaptive Theming**: Complete dark mode support across all screens with fluid transitions.
+- **Background Enhancements**: Gradient patterns that adapt to the active theme for a premium look.
+- **Utility Suite**: A new dedicated section in the application for:
+    - **Quick Notes**: Capturing financial thoughts or future purchase ideas.
+    - **Reminders**: Time-based alerts for important financial tasks.
+    - **Pinning**: Prioritizing critical information at the top.
+- **Dashboard Optimization**: Refined quick actions and cleaner category overviews.
+
+### High-level workflow
+1. User toggles Dark Mode in the Profile/Appearance settings.
+2. Application state (ThemeProvider) updates and persists the choice to shared_preferences.
+3. User navigates to the "Notes" tab to create/update or delete utilities.
+4. Alerts are set for specific dates/times and displayed prominently.
+
+### Business value
+- **Accessibility**: Reduces eye strain and improves usability in dark environments.
+- **Feature Parity**: Brings the app's utility set in line with top-tier financial management products.
+- **Retention**: Encourages daily app usage for tasks beyond simple expense logging.
+
+### Risks
+- **Persistence overhead**: Managed via efficient SQLite storage.
+- **UI Consistency**: Addressed by using a centralized theme provider and standard background decorations.
+
+### Cost implications
+- Minor increase in storage for the additional notes table.
+- Negligible compute impact.
+
+### Timeline
+- Implementation: 1 day
+- Stabilization: 1 day
+
+Date: 2026-02-16

@@ -15,10 +15,10 @@
 ### 1. Presentation Layer
 - **Screens**: Located in `lib/presentation/screens`.
 - **Widgets**: Reusable UI components in `lib/presentation/widgets`.
-- **Providers**: App state and business logic controllers in `lib/providers`.
+- **Providers**: App state Controllers in `lib/presentation/providers` (Auth, Expense, Category, Theme, Note, RegularPayment).
 
 ### 2. Domain Layer (Models)
-- **Models**: Data structures in `lib/data/models`.
+- **Models**: Data structures in `lib/data/models` (User, Expense, Category, Note, RegularPayment).
 - **Entities**: Business logic rules (currently integrated with models for simplicity).
 
 ### 3. Data Layer

@@ -1,0 +1,28 @@
+
+Support for Android x86 targets will be removed in the next stable release after 3.27. See https://github.com/flutter/flutter/issues/157543 for details.
+Running Gradle task 'assembleDebug'...                          
+You are applying Flutter's app_plugin_loader Gradle plugin imperatively using the apply script method, which is deprecated and will be removed in a future release. Migrate to applying Gradle plugins with the declarative plugins block: https://flutter.dev/to/flutter-gradle-plugin-apply
+
+lib/data/services/sms_service.dart:27:27: Error: The method 'queryInBox' isn't defined for the class 'SmsQuery'.
+ - 'SmsQuery' is from 'package:flutter_sms_inbox/flutter_sms_inbox.dart' ('../../../.pub-cache/hosted/pub.dev/flutter_sms_inbox-1.0.4/lib/flutter_sms_inbox.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'queryInBox'.
+      return await _query.queryInBox(
+                          ^^^^^^^^^^
+Target kernel_snapshot_program failed: Exception
+
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':app:compileFlutterBuildDebug'.
+> Process 'command '/home/seq_vishnu/flutter/bin/flutter'' finished with non-zero exit value 1
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+
+BUILD FAILED in 45s
+Running Gradle task 'assembleDebug'...                             46.6s
+Gradle task assembleDebug failed with exit code 1

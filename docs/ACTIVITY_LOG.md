@@ -433,3 +433,125 @@ Initiated planning and documentation for the "SMS Automated Import" feature. Thi
 
 Date: 2026-02-13
 
+## [2026-02-16] Data Connectivity & Business Logic Implementation
+
+**Change Type:** Major
+
+**Decision Made:**
+Connected the application's UI screens to the real SQLite backend, replacing all dummy values with dynamic calculations. Implemented advanced analytics queries and cross-screen data synchronization via Provider.
+
+**Implementation:**
+1. **ExpenseRepository Enhancements:**
+   - Added `getAnalyticsSummary(int months)` for calculating averages and peaks using SQL aggregations.
+   - Refined `getTrends()` to ensure chronological data series for charts.
+   - Improved `getCategoryBreakdown()` to include joined icon and color data.
+2. **Provider State Evolution:**
+   - Added reactive state for `avgMonthlySpent` and `maxMonthlySpent`.
+   - Updated `loadTrends()` to fetch complete analytical context.
+3. **Analytics UI Overhaul:**
+   - Connected Insight cards to real provider data.
+   - Dynamically generated Top Categories list from DB records instead of placeholders.
+   - Fixed trend chart to display oldest to newest data correctly.
+4. **Dashboard Integration:**
+   - Linked "Details" and "Add" quick actions to their respective screens.
+   - Implemented dynamic category builders using database-stored icons (emojis) and color codes.
+   - Enabled real-time refresh via pull-to-refresh and direct navigation.
+5. **Architectural Improvements:**
+   - Updated `MainNavigationWrapper` to support `initialIndex` for deep-linking (e.g., from Dashboard to Analytics).
+   - Standardized hex-to-color conversion for user-defined category colors.
+
+**Impact:**
+- UX: Users now see accurate financial reflections across the app.
+- Performance: SQL-level aggregations ensure fast UI updates even with growing transaction lists.
+- Maintainability: Centralized business logic in Provider/Repository layers prevents data drift.
+
+**Rollback Strategy:**
+- Critical logic is capped within new methods; revert UI bindings to previous provider fields if data mismatch occurs.
+- UI placeholders are preserved in comments for rapid restoration.
+
+Date: 2026-02-16
+
+## [2026-02-16] UI Fixes & Regular Payment Synchronization
+
+**Change Type:** Patch
+
+**Decision Made:**
+Resolved discrepancy where "Regular Payments" were not reflecting on the dashboard and fixed issues with analytics charts not populating for new users.
+
+**Implementation:**
+1. **Regular Payment Sync:**
+   - Implemented `syncRegularPayments` in `ExpenseRepository` to automatically instantiate active bills as monthly expenses.
+   - Integrated sync logic into `ExpenseProvider.loadMonthData` to ensure budget planning is up-to-date.
+2. **Analytics Enhancements:**
+   - Updated `AnalyticsScreen` line chart to show both **Planned** (dashed) and **Actual** (solid) trends.
+   - Refined `maxY` logic to ensure charts have a visible scale even when spending is zero.
+   - Updated **Insight Cards** to fall back to planned metrics if actual spending hasn't started, ensuring meaningful feedback.
+3. **Dashboard Refinement:**
+   - Updated Category list to prioritize showing **Planned** amounts if **Actual** spending is zero, correctly reflecting bills and dues.
+   - Modified repository queries to include categories with planned-only amounts.
+
+**Impact:**
+- UX: Immediate visual confirmation of regular bills in the monthly budget.
+- Accuracy: Better alignment between the "Bills/Regular Payments" module and the main Dashboard/Analytics.
+
+Date: 2026-02-16
+
+## [2026-02-16] UX & Utility Suite Implementation
+
+**Change Type:** Major
+
+**Decision Made:**
+Implemented a comprehensive Dark Mode system and a versatile Utility suite (Notes & Reminders) to enhance user personalization and everyday financial tracking beyond structured expenses. Updated the entire UI to use premium background decorations and fixed dashboard inconsistencies.
+
+**Implementation:**
+1. **Theming System:**
+    - Created `ThemeProvider` with `SharedPreferences` persistence for dark mode.
+    - Added `darkBackgroundDecoration` and `darkTheme` configuration to `AppTheme`.
+    - Integrated logic in `main.dart` to reactively switch themes without app restart.
+    - Updated all major screens (`Dashboard`, `Profile`, `Analytics`, `MonthPlan`, `Categories`, `RegularPayments`, `SmsImport`) to use theme-aware backgrounds and card colors.
+2. **Utility Features (Notes & Reminders):**
+    - Created `Note` model and `NoteRepository`.
+    - Migrated database to **v7** to include the `notes` table.
+    - Implemented `NoteProvider` for state management with Pinning and Date-based filtering.
+    - Created a high-performance `NotesScreen` with modal bottom sheets for creation and editing.
+3. **UI Refinement & Dashboard Fixes:**
+    - Renamed "Add" to "Plan" on Dashboard for better context.
+    - Renamed "Cats" to "Types" for user clarity.
+    - Replaced the generic SMS icon with `LucideIcons.mail` as requested.
+    - Removed redundant "Bills" section from Dashboard (now exclusively in the Regular Payments tab).
+4. **Consistency:**
+    - Standardized card aesthetics across all screens using `Theme.of(context).cardTheme.color`.
+    - Fixed linting issues related to unused imports and variables.
+
+**Impact:**
+- **UX**: Premium, modern feel with complete personalization options.
+- **Accessibility**: Dark mode support improves usability in varying light conditions.
+- **Functionality**: Versatile notes allow users to track financial thoughts alongside transactions.
+- **Maintainability**: Centralized theme and utility logic prevents code duplication.
+
+**Rollback Strategy:**
+- Revert database to v6 (drops notes table).
+- Reset theme preference in SharedPreferences.
+
+Date: 2026-02-16
+
+## [2026-02-16] Theme Transition Bug Fix
+
+**Change Type:** Patch
+
+**Decision Made:**
+Resolved a critical Flutter framework exception (`Failed to interpolate TextStyles with different inherit values`) that occurred during theme transitions (Light <-> Dark) when using custom Google Fonts.
+
+**Implementation:**
+1. **AppTheme Normalization**: 
+    - Explicitly set `inherit: true` for all key `TextStyles` in `AppTheme.dart` (`labelLarge`, `bodyLarge`, `displayLarge`, etc.).
+    - Unified `ElevatedButtonThemeData` across both light and dark themes with explicit `textStyle` definitions.
+    - Ensures that Flutter's animation engine can smoothly interpolate between theme states without encountering mismatched inheritance flags.
+2. **Global Consistency**:
+    - Applied these changes to both `lightTheme` and `darkTheme` to prevent future regressions during theme switching.
+
+**Impact:**
+- **Reliability**: Eliminates app crashes/exceptions during theme changes.
+- **UX**: Smooth transitions between Light and Dark modes.
+
+Date: 2026-02-16

@@ -1,40 +1,26 @@
-# Business Overview - Offline-First Financial Tracking
+# Business Overview - Data Connectivity & Business Logic
 
-## Problem
-Users often lose access to their financial tracking tools when they have poor internet connectivity. Additionally, users are increasingly concerned about their financial data being stored on third-party servers. Existing solutions often require an account and internet for even basic features.
+Date: 2026-02-16
 
-## Objective
-To provide a premium, secure, and fully functional expense tracking experience that works entirely offline. The goal is to give users full control over their data while maintaining a high-standard mobile experience.
+Objective
+Connect the Expenze Mobile application's UI to the real SQLite backend, replacing all hardcoded dummy values with dynamic data and implementing full CRUD operations for expenses and categories.
 
-## Feature Summary
-- **Local Authentication:** Biometric (planned) or passcode-based local login.
-- **Google Identity Integration:** Optional Google login for identity purposes while keeping data restricted to the local device.
-- **SQLite Persistence:** All financial records (expenses, categories, plans) are stored in a local encrypted (future) database.
-- **Monthly Planning:** Tools to set budgets and track actual spending against plans.
-- **Smart SMS Import:** Local parsing of transaction SMS to automate entry without cloud processing.
+Feature summary
+- Real-time Dashboard: Spending summaries are now calculated directly from the SQLite `expenses` table.
+- Advanced Analytics: Spending trends (6M, 1Y, 3Y) are derived from historical transaction data.
+- Insights Module: Average monthly spending and highest spending metrics are calculated dynamically.
+- Interactive Navigation: Proper routing between Dashboard actions and management screens.
+- Category Breakdown: Visual representation of spending per category using actual user data.
 
-## High-Level Workflow
-1. User opens the app and completes a "Direct Setup" or "Google Login".
-2. Application initializes a local SQLite database and checks for existing session.
-3. User adds expenses or imports them from SMS.
-4. Data is persisted immediately to disk.
-5. User logs out to secure the session, keeping the data locally for the next login.
+High-level workflow
+1. User adds/imports an expense.
+2. SQLite database is updated via Repository.
+3. Providers (ChangeNotifier) trigger a rebuild across all screens.
+4. Calculations (totals, averages, trends) are recalculated on-demand.
 
-## Business Value
-- **Zero Latency:** Extremely fast interactions as no network calls are involved for core features.
-- **Privacy First:** Appeals to privacy-conscious users by keeping financial data on-device.
-- **Reliability:** Works in any environment (flights, remote areas, during outages).
+Business value
+Transforms the app from a static mockup into a functional financial management tool, providing users with accurate data to make informed budgeting decisions.
 
-## Risks
-- **Data Loss:** If the device is lost or the app is uninstalled without backup, data is lost (Mitigation: Planned local export/import).
-- **Multiple Devices:** No automatic sync across devices (Mitigation: Future peer-to-peer sync or optional cloud backup).
-
-## Cost Implications
-- **Infrastructure Savings:** Zero backend costs for data storage or processing.
-- **Development Cost:** Focus on local state management and robust database migrations.
-
-## Timeline
-Active Phase: Implementation of core offline-first architecture (Complete).
-Next Phase: Data export/backup tools.
-
-Date: 2026-02-12
+Risks
+- Data integrity issues if imports are duplicated (mitigated via deduplication logic).
+- Performance lag on extremely large datasets (mitigated via indexed database queries).
