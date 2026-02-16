@@ -8,7 +8,12 @@ class ExpenseProvider with ChangeNotifier {
   ExpenseProvider();
 
   List<Expense> _expenses = [];
-  Map<String, double> _summary = {'planned': 0, 'actual': 0, 'remaining': 0};
+  Map<String, double> _summary = {
+    'planned': 0,
+    'actual': 0,
+    'remaining': 0,
+    'limit': 0
+  };
   bool _isLoading = false;
   String _currentMonthKey = DateTime.now().toIso8601String().substring(0, 7);
   List<Map<String, dynamic>> _trends = [];
@@ -43,12 +48,18 @@ class ExpenseProvider with ChangeNotifier {
       final rawSummary = await _repository.getMonthSummary(monthKey);
       _categoryBreakdown = await _repository.getCategoryBreakdown(monthKey);
 
+      final actual = (rawSummary['actual'] as num).toDouble();
+      final planned = (rawSummary['planned'] as num).toDouble();
+      final limit = (rawSummary['limit'] as num).toDouble();
+
+      // If limit is set (>0), use it for remaining calculation, otherwise use planned sum
+      final targetAmount = limit > 0 ? limit : planned;
+
       _summary = {
-        'planned': (rawSummary['planned'] as num).toDouble(),
-        'actual': (rawSummary['actual'] as num).toDouble(),
-        'remaining':
-            ((rawSummary['planned'] as num) - (rawSummary['actual'] as num))
-                .toDouble(),
+        'planned': planned,
+        'actual': actual,
+        'limit': limit,
+        'remaining': (targetAmount - actual).toDouble(),
       };
     } catch (e) {
       print('Error loading expenses: $e');
@@ -86,6 +97,11 @@ class ExpenseProvider with ChangeNotifier {
 
   Future<void> deleteExpense(int id) async {
     await _repository.deleteExpense(id);
+    await loadMonthData(_currentMonthKey);
+  }
+
+  Future<void> updateMonthlyLimit(double limit) async {
+    await _repository.updateMonthlyLimit(_currentMonthKey, limit);
     await loadMonthData(_currentMonthKey);
   }
 

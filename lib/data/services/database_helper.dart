@@ -19,7 +19,7 @@ class DatabaseHelper {
 
     return await openDatabase(
       path,
-      version: 7,
+      version: 9,
       onCreate: _createDB,
       onUpgrade: _onUpgrade,
     );
@@ -72,6 +72,19 @@ class DatabaseHelper {
           updated_at TEXT
         )
       ''');
+    }
+    if (oldVersion < 8) {
+      try {
+        await db.execute('ALTER TABLE regular_payments ADD COLUMN status TEXT');
+        await db.execute(
+            'ALTER TABLE regular_payments ADD COLUMN status_description TEXT');
+      } catch (_) {}
+    }
+    if (oldVersion < 9) {
+      try {
+        await db.execute(
+            'ALTER TABLE regular_payments ADD COLUMN duration_months INTEGER');
+      } catch (_) {}
     }
   }
 
@@ -152,6 +165,8 @@ class DatabaseHelper {
         end_date TEXT,
         frequency TEXT,
         is_active INTEGER DEFAULT 1,
+        status TEXT,
+        status_description TEXT,
         synced INTEGER DEFAULT 0,
         created_at TEXT,
         updated_at TEXT,

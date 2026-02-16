@@ -7,7 +7,6 @@ import '../../providers/expense_provider.dart';
 import '../../providers/category_provider.dart';
 import '../../providers/theme_provider.dart';
 import '../../../data/models/expense.dart';
-import '../../../data/models/category.dart';
 
 class MonthPlanScreen extends StatefulWidget {
   const MonthPlanScreen({super.key});
@@ -17,18 +16,6 @@ class MonthPlanScreen extends StatefulWidget {
 }
 
 class _MonthPlanScreenState extends State<MonthPlanScreen> {
-  bool _showAddForm = false;
-  final _nameController = TextEditingController();
-  final _amountController = TextEditingController();
-  int? _selectedCategoryId;
-
-  @override
-  void dispose() {
-    _nameController.dispose();
-    _amountController.dispose();
-    super.dispose();
-  }
-
   void _handleMonthChange(int offset) {
     final provider = context.read<ExpenseProvider>();
     final current = DateTime.parse('${provider.currentMonthKey}-01');
@@ -39,6 +26,7 @@ class _MonthPlanScreenState extends State<MonthPlanScreen> {
   @override
   Widget build(BuildContext context) {
     final themeProvider = context.watch<ThemeProvider>();
+    final textColor = AppTheme.getTextColor(context);
 
     return Container(
       decoration: themeProvider.isDarkMode
@@ -47,14 +35,17 @@ class _MonthPlanScreenState extends State<MonthPlanScreen> {
       child: Scaffold(
         backgroundColor: Colors.transparent,
         appBar: AppBar(
-          title: const Text('Budget Planner'),
-          actions: [
-            IconButton(
-              onPressed: () => setState(() => _showAddForm = !_showAddForm),
-              icon: Icon(_showAddForm ? LucideIcons.x : LucideIcons.plusCircle,
-                  color: AppTheme.primary),
+          title: Text(
+            'Budget Planner',
+            style: TextStyle(
+              color: textColor,
+              fontWeight: FontWeight.bold,
+              letterSpacing: -0.5,
             ),
-          ],
+          ),
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          centerTitle: true,
         ),
         body: Consumer2<ExpenseProvider, CategoryProvider>(
           builder: (context, expenseProvider, categoryProvider, child) {
@@ -63,23 +54,33 @@ class _MonthPlanScreenState extends State<MonthPlanScreen> {
             }
 
             return CustomScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
               slivers: [
                 // 1. Month Navigation
                 SliverToBoxAdapter(
                   child: _buildMonthNavigator(expenseProvider.currentMonthKey),
                 ),
 
-                // 2. Add Form (Integrated)
-                if (_showAddForm)
-                  SliverToBoxAdapter(
-                    child: _buildAddForm(
-                        categoryProvider.categories, expenseProvider),
-                  ),
-
-                // 3. Summary Header
+                // 2. Summary Header (Vibrant)
                 SliverToBoxAdapter(
-                  child: _buildSummaryOverview(expenseProvider),
+                  child: _buildPremiumSummary(expenseProvider),
                 ),
+
+                // 3. Section Title
+                if (expenseProvider.expenses.isNotEmpty)
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(24, 24, 24, 12),
+                      child: Text(
+                        'Planned Expenses',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: textColor,
+                        ),
+                      ),
+                    ),
+                  ),
 
                 // 4. Expense List
                 if (expenseProvider.expenses.isEmpty)
@@ -89,8 +90,7 @@ class _MonthPlanScreenState extends State<MonthPlanScreen> {
                   )
                 else
                   SliverPadding(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
                     sliver: SliverList(
                       delegate: SliverChildBuilderDelegate(
                         (context, index) {
@@ -113,169 +113,200 @@ class _MonthPlanScreenState extends State<MonthPlanScreen> {
   Widget _buildMonthNavigator(String monthKey) {
     final date = DateTime.parse('$monthKey-01');
     final monthName = DateFormat('MMMM yyyy').format(date);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-      padding: const EdgeInsets.all(8),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: Theme.of(context).cardTheme.color,
+        color: isDark ? AppTheme.bgCardDark : Colors.white,
         borderRadius: BorderRadius.circular(20),
         boxShadow: AppTheme.softShadow,
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          _buildNavButton(
-              LucideIcons.chevronLeft, () => _handleMonthChange(-1)),
+          IconButton(
+            icon: const Icon(LucideIcons.chevronLeft,
+                size: 20, color: AppTheme.primary),
+            onPressed: () => _handleMonthChange(-1),
+          ),
           Text(
             monthName,
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: AppTheme.getTextColor(context),
+            ),
           ),
-          _buildNavButton(
-              LucideIcons.chevronRight, () => _handleMonthChange(1)),
+          IconButton(
+            icon: const Icon(LucideIcons.chevronRight,
+                size: 20, color: AppTheme.primary),
+            onPressed: () => _handleMonthChange(1),
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildNavButton(IconData icon, VoidCallback onTap) {
-    return IconButton(
-      icon: Icon(icon, size: 20, color: AppTheme.primary),
-      onPressed: onTap,
-    );
-  }
-
-  Widget _buildSummaryOverview(ExpenseProvider provider) {
+  Widget _buildPremiumSummary(ExpenseProvider provider) {
     final summary = provider.summary;
     final planned = summary['planned'] ?? 0.0;
     final actual = summary['actual'] ?? 0.0;
     final remaining = summary['remaining'] ?? 0.0;
+    final limit = summary['limit'] ?? 0.0;
+    final target = limit > 0 ? limit : planned;
 
-    return Padding(
-      padding: const EdgeInsets.all(24),
-      child: Row(
-        children: [
-          _buildSummaryCard('Planned', planned, AppTheme.secondary),
-          const SizedBox(width: 12),
-          _buildSummaryCard('Spent', actual, AppTheme.accent),
-          const SizedBox(width: 12),
-          _buildSummaryCard('Balance', remaining,
-              remaining >= 0 ? AppTheme.success : AppTheme.danger),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSummaryCard(String label, double amount, Color color) {
-    return Expanded(
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 20),
-        decoration: BoxDecoration(
-          color: Theme.of(context).cardTheme.color,
-          borderRadius: BorderRadius.circular(24),
-          boxShadow: AppTheme.softShadow,
-        ),
-        child: Column(
-          children: [
-            Text(label,
-                style: TextStyle(
-                    fontSize: 12,
-                    color: AppTheme.textSecondary,
-                    fontWeight: FontWeight.w600)),
-            const SizedBox(height: 4),
-            Text(
-              '₹${amount.toInt()}',
-              style: TextStyle(
-                  fontSize: 18, fontWeight: FontWeight.bold, color: color),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildAddForm(List<Category> categories, ExpenseProvider provider) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: Theme.of(context).cardTheme.color,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: AppTheme.primary.withOpacity(0.1)),
+        gradient: const LinearGradient(
+          colors: [AppTheme.primary, AppTheme.accent],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(30),
+        boxShadow: [
+          BoxShadow(
+            color: AppTheme.primary.withOpacity(0.3),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
+        ],
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Plan New Expense',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-          const SizedBox(height: 20),
-          DropdownButtonFormField<int>(
-            value: _selectedCategoryId,
-            items: categories
-                .map((c) => DropdownMenuItem(value: c.id, child: Text(c.name)))
-                .toList(),
-            onChanged: (val) => setState(() => _selectedCategoryId = val),
-            decoration: AppTheme.inputDecoration('Category', LucideIcons.tag),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('Available Balance',
+                      style: TextStyle(color: Colors.white70, fontSize: 13)),
+                  Text(
+                    '₹${remaining.toInt()}',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 32,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+              GestureDetector(
+                onTap: () => _showLimitDialog(provider),
+                child: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(LucideIcons.edit2,
+                      size: 16, color: Colors.white),
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 12),
-          TextField(
-            controller: _nameController,
-            decoration:
-                AppTheme.inputDecoration('What is it for?', LucideIcons.edit3),
-          ),
-          const SizedBox(height: 12),
-          TextField(
-            controller: _amountController,
-            keyboardType: TextInputType.number,
-            decoration: AppTheme.inputDecoration(
-                'How much? (Planned)', LucideIcons.target),
-          ),
-          const SizedBox(height: 20),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: () => _submitForm(provider),
-              child: const Text('Add to Plan'),
-            ),
+          const SizedBox(height: 24),
+          Row(
+            children: [
+              _buildSummaryItem(
+                  limit > 0 ? 'Limit' : 'Planned', '₹${target.toInt()}'),
+              Container(width: 1, height: 30, color: Colors.white24),
+              _buildSummaryItem('Spent', '₹${actual.toInt()}'),
+              Container(width: 1, height: 30, color: Colors.white24),
+              _buildSummaryItem('Progress',
+                  '${target > 0 ? (actual / target * 100).toInt() : 0}%'),
+            ],
           ),
         ],
       ),
     );
   }
 
-  Future<void> _submitForm(ExpenseProvider provider) async {
-    if (_selectedCategoryId == null ||
-        _nameController.text.isEmpty ||
-        _amountController.text.isEmpty) {
-      return;
-    }
-    final expense = Expense(
-      monthKey: provider.currentMonthKey,
-      categoryId: _selectedCategoryId,
-      name: _nameController.text,
-      plannedAmount: double.parse(_amountController.text),
+  Widget _buildSummaryItem(String label, String value) {
+    return Expanded(
+      child: Column(
+        children: [
+          Text(label,
+              style: const TextStyle(color: Colors.white70, fontSize: 11)),
+          const SizedBox(height: 4),
+          Text(value,
+              style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16)),
+        ],
+      ),
     );
-    await provider.addExpense(expense);
-    setState(() {
-      _showAddForm = false;
-      _nameController.clear();
-      _amountController.clear();
-      _selectedCategoryId = null;
-    });
+  }
+
+  void _showLimitDialog(ExpenseProvider provider) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final controller = TextEditingController(
+        text: provider.summary['limit']! > 0
+            ? provider.summary['limit']!.toStringAsFixed(0)
+            : '');
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Monthly Budget Limit',
+            style: TextStyle(fontWeight: FontWeight.bold)),
+        backgroundColor: isDark ? AppTheme.bgCardDark : Colors.white,
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('Set a total spending limit for this month.'),
+            const SizedBox(height: 16),
+            TextField(
+              controller: controller,
+              keyboardType: TextInputType.number,
+              autofocus: true,
+              decoration: AppTheme.inputDecoration(
+                  'Amount', LucideIcons.indianRupee,
+                  context: context),
+              style: TextStyle(color: AppTheme.getTextColor(context)),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel')),
+          ElevatedButton(
+            onPressed: () {
+              final limit = double.tryParse(controller.text) ?? 0;
+              provider.updateMonthlyLimit(limit);
+              Navigator.pop(context);
+            },
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildEmptyState() {
+    final secondaryTextColor =
+        AppTheme.getTextColor(context, isSecondary: true);
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(LucideIcons.calendarX,
-              size: 64, color: AppTheme.textLight.withOpacity(0.5)),
+              size: 64, color: secondaryTextColor.withValues(alpha: 0.5)),
           const SizedBox(height: 16),
-          const Text('No plans yet',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-          const Text('Plan your month to stay on track',
-              style: TextStyle(color: AppTheme.textSecondary)),
+          Text('No plans yet',
+              style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: AppTheme.getTextColor(context))),
+          Text('Plan your month to stay on track',
+              style: TextStyle(color: secondaryTextColor)),
         ],
       ),
     );
@@ -284,12 +315,16 @@ class _MonthPlanScreenState extends State<MonthPlanScreen> {
   Widget _buildExpenseCard(Expense expense, ExpenseProvider provider) {
     final bool isOver =
         expense.isPaid && (expense.actualAmount > expense.plannedAmount);
+    final textColor = AppTheme.getTextColor(context);
+    final secondaryTextColor =
+        AppTheme.getTextColor(context, isSecondary: true);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Theme.of(context).cardTheme.color,
+        color: isDark ? AppTheme.bgCardDark : Colors.white,
         borderRadius: BorderRadius.circular(24),
         boxShadow: AppTheme.softShadow,
       ),
@@ -301,7 +336,7 @@ class _MonthPlanScreenState extends State<MonthPlanScreen> {
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
                   color: (expense.isPaid ? AppTheme.success : AppTheme.primary)
-                      .withOpacity(0.1),
+                      .withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Icon(
@@ -318,11 +353,13 @@ class _MonthPlanScreenState extends State<MonthPlanScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(expense.name,
-                        style: const TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 16)),
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                            color: textColor)),
                     Text('Target: ₹${expense.plannedAmount.toInt()}',
                         style:
-                            TextStyle(color: AppTheme.textLight, fontSize: 12)),
+                            TextStyle(color: secondaryTextColor, fontSize: 12)),
                   ],
                 ),
               ),
@@ -341,13 +378,12 @@ class _MonthPlanScreenState extends State<MonthPlanScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text('Actual Spent:',
-                    style:
-                        TextStyle(color: AppTheme.textSecondary, fontSize: 13)),
+                    style: TextStyle(color: secondaryTextColor, fontSize: 13)),
                 Text(
                   '₹${expense.actualAmount.toInt()}',
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
-                    color: isOver ? AppTheme.danger : AppTheme.textPrimary,
+                    color: isOver ? AppTheme.danger : textColor,
                   ),
                 ),
               ],
@@ -363,24 +399,29 @@ class _MonthPlanScreenState extends State<MonthPlanScreen> {
       provider.togglePaid(expense, 0);
       return;
     }
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final controller =
         TextEditingController(text: expense.plannedAmount.toStringAsFixed(0));
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Confirm Expense'),
-        backgroundColor: Theme.of(context).cardTheme.color,
+        title: const Text('Confirm Expense',
+            style: TextStyle(fontWeight: FontWeight.bold)),
+        backgroundColor: isDark ? AppTheme.bgCardDark : Colors.white,
         content: Column(
           mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Enter the final amount spent'),
+            const Text('Enter the final amount spent:'),
             const SizedBox(height: 16),
             TextField(
               controller: controller,
               keyboardType: TextInputType.number,
               autofocus: true,
-              decoration:
-                  AppTheme.inputDecoration('Amount', LucideIcons.indianRupee),
+              decoration: AppTheme.inputDecoration(
+                  'Amount', LucideIcons.indianRupee,
+                  context: context),
+              style: TextStyle(color: AppTheme.getTextColor(context)),
             ),
           ],
         ),

@@ -91,11 +91,53 @@ class ExpenseRepository {
       WHERE month_key = ?
     ''', [monthKey]);
 
+    final limit = await getMonthlyLimit(monthKey);
+
     return {
       'planned': result.first['total_planned'] ?? 0.0,
       'actual': result.first['total_actual'] ?? 0.0,
       'pending_count': result.first['pending_count'] ?? 0,
+      'limit': limit,
     };
+  }
+
+  // Get monthly limit from month_plans or users table
+  Future<double> getMonthlyLimit(String monthKey) async {
+    final db = await _dbHelper.database;
+
+    // 1. Try month_plans first
+    final List<Map<String, dynamic>> plans = await db.query(
+      'month_plans',
+      where: 'month_key = ?',
+      whereArgs: [monthKey],
+      limit: 1,
+    );
+
+    if (plans.isNotEmpty && (plans.first['total_planned'] as num) > 0) {
+      return (plans.first['total_planned'] as num).toDouble();
+    }
+
+    // 2. Fallback to user's default_budget
+    final List<Map<String, dynamic>> users = await db.query('users', limit: 1);
+    if (users.isNotEmpty) {
+      return (users.first['default_budget'] as num?)?.toDouble() ?? 0.0;
+    }
+
+    return 0.0;
+  }
+
+  // Update monthly limit in month_plans table
+  Future<void> updateMonthlyLimit(String monthKey, double limit) async {
+    final db = await _dbHelper.database;
+    await db.insert(
+      'month_plans',
+      {
+        'month_key': monthKey,
+        'total_planned': limit,
+        'updated_at': DateTime.now().toIso8601String(),
+      },
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
   }
 
   // Get category breakdown for a month

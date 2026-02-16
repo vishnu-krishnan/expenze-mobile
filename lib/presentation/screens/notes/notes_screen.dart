@@ -26,60 +26,80 @@ class _NotesScreenState extends State<NotesScreen> {
   @override
   Widget build(BuildContext context) {
     final themeProvider = context.watch<ThemeProvider>();
+    final textColor = AppTheme.getTextColor(context);
+    final secondaryTextColor =
+        AppTheme.getTextColor(context, isSecondary: true);
 
     return Scaffold(
       backgroundColor: Colors.transparent,
-      appBar: AppBar(
-        title: const Text('Utilities'),
-        centerTitle: true,
+      body: Container(
+        decoration: themeProvider.isDarkMode
+            ? AppTheme.darkBackgroundDecoration
+            : AppTheme.backgroundDecoration,
+        child: Column(
+          children: [
+            AppBar(
+              title: Text('Utilities',
+                  style:
+                      TextStyle(color: textColor, fontWeight: FontWeight.bold)),
+              centerTitle: true,
+              backgroundColor: Colors.transparent,
+              elevation: 0,
+            ),
+            Expanded(
+              child: Consumer<NoteProvider>(
+                builder: (context, provider, child) {
+                  if (provider.isLoading) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+
+                  if (provider.notes.isEmpty) {
+                    return _buildEmptyState(secondaryTextColor);
+                  }
+
+                  return ListView.builder(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 10),
+                    itemCount: provider.notes.length,
+                    itemBuilder: (context, index) {
+                      return _buildNoteCard(
+                          provider.notes[index], textColor, secondaryTextColor);
+                    },
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _showNoteDialog(context),
         backgroundColor: AppTheme.primary,
         child: const Icon(LucideIcons.plus, color: Colors.white),
       ),
-      body: Consumer<NoteProvider>(
-        builder: (context, provider, child) {
-          if (provider.isLoading) {
-            return const Center(child: CircularProgressIndicator());
-          }
-
-          if (provider.notes.isEmpty) {
-            return _buildEmptyState();
-          }
-
-          return ListView.builder(
-            padding: const EdgeInsets.all(20),
-            itemCount: provider.notes.length,
-            itemBuilder: (context, index) {
-              return _buildNoteCard(provider.notes[index]);
-            },
-          );
-        },
-      ),
     );
   }
 
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(Color secondaryTextColor) {
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(LucideIcons.stickyNote,
-              size: 64, color: AppTheme.textLight.withOpacity(0.5)),
+              size: 64, color: secondaryTextColor.withValues(alpha: 0.5)),
           const SizedBox(height: 16),
           Text(
             'Keep track of your thoughts\nand important reminders',
             textAlign: TextAlign.center,
-            style: TextStyle(color: AppTheme.textLight, fontSize: 16),
+            style: TextStyle(color: secondaryTextColor, fontSize: 16),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildNoteCard(Note note) {
+  Widget _buildNoteCard(Note note, Color textColor, Color secondaryTextColor) {
     final colorVal = note.color != null
         ? Color(int.parse(note.color!.replaceFirst('#', '0xff')))
         : AppTheme.primary;
@@ -98,7 +118,7 @@ class _NotesScreenState extends State<NotesScreen> {
           Container(
             height: 4,
             decoration: BoxDecoration(
-              color: colorVal.withOpacity(0.5),
+              color: colorVal.withValues(alpha: 0.5),
               borderRadius:
                   const BorderRadius.vertical(top: Radius.circular(20)),
             ),
@@ -114,8 +134,10 @@ class _NotesScreenState extends State<NotesScreen> {
                     Expanded(
                       child: Text(
                         note.title,
-                        style: const TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 17),
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 17,
+                            color: textColor),
                       ),
                     ),
                     IconButton(
@@ -124,7 +146,7 @@ class _NotesScreenState extends State<NotesScreen> {
                         size: 18,
                         color: note.isPinned
                             ? AppTheme.primary
-                            : AppTheme.textLight,
+                            : secondaryTextColor.withValues(alpha: 0.5),
                       ),
                       onPressed: () =>
                           context.read<NoteProvider>().togglePin(note),
@@ -133,7 +155,7 @@ class _NotesScreenState extends State<NotesScreen> {
                 ),
                 Text(
                   note.content,
-                  style: TextStyle(color: AppTheme.textSecondary, fontSize: 14),
+                  style: TextStyle(color: secondaryTextColor, fontSize: 14),
                 ),
                 const SizedBox(height: 16),
                 Row(
@@ -144,7 +166,7 @@ class _NotesScreenState extends State<NotesScreen> {
                         padding: const EdgeInsets.symmetric(
                             horizontal: 10, vertical: 4),
                         decoration: BoxDecoration(
-                          color: AppTheme.primary.withOpacity(0.1),
+                          color: AppTheme.primary.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Row(
@@ -168,7 +190,8 @@ class _NotesScreenState extends State<NotesScreen> {
                     Row(
                       children: [
                         IconButton(
-                          icon: const Icon(LucideIcons.edit2, size: 16),
+                          icon: Icon(LucideIcons.edit2,
+                              size: 16, color: secondaryTextColor),
                           onPressed: () => _showNoteDialog(context, note: note),
                         ),
                         IconButton(
@@ -199,109 +222,126 @@ class _NotesScreenState extends State<NotesScreen> {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) => StatefulBuilder(
-        builder: (context, setModalState) => Container(
-          padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).viewInsets.bottom,
-            top: 24,
-            left: 24,
-            right: 24,
-          ),
-          decoration: BoxDecoration(
-            color: Theme.of(context).cardTheme.color ?? Colors.white,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
-          ),
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(note == null ? 'New Note' : 'Edit Note',
-                    style: const TextStyle(
-                        fontSize: 20, fontWeight: FontWeight.bold)),
-                const SizedBox(height: 24),
-                TextField(
-                  controller: titleController,
-                  decoration:
-                      AppTheme.inputDecoration('Title', LucideIcons.type),
-                ),
-                const SizedBox(height: 16),
-                TextField(
-                  controller: contentController,
-                  maxLines: 4,
-                  decoration: AppTheme.inputDecoration(
-                      'Content', LucideIcons.alignLeft),
-                ),
-                const SizedBox(height: 16),
-                ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  leading:
-                      const Icon(LucideIcons.bell, color: AppTheme.primary),
-                  title: Text(selectedDate == null
-                      ? 'Set Reminder'
-                      : DateFormat('MMM d, yyyy h:mm a').format(selectedDate!)),
-                  onTap: () async {
-                    final date = await showDatePicker(
-                      context: context,
-                      initialDate: selectedDate ?? DateTime.now(),
-                      firstDate: DateTime.now(),
-                      lastDate: DateTime.now().add(const Duration(days: 365)),
-                    );
-                    if (date != null) {
-                      final time = await showTimePicker(
+        builder: (context, setModalState) {
+          final isDark = Theme.of(context).brightness == Brightness.dark;
+          final modalBgColor = isDark ? AppTheme.bgCardDark : Colors.white;
+          final textColor = AppTheme.getTextColor(context);
+
+          return Container(
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(context).viewInsets.bottom,
+              top: 24,
+              left: 24,
+              right: 24,
+            ),
+            decoration: BoxDecoration(
+              color: modalBgColor,
+              borderRadius:
+                  const BorderRadius.vertical(top: Radius.circular(30)),
+            ),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(note == null ? 'New Note' : 'Edit Note',
+                      style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: textColor)),
+                  const SizedBox(height: 24),
+                  TextField(
+                    controller: titleController,
+                    decoration: AppTheme.inputDecoration(
+                        'Title', LucideIcons.type,
+                        context: context),
+                    style: TextStyle(color: textColor),
+                  ),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: contentController,
+                    maxLines: 4,
+                    decoration: AppTheme.inputDecoration(
+                        'Content', LucideIcons.alignLeft,
+                        context: context),
+                    style: TextStyle(color: textColor),
+                  ),
+                  const SizedBox(height: 16),
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading:
+                        const Icon(LucideIcons.bell, color: AppTheme.primary),
+                    title: Text(
+                        selectedDate == null
+                            ? 'Set Reminder'
+                            : DateFormat('MMM d, yyyy h:mm a')
+                                .format(selectedDate!),
+                        style: TextStyle(color: textColor)),
+                    onTap: () async {
+                      final date = await showDatePicker(
                         context: context,
-                        initialTime: selectedDate != null
-                            ? TimeOfDay.fromDateTime(selectedDate!)
-                            : TimeOfDay.now(),
+                        initialDate: selectedDate ?? DateTime.now(),
+                        firstDate: DateTime.now(),
+                        lastDate: DateTime.now().add(const Duration(days: 365)),
                       );
-                      if (time != null) {
-                        setModalState(() {
-                          selectedDate = DateTime(date.year, date.month,
-                              date.day, time.hour, time.minute);
-                        });
-                      }
-                    }
-                  },
-                  trailing: selectedDate != null
-                      ? IconButton(
-                          icon: const Icon(LucideIcons.x, size: 16),
-                          onPressed: () =>
-                              setModalState(() => selectedDate = null))
-                      : null,
-                ),
-                const SizedBox(height: 32),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      if (titleController.text.isNotEmpty ||
-                          contentController.text.isNotEmpty) {
-                        if (note == null) {
-                          context.read<NoteProvider>().addNote(
-                                titleController.text,
-                                contentController.text,
-                                reminderDate: selectedDate,
-                              );
-                        } else {
-                          context.read<NoteProvider>().updateNote(
-                                note.copyWith(
-                                  title: titleController.text,
-                                  content: contentController.text,
-                                  reminderDate: selectedDate,
-                                  isReminderActive: selectedDate != null,
-                                ),
-                              );
+                      if (date != null) {
+                        final time = await showTimePicker(
+                          context: context,
+                          initialTime: selectedDate != null
+                              ? TimeOfDay.fromDateTime(selectedDate!)
+                              : TimeOfDay.now(),
+                        );
+                        if (time != null) {
+                          setModalState(() {
+                            selectedDate = DateTime(date.year, date.month,
+                                date.day, time.hour, time.minute);
+                          });
                         }
-                        Navigator.pop(context);
                       }
                     },
-                    child: Text(note == null ? 'Create Note' : 'Save Changes'),
+                    trailing: selectedDate != null
+                        ? IconButton(
+                            icon: const Icon(LucideIcons.x, size: 16),
+                            onPressed: () =>
+                                setModalState(() => selectedDate = null))
+                        : null,
                   ),
-                ),
-                const SizedBox(height: 48), // Bottom safe area
-              ],
+                  const SizedBox(height: 32),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        if (titleController.text.isNotEmpty ||
+                            contentController.text.isNotEmpty) {
+                          if (note == null) {
+                            context.read<NoteProvider>().addNote(
+                                  titleController.text,
+                                  contentController.text,
+                                  reminderDate: selectedDate,
+                                );
+                          } else {
+                            context.read<NoteProvider>().updateNote(
+                                  note.copyWith(
+                                    title: titleController.text,
+                                    content: contentController.text,
+                                    reminderDate: selectedDate,
+                                    isReminderActive: selectedDate != null,
+                                  ),
+                                );
+                          }
+                          Navigator.pop(context);
+                        }
+                      },
+                      child:
+                          Text(note == null ? 'Create Note' : 'Save Changes'),
+                    ),
+                  ),
+                  const SizedBox(height: 48), // Bottom safe area
+                ],
+              ),
             ),
-          ),
-        ),
+          );
+        },
       ),
     );
   }

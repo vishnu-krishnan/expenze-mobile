@@ -19,14 +19,22 @@ class AppTheme {
   static const Color bgSecondary = Color(0xFFC7ECE6);
   static const Color bgCard = Colors.white;
 
-  // Text colors
-  static const Color textPrimary =
-      Color(0xFF2D6C84); // Using heading color for primary text
+  // Static constants for reference but should use BuildContext extension for dynamic themes
+  static const Color textPrimary = Color(0xFF2D6C84);
   static const Color textSecondary = Color(0xFF475569);
   static const Color textLight = Color(0xFF94A3B8);
 
+  // Dark Theme constants
+  static const Color bgPrimaryDark = Color(0xFF0F172A);
+  static const Color bgSecondaryDark = Color(0xFF1E293B);
+  static const Color bgCardDark = Color(0xFF1E293B);
+  static const Color borderDark = Color(0xFF334155);
+  static const Color textPrimaryDark = Color(0xFFF8FAFC);
+  static const Color textSecondaryDark = Color(0xFF94A3B8);
+
   // Border & Depth
   static const Color border = Color(0xFFC7ECE6);
+
   static List<BoxShadow> softShadow = [
     BoxShadow(
       color: primary.withOpacity(0.1),
@@ -34,14 +42,6 @@ class AppTheme {
       offset: const Offset(0, 4),
     ),
   ];
-
-  // Dark Theme Palette (Refined for the new scheme)
-  static const Color bgPrimaryDark = Color(0xFF0F172A);
-  static const Color bgSecondaryDark = Color(0xFF1E293B);
-  static const Color bgCardDark = Color(0xFF1E293B);
-  static const Color borderDark = Color(0xFF334155);
-  static const Color textPrimaryDark = Color(0xFFF8FAFC);
-  static const Color textSecondaryDark = Color(0xFF94A3B8);
 
   // Background patterns
   static BoxDecoration get backgroundDecoration => BoxDecoration(
@@ -72,11 +72,20 @@ class AppTheme {
         ),
       );
 
+  // Helper method to get theme-aware text colors
+  static Color getTextColor(BuildContext context, {bool isSecondary = false}) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    if (isSecondary) {
+      return isDark ? textSecondaryDark : textSecondary;
+    }
+    return isDark ? textPrimaryDark : textPrimary;
+  }
+
   // Light Theme
   static ThemeData lightTheme = ThemeData(
     useMaterial3: true,
     primaryColor: primary,
-    scaffoldBackgroundColor: Colors.white,
+    scaffoldBackgroundColor: bgPrimary,
     textTheme: GoogleFonts.outfitTextTheme().copyWith(
       displayLarge:
           GoogleFonts.outfit(color: textPrimary, fontWeight: FontWeight.bold)
@@ -96,6 +105,7 @@ class AppTheme {
       secondary: secondary,
       error: danger,
       surface: bgCard,
+      onSurface: textPrimary,
     ),
     appBarTheme: AppBarTheme(
       backgroundColor: Colors.transparent,
@@ -174,6 +184,7 @@ class AppTheme {
       secondary: accent,
       error: danger,
       surface: bgCardDark,
+      onSurface: textPrimaryDark,
     ),
     appBarTheme: AppBarTheme(
       backgroundColor: Colors.transparent,
@@ -202,6 +213,14 @@ class AppTheme {
         borderRadius: BorderRadius.circular(16),
         borderSide: const BorderSide(color: borderDark),
       ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: const BorderSide(color: borderDark),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: const BorderSide(color: primary, width: 2),
+      ),
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
@@ -217,12 +236,16 @@ class AppTheme {
     ),
   );
 
-  static InputDecoration inputDecoration(String hint, IconData icon) {
+  static InputDecoration inputDecoration(String hint, IconData icon,
+      {BuildContext? context}) {
+    final color = context != null
+        ? getTextColor(context, isSecondary: true)
+        : textSecondary;
     return InputDecoration(
       hintText: hint,
       prefixIcon: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: Icon(icon, color: textSecondary, size: 20),
+        child: Icon(icon, color: color, size: 20),
       ),
       hintStyle: GoogleFonts.outfit(color: textLight, fontSize: 16),
     );

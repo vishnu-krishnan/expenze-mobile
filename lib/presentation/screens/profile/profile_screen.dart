@@ -35,116 +35,76 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final themeProvider = context.watch<ThemeProvider>();
+    final textColor = AppTheme.getTextColor(context);
+    final secondaryTextColor =
+        AppTheme.getTextColor(context, isSecondary: true);
 
-    return Container(
-      decoration: themeProvider.isDarkMode
-          ? AppTheme.darkBackgroundDecoration
-          : AppTheme.backgroundDecoration,
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
-        appBar: AppBar(
-          title: const Text('Account Identity'),
-          actions: [
-            _isEditing
-                ? IconButton(
-                    onPressed: () async {
-                      await _saveProfile();
-                      if (mounted) setState(() => _isEditing = false);
-                    },
-                    icon: const Icon(LucideIcons.check,
-                        color: AppTheme.success, size: 28),
-                  )
-                : IconButton(
-                    onPressed: () => setState(() => _isEditing = true),
-                    icon:
-                        const Icon(LucideIcons.edit3, color: AppTheme.primary),
-                  ),
-            const SizedBox(width: 8),
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      body: Container(
+        decoration: context.watch<ThemeProvider>().isDarkMode
+            ? AppTheme.darkBackgroundDecoration
+            : AppTheme.backgroundDecoration,
+        child: Column(
+          children: [
+            AppBar(
+              title: Text('Account Identity',
+                  style:
+                      TextStyle(color: textColor, fontWeight: FontWeight.bold)),
+              backgroundColor: Colors.transparent,
+              elevation: 0,
+              actions: [
+                _isEditing
+                    ? IconButton(
+                        onPressed: () async {
+                          await _saveProfile();
+                          if (mounted) setState(() => _isEditing = false);
+                        },
+                        icon: const Icon(LucideIcons.check,
+                            color: AppTheme.success, size: 28),
+                      )
+                    : IconButton(
+                        onPressed: () => setState(() => _isEditing = true),
+                        icon: Icon(LucideIcons.edit3, color: AppTheme.primary),
+                      ),
+                const SizedBox(width: 8),
+              ],
+            ),
+            Expanded(
+              child: Consumer<AuthProvider>(
+                builder: (context, auth, child) {
+                  final user = auth.user;
+                  if (user == null)
+                    return const Center(child: Text('Not logged in'));
+
+                  return SingleChildScrollView(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 24, vertical: 20),
+                    child: Column(
+                      children: [
+                        _buildModernAvatar(
+                            user['fullName'] ?? user['username'] ?? 'U'),
+                        const SizedBox(height: 12),
+                        Text(user['fullName'] ?? user['username'] ?? 'Member',
+                            style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: textColor)),
+                        Text('@${user['username'] ?? ''}',
+                            style: TextStyle(
+                                color: secondaryTextColor, fontSize: 13)),
+                        const SizedBox(height: 32),
+                        _buildSettingsCard(user, textColor, secondaryTextColor),
+                        const SizedBox(height: 24),
+                        _buildLogoutButton(auth),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ),
           ],
         ),
-        body: Consumer<AuthProvider>(
-          builder: (context, auth, child) {
-            final user = auth.user;
-            if (user == null) return const Center(child: Text('Not logged in'));
-
-            return SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-              child: Column(
-                children: [
-                  _buildModernAvatar(
-                      user['fullName'] ?? user['username'] ?? 'U'),
-                  const SizedBox(height: 12),
-                  Text(user['fullName'] ?? user['username'] ?? 'Member',
-                      style: const TextStyle(
-                          fontSize: 20, fontWeight: FontWeight.bold)),
-                  Text('@${user['username'] ?? ''}',
-                      style:
-                          TextStyle(color: AppTheme.textLight, fontSize: 13)),
-                  const SizedBox(height: 32),
-                  _buildSettingsCard(user),
-                  const SizedBox(height: 24),
-                  _buildAppearanceCard(themeProvider),
-                  const SizedBox(height: 32),
-                  _buildLogoutButton(auth),
-                ],
-              ),
-            );
-          },
-        ),
-      ),
-    );
-  }
-
-  Widget _buildAppearanceCard(ThemeProvider themeProvider) {
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardTheme.color,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: AppTheme.softShadow,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text('Appearance',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-          const SizedBox(height: 20),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                        color: themeProvider.isDarkMode
-                            ? AppTheme.accent
-                            : AppTheme.bgSecondary,
-                        borderRadius: BorderRadius.circular(12)),
-                    child: Icon(
-                        themeProvider.isDarkMode
-                            ? LucideIcons.moon
-                            : LucideIcons.sun,
-                        size: 20,
-                        color: themeProvider.isDarkMode
-                            ? Colors.white
-                            : AppTheme.textSecondary),
-                  ),
-                  const SizedBox(width: 16),
-                  const Text('Dark Mode',
-                      style:
-                          TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
-                ],
-              ),
-              Switch.adaptive(
-                value: themeProvider.isDarkMode,
-                onChanged: (val) => themeProvider.toggleTheme(),
-                activeColor: AppTheme.primary,
-              ),
-            ],
-          ),
-        ],
       ),
     );
   }
@@ -154,24 +114,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        gradient:
-            const LinearGradient(colors: [AppTheme.primary, AppTheme.accent]),
+        border: Border.all(color: AppTheme.primary, width: 2),
       ),
       child: CircleAvatar(
         radius: 50,
-        backgroundColor: Colors.white,
+        backgroundColor: AppTheme.primary,
         child: Text(
           name.isNotEmpty ? name[0].toUpperCase() : 'U',
           style: const TextStyle(
-              fontSize: 40,
-              fontWeight: FontWeight.bold,
-              color: AppTheme.primary),
+              fontSize: 40, fontWeight: FontWeight.bold, color: Colors.white),
         ),
       ),
     );
   }
 
-  Widget _buildSettingsCard(Map<String, dynamic> user) {
+  Widget _buildSettingsCard(
+      Map<String, dynamic> user, Color textColor, Color secondaryTextColor) {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
@@ -182,39 +140,52 @@ class _ProfileScreenState extends State<ProfileScreen> {
       child: Column(
         children: [
           _buildInfoRow(LucideIcons.user, 'Full Name', _nameController.text,
+              textColor: textColor,
+              secondaryTextColor: secondaryTextColor,
               controller: _nameController),
-          const Divider(height: 32),
+          Divider(height: 32, color: secondaryTextColor.withValues(alpha: 0.1)),
           _buildInfoRow(
               LucideIcons.atSign, 'Username', _usernameController.text,
+              textColor: textColor,
+              secondaryTextColor: secondaryTextColor,
               controller: _usernameController),
-          const Divider(height: 32),
+          Divider(height: 32, color: secondaryTextColor.withValues(alpha: 0.1)),
           _buildInfoRow(
               LucideIcons.mail, 'Communication', _emailController.text,
+              textColor: textColor,
+              secondaryTextColor: secondaryTextColor,
               controller: _emailController),
-          const Divider(height: 32),
+          Divider(height: 32, color: secondaryTextColor.withValues(alpha: 0.1)),
           _buildInfoRow(
               LucideIcons.phone, 'Contact number', _phoneController.text,
+              textColor: textColor,
+              secondaryTextColor: secondaryTextColor,
               controller: _phoneController),
-          const Divider(height: 32),
+          Divider(height: 32, color: secondaryTextColor.withValues(alpha: 0.1)),
           _buildInfoRow(
               LucideIcons.wallet, 'Spending Limit', _budgetController.text,
-              controller: _budgetController, isNumber: true),
+              textColor: textColor,
+              secondaryTextColor: secondaryTextColor,
+              controller: _budgetController,
+              isNumber: true),
         ],
       ),
     );
   }
 
   Widget _buildInfoRow(IconData icon, String label, String value,
-      {TextEditingController? controller, bool isNumber = false}) {
+      {required Color textColor,
+      required Color secondaryTextColor,
+      TextEditingController? controller,
+      bool isNumber = false}) {
     return Row(
       children: [
         Container(
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
-              color: Theme.of(context).cardTheme.color!.withOpacity(0.5),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: AppTheme.border.withOpacity(0.1))),
-          child: Icon(icon, size: 20, color: AppTheme.textSecondary),
+              color: AppTheme.primary.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(12)),
+          child: Icon(icon, size: 20, color: AppTheme.primary),
         ),
         const SizedBox(width: 16),
         Expanded(
@@ -223,7 +194,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             children: [
               Text(label,
                   style: TextStyle(
-                      color: AppTheme.textLight,
+                      color: secondaryTextColor,
                       fontSize: 11,
                       fontWeight: FontWeight.w600)),
               if (_isEditing && controller != null)
@@ -235,13 +206,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       isDense: true,
                       contentPadding: EdgeInsets.symmetric(vertical: 4),
                       border: InputBorder.none),
-                  style: const TextStyle(
-                      fontWeight: FontWeight.bold, fontSize: 15),
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 15,
+                      color: textColor),
                 )
               else
                 Text(value,
-                    style: const TextStyle(
-                        fontWeight: FontWeight.bold, fontSize: 15)),
+                    style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 15,
+                        color: textColor)),
             ],
           ),
         ),
@@ -253,11 +228,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return ElevatedButton(
       onPressed: () => auth.logout(),
       style: ElevatedButton.styleFrom(
-        backgroundColor: Theme.of(context).cardTheme.color,
+        backgroundColor: Theme.of(context).brightness == Brightness.dark
+            ? AppTheme.bgCardDark
+            : Colors.white,
         foregroundColor: AppTheme.danger,
-        side: BorderSide(color: AppTheme.danger.withOpacity(0.1)),
+        side: BorderSide(color: AppTheme.danger.withValues(alpha: 0.2)),
         minimumSize: const Size(double.infinity, 60),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        elevation: 0,
       ),
       child: const Row(
         mainAxisAlignment: MainAxisAlignment.center,

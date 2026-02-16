@@ -27,45 +27,61 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
   @override
   Widget build(BuildContext context) {
     final themeProvider = context.watch<ThemeProvider>();
+    final textColor = AppTheme.getTextColor(context);
+    final secondaryTextColor =
+        AppTheme.getTextColor(context, isSecondary: true);
 
-    return Container(
-      decoration: themeProvider.isDarkMode
-          ? AppTheme.darkBackgroundDecoration
-          : AppTheme.backgroundDecoration,
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
-        appBar: AppBar(
-          title: const Text('Spending Analytics'),
-          elevation: 0,
-        ),
-        body: Consumer<ExpenseProvider>(
-          builder: (context, provider, child) {
-            if (provider.isLoading) {
-              return const Center(child: CircularProgressIndicator());
-            }
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      body: Container(
+        decoration: themeProvider.isDarkMode
+            ? AppTheme.darkBackgroundDecoration
+            : AppTheme.backgroundDecoration,
+        child: Column(
+          children: [
+            AppBar(
+              title: Text('Spending Analytics',
+                  style:
+                      TextStyle(color: textColor, fontWeight: FontWeight.bold)),
+              elevation: 0,
+              backgroundColor: Colors.transparent,
+              centerTitle: true,
+            ),
+            Expanded(
+              child: Consumer<ExpenseProvider>(
+                builder: (context, provider, child) {
+                  if (provider.isLoading) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
 
-            return SingleChildScrollView(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildPeriodSelector(),
-                  const SizedBox(height: 24),
-                  _buildTrendChart(provider.trends),
-                  const SizedBox(height: 32),
-                  _buildInsightCards(),
-                  const SizedBox(height: 24),
-                  _buildCategoryBreakdown(),
-                ],
+                  return SingleChildScrollView(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 24, vertical: 10),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildPeriodSelector(textColor, secondaryTextColor),
+                        const SizedBox(height: 24),
+                        _buildTrendChart(
+                            provider.trends, textColor, secondaryTextColor),
+                        const SizedBox(height: 32),
+                        _buildInsightCards(textColor, secondaryTextColor),
+                        const SizedBox(height: 32),
+                        _buildCategoryBreakdown(textColor, secondaryTextColor),
+                        const SizedBox(height: 100),
+                      ],
+                    ),
+                  );
+                },
               ),
-            );
-          },
+            ),
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildPeriodSelector() {
+  Widget _buildPeriodSelector(Color textColor, Color secondaryTextColor) {
     return Container(
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
@@ -85,6 +101,9 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
 
   Widget _buildPeriodButton(String label, int months) {
     final isSelected = _selectedPeriod == months;
+    final secondaryTextColor =
+        AppTheme.getTextColor(context, isSecondary: true);
+
     return Expanded(
       child: GestureDetector(
         onTap: () {
@@ -101,7 +120,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
             label,
             textAlign: TextAlign.center,
             style: TextStyle(
-              color: isSelected ? Colors.white : AppTheme.textSecondary,
+              color: isSelected ? Colors.white : secondaryTextColor,
               fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
               fontSize: 14,
             ),
@@ -111,7 +130,8 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
     );
   }
 
-  Widget _buildTrendChart(List<Map<String, dynamic>> trends) {
+  Widget _buildTrendChart(List<Map<String, dynamic>> trends, Color textColor,
+      Color secondaryTextColor) {
     if (trends.isEmpty) {
       return Container(
         height: 280,
@@ -125,11 +145,11 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(LucideIcons.trendingUp,
-                  size: 48, color: AppTheme.textLight.withOpacity(0.5)),
+                  size: 48, color: secondaryTextColor.withValues(alpha: 0.5)),
               const SizedBox(height: 16),
               Text(
                 'No data available',
-                style: TextStyle(color: AppTheme.textLight, fontSize: 16),
+                style: TextStyle(color: secondaryTextColor, fontSize: 16),
               ),
             ],
           ),
@@ -157,7 +177,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
     if (maxY == 0) maxY = 5000;
 
     return Container(
-      height: 280,
+      height: 320,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: Theme.of(context).cardTheme.color,
@@ -170,20 +190,23 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
+              Text(
                 'Spending Trend',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: textColor),
               ),
               Container(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
-                  color: AppTheme.primary.withOpacity(0.1),
+                  color: AppTheme.primary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Row(
                   children: [
-                    Icon(LucideIcons.trendingUp,
+                    const Icon(LucideIcons.trendingUp,
                         size: 14, color: AppTheme.primary),
                     const SizedBox(width: 4),
                     Text(
@@ -202,7 +225,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
               ),
             ],
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 32),
           Expanded(
             child: LineChart(
               LineChartData(
@@ -212,7 +235,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                   horizontalInterval: maxY > 0 ? maxY / 4 : 1000,
                   getDrawingHorizontalLine: (value) {
                     return FlLine(
-                      color: AppTheme.border.withOpacity(0.1),
+                      color: secondaryTextColor.withValues(alpha: 0.1),
                       strokeWidth: 1,
                     );
                   },
@@ -237,25 +260,25 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                         if (parts.length == 2) {
                           final month = int.parse(parts[1]);
                           const months = [
-                            'J',
-                            'F',
-                            'M',
-                            'A',
-                            'M',
-                            'J',
-                            'J',
-                            'A',
-                            'S',
-                            'O',
-                            'N',
-                            'D'
+                            'Jan',
+                            'Feb',
+                            'Mar',
+                            'Apr',
+                            'May',
+                            'Jun',
+                            'Jul',
+                            'Aug',
+                            'Sep',
+                            'Oct',
+                            'Nov',
+                            'Dec'
                           ];
                           return Padding(
                             padding: const EdgeInsets.only(top: 8),
                             child: Text(
-                              months[month - 1],
+                              months[month - 1][0],
                               style: TextStyle(
-                                  color: AppTheme.textLight,
+                                  color: secondaryTextColor,
                                   fontSize: 10,
                                   fontWeight: FontWeight.w600),
                             ),
@@ -274,7 +297,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                         return Text(
                           '₹${(value / 1000).toStringAsFixed(0)}k',
                           style: TextStyle(
-                              color: AppTheme.textLight,
+                              color: secondaryTextColor,
                               fontSize: 10,
                               fontWeight: FontWeight.w600),
                         );
@@ -293,7 +316,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                   LineChartBarData(
                     spots: spotsPlanned,
                     isCurved: true,
-                    color: AppTheme.secondary.withOpacity(0.3),
+                    color: AppTheme.secondary.withValues(alpha: 0.3),
                     barWidth: 2,
                     isStrokeCapRound: true,
                     dashArray: [5, 5],
@@ -321,8 +344,8 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                       show: true,
                       gradient: LinearGradient(
                         colors: [
-                          AppTheme.primary.withOpacity(0.1),
-                          AppTheme.primary.withOpacity(0.0)
+                          AppTheme.primary.withValues(alpha: 0.15),
+                          AppTheme.primary.withValues(alpha: 0.0)
                         ],
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
@@ -338,13 +361,14 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
     );
   }
 
-  Widget _buildInsightCards() {
+  Widget _buildInsightCards(Color textColor, Color secondaryTextColor) {
     return Consumer<ExpenseProvider>(
       builder: (context, provider, child) {
         return Row(
           children: [
             Expanded(
               child: _buildInsightCard(
+                context,
                 'Avg Monthly',
                 '₹${provider.avgMonthlySpent.toStringAsFixed(0)}',
                 LucideIcons.barChart3,
@@ -354,6 +378,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
             const SizedBox(width: 12),
             Expanded(
               child: _buildInsightCard(
+                context,
                 'Highest',
                 '₹${provider.maxMonthlySpent.toStringAsFixed(0)}',
                 LucideIcons.trendingUp,
@@ -366,8 +391,12 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
     );
   }
 
-  Widget _buildInsightCard(
-      String label, String value, IconData icon, Color color) {
+  Widget _buildInsightCard(BuildContext context, String label, String value,
+      IconData icon, Color color) {
+    final textColor = AppTheme.getTextColor(context);
+    final secondaryTextColor =
+        AppTheme.getTextColor(context, isSecondary: true);
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -381,7 +410,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
+              color: color.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(icon, color: color, size: 20),
@@ -390,21 +419,22 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
           Text(
             label,
             style: TextStyle(
-                color: AppTheme.textLight,
+                color: secondaryTextColor,
                 fontSize: 11,
                 fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 4),
           Text(
             value,
-            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            style: TextStyle(
+                fontSize: 20, fontWeight: FontWeight.bold, color: textColor),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildCategoryBreakdown() {
+  Widget _buildCategoryBreakdown(Color textColor, Color secondaryTextColor) {
     return Consumer<ExpenseProvider>(
       builder: (context, provider, child) {
         final breakdown = provider.categoryBreakdown;
@@ -417,15 +447,18 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Top Categories',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            Text('Top Categories',
+                style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: textColor)),
             const SizedBox(height: 16),
             if (breakdown.isEmpty)
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 20),
                 child: Center(
                   child: Text('No breakdown data for this month',
-                      style: TextStyle(color: AppTheme.textLight)),
+                      style: TextStyle(color: secondaryTextColor)),
                 ),
               )
             else
@@ -438,7 +471,8 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                 final emoji = (item['icon'] as String?) ?? '📁';
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 12),
-                  child: _buildCategoryItem(name, amount, progress, emoji),
+                  child: _buildCategoryItem(
+                      context, name, amount, progress, emoji),
                 );
               }),
           ],
@@ -447,8 +481,12 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
     );
   }
 
-  Widget _buildCategoryItem(
-      String name, double amount, double progress, String emoji) {
+  Widget _buildCategoryItem(BuildContext context, String name, double amount,
+      double progress, String emoji) {
+    final textColor = AppTheme.getTextColor(context);
+    final secondaryTextColor =
+        AppTheme.getTextColor(context, isSecondary: true);
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -467,11 +505,13 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(name,
-                        style: const TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 15)),
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15,
+                            color: textColor)),
                     Text('₹${amount.toStringAsFixed(0)}',
                         style:
-                            TextStyle(color: AppTheme.textLight, fontSize: 13)),
+                            TextStyle(color: secondaryTextColor, fontSize: 13)),
                   ],
                 ),
               ),
@@ -489,7 +529,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
             borderRadius: BorderRadius.circular(4),
             child: LinearProgressIndicator(
               value: progress,
-              backgroundColor: AppTheme.bgSecondary.withOpacity(0.1),
+              backgroundColor: AppTheme.primary.withValues(alpha: 0.1),
               valueColor: const AlwaysStoppedAnimation<Color>(AppTheme.primary),
               minHeight: 6,
             ),

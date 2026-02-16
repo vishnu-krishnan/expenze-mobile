@@ -3,8 +3,10 @@ import 'package:provider/provider.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/expense_provider.dart';
+import '../../providers/category_provider.dart';
 import '../../providers/theme_provider.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../data/models/expense.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -64,6 +66,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final auth = Provider.of<AuthProvider>(context);
     final user = auth.user;
     final themeProvider = context.watch<ThemeProvider>();
+    final textColor = AppTheme.getTextColor(context);
+    final secondaryTextColor =
+        AppTheme.getTextColor(context, isSecondary: true);
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -82,7 +87,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
               final actual = summary['actual'] ?? 0.0;
               final planned = summary['planned'] ?? 0.0;
               final remaining = summary['remaining'] ?? 0.0;
-              final pctUsed = planned > 0 ? (actual / planned) : 0.0;
+              final limit = summary['limit'] ?? 0.0;
+              final target = limit > 0 ? limit : planned;
+              final pctUsed = target > 0 ? (actual / target) : 0.0;
 
               return RefreshIndicator(
                 onRefresh: () =>
@@ -99,15 +106,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             Text(
                               _getTimeBasedGreeting(),
                               style: TextStyle(
-                                color: AppTheme.textSecondary,
+                                color: secondaryTextColor,
                                 fontSize: 14,
                               ),
                             ),
                             Text(
                               user?['fullName'] ?? user?['username'] ?? 'User',
-                              style: const TextStyle(
-                                fontSize: 22,
+                              style: TextStyle(
+                                fontSize: 24,
                                 fontWeight: FontWeight.bold,
+                                color: textColor,
                                 letterSpacing: -0.5,
                               ),
                             ),
@@ -115,12 +123,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         ),
                       ),
                     ),
+                    if ((summary['limit'] ?? 0) <= 0)
+                      SliverToBoxAdapter(
+                        child: _buildMonthIndicator(provider),
+                      ),
                     SliverToBoxAdapter(
-                      child: _buildWalletCard(
-                          actual, remaining, pctUsed, provider),
+                      child: _buildWalletCard(actual, remaining, pctUsed,
+                          provider, summary, planned),
                     ),
                     SliverToBoxAdapter(
-                      child: _buildQuickActions(),
+                      child: _buildQuickActions(context),
                     ),
                     SliverToBoxAdapter(
                       child: Padding(
@@ -128,11 +140,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Text(
+                            Text(
                               'Spending Insights',
                               style: TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
+                                color: textColor,
                               ),
                             ),
                             TextButton(
@@ -176,7 +189,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             }
 
                             return _buildCategoryItem(
-                                title, amount, iconStr, color);
+                                context, title, amount, iconStr, color);
                           },
                           childCount: provider.categoryBreakdown.length,
                         ),
@@ -190,11 +203,122 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
         ),
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => _showAddExpenseDialog(context),
+        backgroundColor: AppTheme.primary,
+        child: const Icon(LucideIcons.plus, color: Colors.white),
+      ),
+    );
+  }
+
+  void _showAddExpenseDialog(BuildContext context) {
+    final nameController = TextEditingController();
+    final amountController = TextEditingController();
+    int? selectedCategoryId;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setModalState) {
+          final isDark = Theme.of(context).brightness == Brightness.dark;
+          final modalBgColor = isDark ? AppTheme.bgCardDark : Colors.white;
+          final textColor = AppTheme.getTextColor(context);
+          final categories = context.read<CategoryProvider>().categories;
+
+          return Container(
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(context).viewInsets.bottom,
+              top: 24,
+              left: 24,
+              right: 24,
+            ),
+            decoration: BoxDecoration(
+              color: modalBgColor,
+              borderRadius:
+                  const BorderRadius.vertical(top: Radius.circular(30)),
+            ),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Quick Expense',
+                      style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: textColor)),
+                  const SizedBox(height: 24),
+                  DropdownButtonFormField<int>(
+                    value: selectedCategoryId,
+                    dropdownColor: modalBgColor,
+                    items: categories
+                        .map((c) => DropdownMenuItem(
+                            value: c.id,
+                            child: Text(c.name,
+                                style: TextStyle(color: textColor))))
+                        .toList(),
+                    onChanged: (val) =>
+                        setModalState(() => selectedCategoryId = val),
+                    decoration: AppTheme.inputDecoration(
+                        'Category', LucideIcons.layoutGrid,
+                        context: context),
+                  ),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: nameController,
+                    decoration: AppTheme.inputDecoration(
+                        'What is it for?', LucideIcons.edit3,
+                        context: context),
+                    style: TextStyle(color: textColor),
+                  ),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: amountController,
+                    keyboardType: TextInputType.number,
+                    decoration: AppTheme.inputDecoration(
+                        'Amount (Planned)', LucideIcons.target,
+                        context: context),
+                    style: TextStyle(color: textColor),
+                  ),
+                  const SizedBox(height: 32),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () async {
+                        if (nameController.text.isEmpty ||
+                            selectedCategoryId == null ||
+                            amountController.text.isEmpty) return;
+
+                        final provider = context.read<ExpenseProvider>();
+                        final expense = Expense(
+                          monthKey: provider.currentMonthKey,
+                          categoryId: selectedCategoryId,
+                          name: nameController.text,
+                          plannedAmount:
+                              double.tryParse(amountController.text) ?? 0,
+                        );
+
+                        await provider.addExpense(expense);
+
+                        if (mounted) Navigator.pop(context);
+                      },
+                      child: const Text('Add to Plan'),
+                    ),
+                  ),
+                  const SizedBox(height: 48),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
     );
   }
 
   Widget _buildWalletCard(double actual, double remaining, double pctUsed,
-      ExpenseProvider provider) {
+      ExpenseProvider provider, Map<String, double> summary, double planned) {
     return GestureDetector(
       onHorizontalDragEnd: (details) {
         if (details.primaryVelocity! > 0) {
@@ -232,15 +356,49 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     const Text('Total Spent',
                         style: TextStyle(color: Colors.white70, fontSize: 13)),
                     Text(
-                      '₹${actual.toStringAsFixed(2)}',
+                      '₹${actual.toStringAsFixed(0)}',
                       style: const TextStyle(
                           color: Colors.white,
-                          fontSize: 30,
+                          fontSize: 28,
                           fontWeight: FontWeight.bold),
                     ),
                   ],
                 ),
-                _buildMonthIndicator(provider),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                        (summary['limit'] ?? 0) > 0
+                            ? 'Monthly Limit'
+                            : 'Total Planned',
+                        style: const TextStyle(
+                            color: Colors.white70, fontSize: 12)),
+                    Row(
+                      children: [
+                        Text(
+                          '₹${((summary['limit'] ?? 0) > 0 ? summary['limit']! : planned).toStringAsFixed(0)}',
+                          style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(width: 4),
+                        GestureDetector(
+                          onTap: () => _showSetLimitDialog(context, provider),
+                          child: Container(
+                            padding: const EdgeInsets.all(4),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.2),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(LucideIcons.edit2,
+                                size: 10, color: Colors.white),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ],
             ),
             const Spacer(),
@@ -293,6 +451,51 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
+  void _showSetLimitDialog(BuildContext context, ExpenseProvider provider) {
+    final controller = TextEditingController(
+        text: (provider.summary['limit'] ?? 0) > 0
+            ? provider.summary['limit']!.toStringAsFixed(0)
+            : '');
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Set Monthly Limit',
+            style: TextStyle(fontWeight: FontWeight.bold)),
+        backgroundColor: Theme.of(context).cardTheme.color,
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('Enter your spending goal for this month:'),
+            const SizedBox(height: 16),
+            TextField(
+              controller: controller,
+              keyboardType: TextInputType.number,
+              autofocus: true,
+              decoration: AppTheme.inputDecoration(
+                  'Monthly Limit', LucideIcons.indianRupee,
+                  context: context),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel')),
+          ElevatedButton(
+            onPressed: () {
+              final limit = double.tryParse(controller.text) ?? 0;
+              provider.updateMonthlyLimit(limit);
+              Navigator.pop(context);
+            },
+            child: const Text('Save Limit'),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildMonthIndicator(ExpenseProvider provider) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
@@ -308,24 +511,28 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  Widget _buildQuickActions() {
+  Widget _buildQuickActions(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          _buildActionItem(LucideIcons.calendar, 'Plan',
+          _buildActionItem(context, LucideIcons.calendar, 'Plan',
               () => Navigator.pushNamed(context, '/month')),
-          _buildActionItem(LucideIcons.mail, 'Import',
+          _buildActionItem(context, LucideIcons.mail, 'Import',
               () => Navigator.pushNamed(context, '/import')),
-          _buildActionItem(LucideIcons.grid, 'Types',
+          _buildActionItem(context, LucideIcons.grid, 'Types',
               () => Navigator.pushNamed(context, '/categories')),
         ],
       ),
     );
   }
 
-  Widget _buildActionItem(IconData icon, String label, VoidCallback onTap) {
+  Widget _buildActionItem(
+      BuildContext context, IconData icon, String label, VoidCallback onTap) {
+    final secondaryTextColor =
+        AppTheme.getTextColor(context, isSecondary: true);
+
     return GestureDetector(
       onTap: onTap,
       child: Column(
@@ -341,17 +548,21 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
           const SizedBox(height: 8),
           Text(label,
-              style: const TextStyle(
+              style: TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.w600,
-                  color: AppTheme.textSecondary)),
+                  color: secondaryTextColor)),
         ],
       ),
     );
   }
 
-  Widget _buildCategoryItem(
-      String title, String amount, String icon, Color color) {
+  Widget _buildCategoryItem(BuildContext context, String title, String amount,
+      String icon, Color color) {
+    final textColor = AppTheme.getTextColor(context);
+    final secondaryTextColor =
+        AppTheme.getTextColor(context, isSecondary: true);
+
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -365,7 +576,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
+              color: color.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Text(icon, style: const TextStyle(fontSize: 18)),
@@ -376,19 +587,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(title,
-                    style: const TextStyle(
-                        fontWeight: FontWeight.bold, fontSize: 15)),
+                    style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 15,
+                        color: textColor)),
                 Text('Monthly spending',
-                    style: TextStyle(color: AppTheme.textLight, fontSize: 11)),
+                    style: TextStyle(color: secondaryTextColor, fontSize: 11)),
               ],
             ),
           ),
           Text(
             amount,
-            style: const TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 15,
-                color: AppTheme.textPrimary),
+            style: TextStyle(
+                fontWeight: FontWeight.bold, fontSize: 15, color: textColor),
           ),
         ],
       ),

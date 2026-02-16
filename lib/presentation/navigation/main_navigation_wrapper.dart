@@ -4,8 +4,8 @@ import '../../core/theme/app_theme.dart';
 import '../screens/dashboard/dashboard_screen.dart';
 import '../screens/analytics/analytics_screen.dart';
 import '../screens/regular/regular_payments_screen.dart';
-import '../screens/notes/notes_screen.dart';
 import '../screens/profile/profile_screen.dart';
+import '../screens/settings/settings_screen.dart';
 import '../providers/theme_provider.dart';
 import 'package:provider/provider.dart';
 
@@ -30,7 +30,7 @@ class _MainNavigationWrapperState extends State<MainNavigationWrapper> {
     const DashboardScreen(),
     const AnalyticsScreen(),
     const RegularPaymentsScreen(),
-    const NotesScreen(),
+    const SettingsScreen(),
     const ProfileScreen(),
   ];
 
@@ -77,7 +77,7 @@ class _MainNavigationWrapperState extends State<MainNavigationWrapper> {
             _buildNavItem(LucideIcons.home, 'Home', 0),
             _buildNavItem(LucideIcons.pieChart, 'Analytics', 1),
             _buildNavItem(LucideIcons.creditCard, 'Bills', 2),
-            _buildNavItem(LucideIcons.stickyNote, 'Notes', 3),
+            _buildNavItem(LucideIcons.settings, 'Settings', 3),
             _buildNavItem(LucideIcons.user, 'Profile', 4),
           ],
         ),

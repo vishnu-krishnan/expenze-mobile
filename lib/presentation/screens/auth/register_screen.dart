@@ -188,7 +188,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               width: 20,
                               child: CircularProgressIndicator(
                                   strokeWidth: 2, color: Colors.white))
-                          : const Text('Direct Setup'),
+                          : const Text('Sign Up'),
                     ),
                     const SizedBox(height: 24),
                     Row(

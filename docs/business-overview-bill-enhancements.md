@@ -1,0 +1,32 @@
+# Business Overview - Bill Status & Quick Actions
+
+Problem
+Tracking recurring bills without knowing their current status (e.g., pending, paid, overdue) leads to financial confusion. Additionally, navigating multiple screens to add a simple expense creates friction in daily usage.
+
+Objective
+Provide users with more granular control over recurring payments and a streamlined way to record expenses directly from the home screen.
+
+Feature Summary
+1.  Bill Status Tracking: Allows users to set a status (e.g., "Paid", "Awaiting Salary") and a description for each regular payment.
+2.  Quick Expense Action: A floating button on the dashboard to immediately record expenses without depth-navigation.
+3.  Theme Visibility: Full readability in light and dark modes across all core financial screens.
+
+High-level Workflow
+-   Users navigate to Regular Payments and tap a bill to edit its status/details.
+-   Users tap the "+" button on the Dashboard to open a quick-entry modal for expenses.
+
+Business Value
+-   Improved user retention through simplified UX (Quick Actions).
+-   Enhanced financial clarity for recurring commitments.
+-   Professional, modern aesthetic that builds user trust.
+
+Risks
+-   Increased UI complexity if status fields are overused.
+
+Cost Implications
+-   Minimal; local database storage only.
+
+Timeline
+-   Implemented and verified: 2026-02-16.
+
+Date: 2026-02-16

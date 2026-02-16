@@ -1,6 +1,6 @@
 {
-    "name": "expenze_mobile",
-    "short_name": "expenze_mobile",
+    "name": "Expenze",
+    "short_name": "Expenze",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

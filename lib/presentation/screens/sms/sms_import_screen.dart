@@ -39,18 +39,33 @@ class SmsImportScreen extends StatefulWidget {
   State<SmsImportScreen> createState() => _SmsImportScreenState();
 }
 
-class _SmsImportScreenState extends State<SmsImportScreen> {
+class _SmsImportScreenState extends State<SmsImportScreen>
+    with SingleTickerProviderStateMixin {
   final _rawTextController = TextEditingController();
   List<DetectedExpense> _detectedExpenses = [];
   bool _isLoading = false;
   final _smsService = SmsService();
   final _apiService = ApiService();
+  late TabController _tabController;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 2, vsync: this);
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    _rawTextController.dispose();
+    super.dispose();
+  }
 
   Future<void> _syncFromInbox() async {
     setState(() => _isLoading = true);
 
     try {
-      final messages = await _smsService.getRecentSms(limit: 50);
+      final messages = await _smsService.getRecentSms(limit: 100);
       final List<DetectedExpense> newExpenses = [];
 
       for (var msg in messages) {
@@ -97,36 +112,26 @@ class _SmsImportScreenState extends State<SmsImportScreen> {
     }
   }
 
-  void _parseSms() {
+  void _parseManualSms() {
     final text = _rawTextController.text;
     if (text.isEmpty) return;
 
     setState(() => _isLoading = true);
 
     final lines = text.split('\n').where((l) => l.trim().length > 10).toList();
-    final results = lines.asMap().entries.map((entry) {
-      final line = entry.value;
-      final index = entry.key;
+    final List<DetectedExpense> results = [];
 
-      final amountRegex = RegExp(
-          r'(?:Rs\.?|INR|debited for Rs)\s*?([\d,]+(?:\.\d{2})?)',
-          caseSensitive: false);
-      final amountMatch = amountRegex.firstMatch(line);
-      final amount = amountMatch != null
-          ? double.parse(amountMatch.group(1)!.replaceAll(',', ''))
-          : 0.0;
-
-      final merchantRegex = RegExp(
-          r'(?:at|to|for|from|merchant:?)\s+([A-Z0-9\s&]{3,24})',
-          caseSensitive: false);
-      final merchantMatch = merchantRegex.firstMatch(line);
-      final merchant = merchantMatch != null
-          ? merchantMatch.group(1)!.trim()
-          : 'Unknown Merchant';
-
-      return DetectedExpense(
-          id: 'lite-$index', raw: line, name: merchant, amount: amount);
-    }).toList();
+    for (var line in lines) {
+      final parsed = _smsService.parseExpenseFromSms(line);
+      if (parsed != null) {
+        results.add(DetectedExpense(
+          id: 'manual-${DateTime.now().millisecondsSinceEpoch}',
+          raw: parsed['raw'],
+          name: parsed['merchant'],
+          amount: parsed['amount'],
+        ));
+      }
+    }
 
     setState(() {
       _detectedExpenses = results;
@@ -189,10 +194,12 @@ class _SmsImportScreenState extends State<SmsImportScreen> {
     final provider = context.read<ExpenseProvider>();
     final currentMonth = provider.currentMonthKey;
 
+    int successCount = 0;
     for (var i = 0; i < _detectedExpenses.length; i++) {
       final item = _detectedExpenses[i];
       if (item.categoryId == null || item.amount == 0 || item.isSuccess)
         continue;
+
       setState(() => _detectedExpenses[i].isSaving = true);
       try {
         final expense = Expense(
@@ -203,227 +210,358 @@ class _SmsImportScreenState extends State<SmsImportScreen> {
           actualAmount: item.amount,
           priority: item.priority,
           isPaid: true,
+          paidDate: DateTime.now().toIso8601String(),
         );
         await provider.addExpense(expense);
         setState(() => _detectedExpenses[i].isSuccess = true);
+        successCount++;
       } catch (e) {
-        _smsService.logger.e('Error importing: $e');
+        _smsService.logger.e('Error importing item ${item.name}: $e');
       } finally {
         setState(() => _detectedExpenses[i].isSaving = false);
       }
+    }
+
+    if (successCount > 0 && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Successfully imported $successCount transactions'),
+          backgroundColor: AppTheme.success,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final themeProvider = context.watch<ThemeProvider>();
+    final textColor = AppTheme.getTextColor(context);
+    final secondaryTextColor =
+        AppTheme.getTextColor(context, isSecondary: true);
 
-    return Container(
-      decoration: themeProvider.isDarkMode
-          ? AppTheme.darkBackgroundDecoration
-          : AppTheme.backgroundDecoration,
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
-        appBar: AppBar(title: const Text('Smart SMS Import')),
-        body: Consumer<CategoryProvider>(
-          builder: (context, catProvider, child) {
-            return SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      body: Container(
+        decoration: themeProvider.isDarkMode
+            ? AppTheme.darkBackgroundDecoration
+            : AppTheme.backgroundDecoration,
+        child: Column(
+          children: [
+            AppBar(
+              title: Text('Smart SMS Import',
+                  style:
+                      TextStyle(color: textColor, fontWeight: FontWeight.bold)),
+              backgroundColor: Colors.transparent,
+              elevation: 0,
+              centerTitle: true,
+            ),
+            TabBar(
+              controller: _tabController,
+              indicatorColor: AppTheme.primary,
+              labelColor: AppTheme.primary,
+              unselectedLabelColor: secondaryTextColor,
+              tabs: const [
+                Tab(
+                    text: 'Auto Sync',
+                    icon: Icon(LucideIcons.refreshCw, size: 20)),
+                Tab(
+                    text: 'Manual Paste',
+                    icon: Icon(LucideIcons.clipboard, size: 20)),
+              ],
+            ),
+            Expanded(
+              child: TabBarView(
+                controller: _tabController,
                 children: [
-                  _buildInputSection(),
-                  if (_detectedExpenses.isNotEmpty) ...[
-                    const SizedBox(height: 24),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text('Detected Expenses',
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 18)),
-                        ElevatedButton.icon(
-                          onPressed: _importAll,
-                          icon: const Icon(LucideIcons.plus, size: 16),
-                          label: const Text('Import All'),
-                          style: AppTheme.primaryButtonStyle.copyWith(
-                            padding: WidgetStateProperty.all(
-                                const EdgeInsets.symmetric(
-                                    horizontal: 12, vertical: 8)),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    ..._detectedExpenses.asMap().entries.map((entry) =>
-                        _buildDetectedCard(
-                            entry.value, entry.key, catProvider.categories)),
-                  ],
+                  _buildAutoSyncTab(textColor, secondaryTextColor),
+                  _buildManualTab(textColor, secondaryTextColor),
                 ],
               ),
-            );
-          },
+            ),
+          ],
         ),
       ),
+      floatingActionButton: _detectedExpenses.isNotEmpty
+          ? FloatingActionButton.extended(
+              onPressed: _importAll,
+              backgroundColor: AppTheme.primary,
+              icon: const Icon(LucideIcons.checkSquare, color: Colors.white),
+              label: const Text('Import All',
+                  style: TextStyle(
+                      color: Colors.white, fontWeight: FontWeight.bold)),
+            )
+          : null,
     );
   }
 
-  Widget _buildInputSection() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardTheme.color,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: AppTheme.softShadow,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Row(
-            children: [
-              Icon(LucideIcons.mail, size: 18, color: AppTheme.primary),
-              const SizedBox(width: 8),
-              const Text('Paste SMS Content',
-                  style: TextStyle(fontWeight: FontWeight.bold)),
-            ],
-          ),
-          const SizedBox(height: 12),
-          TextField(
-            controller: _rawTextController,
-            maxLines: 6,
-            decoration: AppTheme.inputDecoration(
-                    'Paste transaction messages...', LucideIcons.smartphone)
-                .copyWith(prefixIcon: null),
-            style: const TextStyle(fontFamily: 'monospace', fontSize: 13),
-          ),
-          const SizedBox(height: 16),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton.icon(
-              onPressed: _isLoading ? null : _syncFromInbox,
-              icon: _isLoading
-                  ? const SizedBox(
-                      width: 18,
-                      height: 18,
-                      child: CircularProgressIndicator(
-                          color: Colors.white, strokeWidth: 2))
-                  : const Icon(LucideIcons.refreshCw, size: 18),
-              label: Text(_isLoading ? 'Syncing...' : 'Sync from Inbox'),
+  Widget _buildAutoSyncTab(Color textColor, Color secondaryTextColor) {
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(24),
+          child: Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Theme.of(context).cardTheme.color,
+              borderRadius: BorderRadius.circular(24),
+              boxShadow: AppTheme.softShadow,
+            ),
+            child: Column(
+              children: [
+                const Icon(LucideIcons.smartphone,
+                    size: 48, color: AppTheme.primary),
+                const SizedBox(height: 16),
+                Text(
+                  'Auto-detect from Inbox',
+                  style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: textColor),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'We scan your messages locally to find recent transaction alerts from your bank.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: secondaryTextColor, fontSize: 13),
+                ),
+                const SizedBox(height: 24),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    onPressed: _isLoading ? null : _syncFromInbox,
+                    icon: _isLoading
+                        ? const SizedBox(
+                            width: 18,
+                            height: 18,
+                            child: CircularProgressIndicator(
+                                strokeWidth: 2, color: Colors.white))
+                        : const Icon(LucideIcons.zap, size: 18),
+                    label: Text(_isLoading ? 'Scanning...' : 'Start Auto Scan'),
+                  ),
+                ),
+              ],
             ),
           ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(
-                child: ElevatedButton.icon(
-                  onPressed: _isLoading ? null : _parseSms,
-                  icon: const Icon(LucideIcons.zap, size: 18),
-                  label: const Text('Lite Parse'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppTheme.textSecondary,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14)),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: ElevatedButton.icon(
-                  onPressed: _isLoading ? null : _aiParse,
-                  icon: const Icon(LucideIcons.sparkles, size: 18),
-                  label: const Text('AI Parse'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.deepPurple,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14)),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
+        ),
+        Expanded(
+          child: _buildDetectedList(textColor, secondaryTextColor),
+        ),
+      ],
     );
   }
 
-  Widget _buildDetectedCard(
-      DetectedExpense expense, int index, List<Category> categories) {
+  Widget _buildManualTab(Color textColor, Color secondaryTextColor) {
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(24),
+          child: Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Theme.of(context).cardTheme.color,
+              borderRadius: BorderRadius.circular(24),
+              boxShadow: AppTheme.softShadow,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Paste SMS Content',
+                    style: TextStyle(
+                        fontWeight: FontWeight.bold, color: textColor)),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: _rawTextController,
+                  maxLines: 4,
+                  decoration: AppTheme.inputDecoration(
+                      'Paste one or more bank messages...',
+                      LucideIcons.alignLeft,
+                      context: context),
+                  style: TextStyle(color: textColor, fontSize: 13),
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: _isLoading ? null : _parseManualSms,
+                        icon: const Icon(LucideIcons.search, size: 18),
+                        label: const Text('Lite Scan'),
+                        style: OutlinedButton.styleFrom(
+                          side: BorderSide(
+                              color: AppTheme.primary.withValues(alpha: 0.5)),
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: ElevatedButton.icon(
+                        onPressed: _isLoading ? null : _aiParse,
+                        icon: const Icon(LucideIcons.sparkles, size: 18),
+                        label: const Text('AI Analysis'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.deepPurple,
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+        Expanded(
+          child: _buildDetectedList(textColor, secondaryTextColor),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDetectedList(Color textColor, Color secondaryTextColor) {
+    if (_detectedExpenses.isEmpty && !_isLoading) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(LucideIcons.listFilter,
+                size: 48, color: secondaryTextColor.withValues(alpha: 0.3)),
+            const SizedBox(height: 16),
+            Text('No transactions detected yet',
+                style: TextStyle(color: secondaryTextColor)),
+          ],
+        ),
+      );
+    }
+
+    if (_isLoading && _detectedExpenses.isEmpty) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    return Consumer<CategoryProvider>(
+      builder: (context, catProvider, child) {
+        return ListView.builder(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          itemCount: _detectedExpenses.length,
+          itemBuilder: (context, index) {
+            final expense = _detectedExpenses[index];
+            return _buildDetectedCard(expense, index, catProvider.categories,
+                textColor, secondaryTextColor);
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildDetectedCard(DetectedExpense expense, int index,
+      List<Category> categories, Color textColor, Color secondaryTextColor) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: expense.isSuccess
-            ? AppTheme.success.withValues(alpha: 0.1)
+            ? AppTheme.success.withValues(
+                alpha: Theme.of(context).brightness == Brightness.dark
+                    ? 0.05
+                    : 0.1)
             : Theme.of(context).cardTheme.color,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(24),
         boxShadow: AppTheme.softShadow,
         border: Border.all(
             color: expense.isSuccess
                 ? AppTheme.success.withValues(alpha: 0.3)
-                : AppTheme.border.withValues(alpha: 0.1)),
+                : AppTheme.primary.withValues(alpha: 0.05)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: AppTheme.primary.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(LucideIcons.indianRupee,
+                    size: 18, color: AppTheme.primary),
+              ),
+              const SizedBox(width: 16),
               Expanded(
-                child: Text(expense.name,
-                    style: const TextStyle(
-                        fontWeight: FontWeight.bold, fontSize: 16)),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(expense.name,
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15,
+                            color: textColor)),
+                    Text(
+                      expense.raw.length > 50
+                          ? '${expense.raw.substring(0, 50)}...'
+                          : expense.raw,
+                      style: TextStyle(
+                          color: secondaryTextColor,
+                          fontSize: 11,
+                          fontStyle: FontStyle.italic),
+                    ),
+                  ],
+                ),
               ),
               Text(
                 '₹${expense.amount.toStringAsFixed(0)}',
-                style: const TextStyle(
+                style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 18,
-                    color: AppTheme.primary),
+                    color: textColor),
               ),
             ],
           ),
-          Text(
-            expense.raw,
-            style: TextStyle(
-                color: AppTheme.textSecondary,
-                fontSize: 11,
-                fontStyle: FontStyle.italic),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-          const Divider(height: 24),
+          const SizedBox(height: 20),
           Row(
             children: [
               Expanded(
                 child: DropdownButtonFormField<int>(
                   value: expense.categoryId,
+                  dropdownColor: Theme.of(context).cardTheme.color,
                   items: categories
                       .map((c) => DropdownMenuItem(
                           value: c.id,
                           child: Text(c.name,
-                              style: const TextStyle(fontSize: 13))))
+                              style:
+                                  TextStyle(fontSize: 13, color: textColor))))
                       .toList(),
                   onChanged: expense.isSuccess
                       ? null
                       : (val) => setState(
                           () => _detectedExpenses[index].categoryId = val),
-                  decoration:
-                      AppTheme.inputDecoration('Category', LucideIcons.tag),
+                  decoration: AppTheme.inputDecoration(
+                      'Category', LucideIcons.tag,
+                      context: context),
                 ),
               ),
               const SizedBox(width: 12),
               if (expense.isSaving)
-                const CircularProgressIndicator(strokeWidth: 2)
+                const SizedBox(
+                    width: 40,
+                    child: Center(
+                        child: CircularProgressIndicator(strokeWidth: 2)))
               else if (expense.isSuccess)
                 const Icon(LucideIcons.checkCircle,
-                    color: AppTheme.success, size: 24)
+                    color: AppTheme.success, size: 28)
               else
-                IconButton(
-                  icon: const Icon(LucideIcons.trash2,
-                      color: AppTheme.danger, size: 20),
-                  onPressed: () =>
-                      setState(() => _detectedExpenses.removeAt(index)),
+                Container(
+                  decoration: BoxDecoration(
+                    color: AppTheme.danger.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: IconButton(
+                    icon: const Icon(LucideIcons.trash2,
+                        color: AppTheme.danger, size: 18),
+                    onPressed: () =>
+                        setState(() => _detectedExpenses.removeAt(index)),
+                  ),
                 ),
             ],
           ),

@@ -15,7 +15,7 @@ class SmsService {
     return status.isGranted;
   }
 
-  Future<List<SmsMessage>> getRecentSms({int limit = 50}) async {
+  Future<List<SmsMessage>> getRecentSms({int limit = 100}) async {
     bool granted = await Permission.sms.isGranted;
     if (!granted) {
       granted = await requestPermissions();
@@ -35,31 +35,69 @@ class SmsService {
   }
 
   Map<String, dynamic>? parseExpenseFromSms(String body) {
-    // Regex for Amount (₹, Rs, INR)
-    final amountRegex = RegExp(
-        r'(?:Rs\.?|INR|₹|debited for Rs|spent Rs)\s*?([\d,]+(?:\.\d{2})?)',
-        caseSensitive: false);
-    final amountMatch = amountRegex.firstMatch(body);
+    if (body.isEmpty) return null;
 
-    if (amountMatch == null) return null;
+    final lowerBody = body.toLowerCase();
 
-    final amount = double.parse(amountMatch.group(1)!.replaceAll(',', ''));
+    // Check if it's a debit/payment message
+    final isDebit = lowerBody.contains('debited') ||
+        lowerBody.contains('paid') ||
+        lowerBody.contains('spent') ||
+        lowerBody.contains('payment') ||
+        lowerBody.contains('withdrawn') ||
+        lowerBody.contains('dr to') ||
+        lowerBody.contains('transfer to');
 
-    // Regex for Merchant
-    final merchantRegex = RegExp(
-        r'(?:at|to|for|from|merchant:?|vpa)\s+([A-Z0-9\s&]{3,24})',
-        caseSensitive: false);
-    final merchantMatch = merchantRegex.firstMatch(body);
-    final merchant = merchantMatch != null
-        ? merchantMatch.group(1)!.trim()
-        : 'Unknown Merchant';
+    if (!isDebit) return null;
 
-    // Filter out messages that don't look like debits/spends
-    final isExpense =
-        RegExp(r'(debited|spent|paid|payment|withdrawn)', caseSensitive: false)
-            .hasMatch(body);
+    // Amount Extraction Patterns
+    final amountPatterns = [
+      RegExp(
+          r'(?:rs\.?|inr|₹|debited for rs|spent rs|amt:)\s*?([\d,]+(?:\.\d{1,2})?)',
+          caseSensitive: false),
+      RegExp(r'vpa.*?\s([\d,]+(?:\.\d{1,2})?)', caseSensitive: false),
+      RegExp(r'debited.*?([\d,]+(?:\.\d{1,2})?)', caseSensitive: false),
+    ];
 
-    if (!isExpense) return null;
+    double? amount;
+    for (var pattern in amountPatterns) {
+      final match = pattern.firstMatch(body);
+      if (match != null) {
+        try {
+          amount = double.parse(match.group(1)!.replaceAll(',', ''));
+          break;
+        } catch (_) {}
+      }
+    }
+
+    if (amount == null || amount <= 0) return null;
+
+    // Merchant Extraction Patterns
+    final merchantPatterns = [
+      RegExp(
+          r'(?:to|at|for|from|merchant:?|vpa|info:)\s+([A-Za-z0-9\s&*_\-.]{3,30})',
+          caseSensitive: false),
+      RegExp(r'(?:debited to)\s+([A-Za-z0-9\s&*]{3,30})', caseSensitive: false),
+      RegExp(r'([A-Za-z0-9\s&*]{3,20})\s+ref', caseSensitive: false),
+    ];
+
+    String merchant = 'Unknown Merchant';
+    for (var pattern in merchantPatterns) {
+      final match = pattern.firstMatch(body);
+      if (match != null) {
+        final val = match.group(1)!.trim();
+        if (val.isNotEmpty &&
+            !val.toLowerCase().contains('debit') &&
+            !val.toLowerCase().contains('credit')) {
+          merchant = val;
+          break;
+        }
+      }
+    }
+
+    // Clean merchant name
+    merchant = merchant.replaceAll(RegExp(r'\s+'), ' ').trim();
+    if (merchant.length > 25) merchant = merchant.substring(0, 25).trim();
 
     return {
       'amount': amount,

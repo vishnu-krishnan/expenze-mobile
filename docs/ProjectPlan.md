@@ -30,6 +30,7 @@
 - [x] **System-wide Dark Mode**
 - [x] **Utilities Section (Notes & Reminders)**
 - [x] **Visual Polish & Dashboard Refinement**
+- [x] **Bill Status & Quick Expense Tracking**
 - [ ] Play Store Optimization
 - [ ] Vulnerability Scanning
 - [ ] Final Documentation Suite

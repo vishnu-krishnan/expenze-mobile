@@ -555,3 +555,127 @@ Resolved a critical Flutter framework exception (`Failed to interpolate TextStyl
 - **UX**: Smooth transitions between Light and Dark modes.
 
 Date: 2026-02-16
+
+## [2026-02-16] Theme Consistency & Text Visibility Refinements
+
+**Change Type:** Patch
+
+**Decision Made:**
+Implemented system-wide text visibility fixes to ensure all UI elements are readable across both Light and Dark themes. Standardized the use of dynamic text colors and refined background decorations.
+
+**Implementation:**
+1. **Theming Utilities Refinement**:
+    - Introduced `AppTheme.getTextColor(context)` to dynamically retrieve primary and secondary text colors based on theme brightness.
+    - Updated `AppTheme.inputDecoration` to accept `BuildContext` for theme-aware hint styling.
+    - Ensured explicit `inherit: true` for all `GoogleFonts` styles in `AppTheme.dart` to prevent interpolation errors.
+2. **Screen-level Updates**:
+    - **DashboardScreen**: Refactored to use dynamic text colors for greetings, stats cards, and category items. Fixed background decoration placement to prevent overflow.
+    - **AnalyticsScreen**: Standardized text colors for chart labels, insight cards, and category breakdowns. Improved chart contrast.
+    - **NotesScreen**: Updated empty state and card styling for theme consistency. Applied modern background decorations.
+    - **ProfileScreen**: Fixed hardcoded color references and corrected `BoxDecoration` border parameter error.
+    - **CategoriesScreen**: Enhanced category list item visibility with theme-aware colors.
+3. **Bug Fixes**:
+    - Resolved `Failed to interpolate TextStyles` error by normalizing `inherit` values.
+    - Fixed `RenderFlex overflow` issues by refining background decoration application.
+
+**Impact:**
+- **UX**: High readability in all lighting conditions and theme modes.
+- **Reliability**: Eliminated framework exceptions during theme switching.
+- **Consistency**: Unified aesthetic across all core screens.
+
+Date: 2026-02-16
+
+## [2026-02-16] Regular Payments Enhancement & Quick Actions
+
+**Change Type:** Minor
+
+**Decision Made:**
+Enhanced the "Regular Payments" module to allow tracking of bill status and detailed logs. Added a "Quick Add" feature to the Dashboard for faster expense entry.
+
+**Implementation:**
+1. **Regular Payments Upgrade**:
+    - **Database Migration (v8)**: Added `status` and `status_description` columns to the `regular_payments` table.
+    - **Model & Provider**: Updated `RegularPayment` model with `copyWith` and `status` fields. Added `updatePayment` method to `RegularPaymentProvider`.
+    - **UI Refinement**: Redesigned `RegularPaymentsScreen` with a modal dialog for both adding and editing. Added status indicators and description support to payment cards.
+2. **Dashboard Quick Actions**:
+    - **New Feature**: Added a **FloatingActionButton** to the Dashboard for immediate expense entry.
+    - **Implementation**: Created a "Quick Expense" modal bottom sheet on the Dashboard that integrates with `ExpenseProvider` and `CategoryProvider`.
+3. **Maintenance**:
+    - Removed unused imports and simplified screen layouts.
+    - Updated `.gitignore` to exclude `test/` artifacts.
+
+**Impact:**
+- **UX**: Improved bill management transparency and reduced friction for adding expenses.
+- **Functionality**: Users can now document payment reasons or delay statuses (e.g., "Awaiting Salary").
+- **Maintainability**: Cleaner codebase with reduced unused dependencies.
+
+Date: 2026-02-16
+
+Date: 2026-02-16
+
+## [2026-02-16] Spending Limit & Budget Planner Refinements
+
+**Change Type:** Minor
+
+**Decision Made:**
+Enhanced the "Monthly Spending Limit" functionality to ensure it is prioritized for all remaining balance calculations. Refined the Budget Planner screen to remove redundant input forms and improved its visual aesthetic with a premium gradient header.
+
+**Implementation:**
+1. **Spending Limit Integration**:
+    - Modified `ExpenseRepository.getMonthSummary` and `getMonthlyLimit` to correctly fetch the limit from `month_plans` with a fallback to user default budget.
+    - Updated `ExpenseProvider.loadMonthData` to prioritize the limit over the planned sum for "Remaining" calculations.
+    - Integrated limit editing dialogs into both `DashboardScreen` and `MonthPlanScreen`.
+2. **Budget Planner (MonthPlanScreen) UI Update**:
+    - Removed the "Plan New Expense" form as per user request (logic now centered on tracking and limit adjustment).
+    - Implemented a premium gradient summary header to match the Dashboard's aesthetic.
+    - Fixed color inconsistencies and standardized theme-aware text/card styling.
+3. **Bug Fixes**:
+    - Corrected issues where the spending limit was not reflected in the total budget calculations.
+    - Resolved UI flickering/mismatch in background decorations.
+
+**Impact:**
+- **UX**: Cleaner, more focused Budget Planner. More intuitive budget tracking using explicit limits.
+- **Accuracy**: Financial stats now correctly track against user-defined goals.
+- **Consistency**: Universal look and feel across core screens.
+
+Date: 2026-02-16
+
+## [2026-02-16] Brand Realignment & App Renaming
+
+**Change Type:** Minor
+
+**Decision Made:**
+Updated the application's user-facing name from `expenze_mobile` to `Expenze` across all supported platforms (Android, iOS, Web) to ensure brand consistency and a more professional presentation.
+
+**Implementation:**
+1. **Android**: Modified `android/app/src/main/AndroidManifest.xml` to set `android:label="Expenze"`.
+2. **iOS**: Updated `ios/Runner/Info.plist` to set `CFBundleDisplayName` and `CFBundleName` to `Expenze`.
+3. **Web**: 
+    - Updated `web/manifest.json` with new name and short_name.
+    - Updated `web/index.html` title and iOS meta tags.
+4. **App Level**: Verified `MaterialApp` title is set correctly to `Expenze`.
+
+**Impact:**
+- **UX/Branding**: Improved user recall and professional look on the device home screen and browser tabs.
+- **Consistency**: Unified brand identity across all platforms.
+
+Date: 2026-02-16
+
+## [2026-02-16] UI Reorganization: Centralized App Settings
+
+**Change Type:** Minor
+
+**Decision Made:**
+Relocated the Dark Mode toggle from the Profile screen to a newly created dedicated Settings screen. This improves the architectural separation between user account details and application-wide preferences.
+
+**Implementation:**
+1. **New Screen**: Created `lib/presentation/screens/settings/settings_screen.dart` to host application settings, starting with Appearance (Dark Mode).
+2. **Navigation Update**: Updated `lib/presentation/navigation/main_navigation_wrapper.dart` to replace the "Notes" tab with the "Settings" tab. 
+3. **Profile Refactor**: Removed the appearance management section from `ProfileScreen` to keep it focused on account identity.
+4. **Cleanup**: Resolved lint errors related to unused imports and missing type arguments during the transition.
+
+**Impact:**
+- **UX**: More intuitive navigation. Users now look for "Settings" to change app behavior rather than searching within their profile.
+- **Maintainability**: Clearer separation of concerns makes it easier to add future global settings (notifications, currency, etc.).
+
+Date: 2026-02-16
