@@ -103,7 +103,28 @@ class ExpenseProvider with ChangeNotifier {
         }
       }
 
-      _trends = filledTrends;
+      if (months == 60) {
+        // Aggregate into 5 yearly values to avoid cluttering the chart
+        final Map<String, Map<String, dynamic>> yearlyAggregation = {};
+        for (var m in filledTrends) {
+          final year = m['month_key'].split('-')[0];
+          if (!yearlyAggregation.containsKey(year)) {
+            yearlyAggregation[year] = {
+              'month_key': '$year-01', // Standardize to 1st Jan of that year
+              'total_planned': 0.0,
+              'total_actual': 0.0,
+            };
+          }
+          yearlyAggregation[year]!['total_planned'] +=
+              (m['total_planned'] as num).toDouble();
+          yearlyAggregation[year]!['total_actual'] +=
+              (m['total_actual'] as num).toDouble();
+        }
+        _trends = yearlyAggregation.values.toList()
+          ..sort((a, b) => a['month_key'].compareTo(b['month_key']));
+      } else {
+        _trends = filledTrends;
+      }
 
       final summary = await _repository.getAnalyticsSummary(months);
       _avgMonthlySpent = summary['avg_spent'] ?? 0;

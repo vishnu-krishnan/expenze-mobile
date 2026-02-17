@@ -1,0 +1,23 @@
+# Business Overview - Analytics 5-Year Aggregation
+
+## Problem
+The 5-year analytics view was cluttered and difficult to interpret because it attempted to plot 60 individual monthly data points on a single chart. This resulted in a "crowded" line with overlapping dots, making it nearly impossible for users to identify long-term trends at a glance.
+
+## Objective
+To simplify long-term analysis by aggregating monthly data into yearly summaries when the 5-year period is selected.
+
+## Feature Summary
+- **Yearly Aggregation**: For the 5-year view, the application now automatically groups 60 months of data into 5 distinct yearly points.
+- **Improved Chart Clarity**: The line chart now shows clear yearly peaks and troughs, removing the visual noise of monthly fluctuations.
+- **Consistent UI**: The list view and chart labels dynamically switch from "Monthly" to "Yearly" when the 5-year window is active.
+- **Optimized Formatting**: Date labels reflect the aggregation level (showing just the year, e.g., "2024" instead of "Jan 24") for better readability.
+
+## Business Value
+- **Strategic Insights**: Users can now see their annual spending growth or reduction over a half-decade period.
+- **Professional Aesthetics**: The chart remains clean and premium regardless of the data volume.
+- **Ease of Use**: Automatic switching between monthly and yearly views provides the right level of detail at the right time.
+
+## Timeline
+- Implementation and Verification: 20 minutes.
+
+Date: 2026-02-17

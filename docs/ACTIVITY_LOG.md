@@ -828,6 +828,94 @@ Resolved critical build blockers and stability issues to ensure production readi
 - **Maintainability**: Fixed build errors and improved code quality.
 
 Date: 2026-02-17
+
+## [2026-02-17] Analytics Logic Refinement
+
+**Change Type:** Minor | Patch
+
+**Decision Made:**
+Fixed inconsistencies in the Analytics module where chart data and calculations were based on "active months" rather than the selected calendar window (6M, 1Y, 5Y).
+
+**Implementation:**
+1. **Repository Improvements**:
+    - Updated `getTrends` and `getAnalyticsSummary` to use calendar-based filtering (`WHERE month_key >= ?`).
+    - Fixed Average Monthly Spent calculation to divide by the total number of months in the period, ensuring realistic averages during partial spending years.
+    - Limited "Highest Expense" calculation to the specific calendar window selected.
+2. **Provider Sync**:
+    - Ensured `loadTrends` in `ExpenseProvider` consistently generators exactly N data points for the trend line, even when data is missing for specific months.
+3. **Documentation**:
+    - Created `docs/business-overview-analytics-fixes.md` and `docs/technical-specification-analytics-fixes.md` for reference.
+
+**Impact:**
+- **Accuracy**: Spending charts and summaries now strictly follow the selected 6-month, 1-year, or 5-year views.
+- **Visual Integrity**: X-axis labels and trend points are guaranteed to be chronological and proportional.
+- **Insights**: Averaging logic now reflects actual monthly performance over the entire period rather than just "spent months."
+
+Date: 2026-02-17
+
+## [2026-02-17] Analytics UX: Pagination & Contextual Clarity
+
+**Change Type:** Minor | Patch
+
+**Decision Made:**
+Improved the Analytics screen user interface by adding period-specific labels and a pagination mechanism for monthly expense totals.
+
+**Implementation:**
+1. **Header Updates**: Renamed "Monthly Performance" to "Monthly Total Expenses" and added a dynamic subtitle showing the selected period (e.g., "Last 6 Months", "Last 5 Years").
+2. **Smart Pagination**: 
+    - Introduced a `_visibleMonths` state to limit the initial monthly grid to 6 items.
+    - Added a "Show More History" button that expands the view in 6-month increments.
+    - Implemented a reset logic that reverts pagination to 6 items whenever the time period (6M, 1Y, 5Y) is toggled.
+3. **Documentation**:
+    - Created `docs/business-overview-analytics-pagination.md` and `docs/business-overview-analytics-pagination.txt` for reference.
+
+**Impact:**
+- **Performance**: Significant reduction in initial widget rendering for long periods (like 5 years), leading to smoother screen transitions.
+- **Clarity**: Users now have explicit confirmation of the time window being viewed.
+- **Maintainability**: Scalable UI pattern for handling large historical datasets.
+
+Date: 2026-02-17
+
+## [2026-02-17] Analytics: 5-Year Data Aggregation
+
+**Change Type:** Minor | Patch
+
+**Decision Made:**
+Aggregated 5-year data into yearly points to improve chart readability and prevents visual "breaking" of the graph due to data density.
+
+**Implementation:**
+1. **Aggregated Provider Logic**: Updated `ExpenseProvider` to detect the 60-month (5Y) selection and automatically group monthly totals into 5 yearly data points.
+2. **Dynamic UI Adaptation**: 
+    - Updated `AnalyticsScreen` to adjust the chart interval and date formatting specifically for yearly views.
+    - Renamed the history section to "Yearly Total Expenses" when the 5Y view is active.
+3. **Documentation**:
+    - Created `docs/business-overview-analytics-5y-aggregation.md` and `docs/business-overview-analytics-5y-aggregation.txt`.
+
+**Impact:**
+- **Clarity**: The 5-year trend is now a clean 5-point line instead of a cluttered 60-point mess.
+- **Usability**: Enhanced the ability to perform long-term financial comparisons.
+- **UX Consistency**: Labels and formats now accurately reflect the level of data aggregation.
+
+Date: 2026-02-17
+
+## [2026-02-17] Analytics: Curve Overshoot Fix
+
+**Change Type:** Patch
+
+**Decision Made:**
+Implemented logic to prevent the spending trend curves from dipping below zero during sharp value transitions (e.g., zero to high spending).
+
+**Implementation:**
+1. **Chart Setting**: Enabled `preventCurveOverShooting` on both Actual and Planned `LineChartBarData` instances in `AnalyticsScreen`.
+2. **Visual Stabilization**: This ensures the cubic spline interpolation respects the data bounds (Min: 0) while maintaining the premium curved aesthetic.
+3. **Documentation**:
+    - Created `docs/business-overview-analytics-visual-fix.md` and `docs/business-overview-analytics-visual-fix.txt`.
+
+**Impact:**
+- **Accuracy**: Eliminates the "negative spending" visual glitch.
+- **UI Quality**: Smoother, more mathematically correct transitions between data points.
+
+Date: 2026-02-17
     - Updated **Profile Screen** to support local data reset and profile editing.
 4. **App Core**:
     - Updated `main.dart` to route users based on local onboarding and lock states.

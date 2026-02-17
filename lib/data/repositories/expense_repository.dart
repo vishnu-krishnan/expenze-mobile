@@ -165,9 +165,14 @@ class ExpenseRepository {
     return result;
   }
 
-  // Get spending trends for specified months
+  // Get spending trends for specified months (calendar-aligned)
   Future<List<Map<String, dynamic>>> getTrends(int months) async {
     final db = await _dbHelper.database;
+    final now = DateTime.now();
+    // Calculate start month key (e.g., if now is 2026-02 and months is 6, start is 2025-09)
+    final startDate = DateTime(now.year, now.month - months + 1, 1);
+    final startMonthKey =
+        "${startDate.year}-${startDate.month.toString().padLeft(2, '0')}";
 
     final result = await db.rawQuery('''
       SELECT 
@@ -175,52 +180,56 @@ class ExpenseRepository {
         SUM(planned_amount) as total_planned,
         SUM(actual_amount) as total_actual
       FROM expenses
+      WHERE month_key >= ?
       GROUP BY month_key
       ORDER BY month_key ASC
-    ''');
-
-    // Take only the last N months record to show recent trends
-    if (result.length > months) {
-      return result.sublist(result.length - months);
-    }
+    ''', [startMonthKey]);
 
     return result;
   }
 
-  // Get Analytics summary for a period
+  // Get Analytics summary for a specific calendar period
   Future<Map<String, double>> getAnalyticsSummary(int months) async {
     final db = await _dbHelper.database;
+    final now = DateTime.now();
+    final startDate = DateTime(now.year, now.month - months + 1, 1);
+    final startMonthKey =
+        "${startDate.year}-${startDate.month.toString().padLeft(2, '0')}";
 
-    // Get average and max from grouped month data
+    // Get average and max from grouped month data within the period
     final result = await db.rawQuery('''
       SELECT 
-        AVG(actual_total) as avg_spent,
-        MAX(actual_total) as max_spent,
-        AVG(planned_total) as avg_planned,
+        SUM(actual_total) as sum_actual,
+        MAX(actual_total) as max_actual,
+        SUM(planned_total) as sum_planned,
         MAX(planned_total) as max_planned
       FROM (
         SELECT 
           SUM(actual_amount) as actual_total,
           SUM(planned_amount) as planned_total
         FROM expenses
+        WHERE month_key >= ?
         GROUP BY month_key
-        ORDER BY month_key DESC
-        LIMIT ?
       )
-    ''', [months]);
+    ''', [startMonthKey]);
 
-    if (result.isEmpty || result.first['avg_spent'] == null) {
+    if (result.isEmpty || result.first['sum_actual'] == null) {
       return {'avg_spent': 0.0, 'max_spent': 0.0};
     }
 
-    final avgSpent = (result.first['avg_spent'] as num).toDouble();
-    final maxSpent = (result.first['max_spent'] as num).toDouble();
-    final avgPlanned = (result.first['avg_planned'] as num).toDouble();
+    // Calculation logic:
+    // Average = Total Sum / Period Months (to account for months with 0 spending)
+    final sumActual = (result.first['sum_actual'] as num).toDouble();
+    final maxActual = (result.first['max_actual'] as num).toDouble();
+    final sumPlanned = (result.first['sum_planned'] as num).toDouble();
     final maxPlanned = (result.first['max_planned'] as num).toDouble();
 
+    final avgActual = sumActual / months;
+    final avgPlanned = sumPlanned / months;
+
     return {
-      'avg_spent': avgSpent > 0 ? avgSpent : avgPlanned,
-      'max_spent': maxSpent > 0 ? maxSpent : maxPlanned,
+      'avg_spent': avgActual > 0 ? avgActual : avgPlanned,
+      'max_spent': maxActual > 0 ? maxActual : maxPlanned,
     };
   }
 

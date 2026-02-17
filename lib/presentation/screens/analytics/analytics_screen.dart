@@ -93,15 +93,57 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                       _buildSpendingSummary(
                           provider, textColor, secondaryTextColor),
                       const SizedBox(height: 32),
-                      Text('Monthly Performance',
+                      Text(
+                          _selectedPeriod >= 60
+                              ? 'Yearly Total Expenses'
+                              : 'Monthly Total Expenses',
                           style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
                               color: textColor,
                               letterSpacing: -0.5)),
+                      Text(
+                          _selectedPeriod >= 12
+                              ? 'Last ${_selectedPeriod ~/ 12} ${(_selectedPeriod ~/ 12) > 1 ? "Years" : "Year"}'
+                              : 'Last $_selectedPeriod Months',
+                          style: TextStyle(
+                              fontSize: 13,
+                              color: secondaryTextColor,
+                              fontWeight: FontWeight.w500)),
                       const SizedBox(height: 16),
                       _buildPerformanceGrid(
                           provider.trends, textColor, secondaryTextColor),
+                      if (provider.trends.length > _visibleMonths)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 16),
+                          child: TextButton(
+                            onPressed: () {
+                              setState(() {
+                                _visibleMonths += 6;
+                              });
+                            },
+                            style: TextButton.styleFrom(
+                              foregroundColor: AppTheme.primary,
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                side: BorderSide(
+                                    color: AppTheme.primary
+                                        .withValues(alpha: 0.2)),
+                              ),
+                            ),
+                            child: const Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text('Show More History',
+                                    style:
+                                        TextStyle(fontWeight: FontWeight.bold)),
+                                SizedBox(width: 8),
+                                Icon(Icons.keyboard_arrow_down, size: 20),
+                              ],
+                            ),
+                          ),
+                        ),
                       const SizedBox(height: 140),
                     ],
                   ),
@@ -113,6 +155,8 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
       ),
     );
   }
+
+  int _visibleMonths = 6;
 
   Widget _buildPeriodSelector(Color textColor) {
     return Container(
@@ -136,7 +180,10 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
     final isSelected = _selectedPeriod == months;
     return GestureDetector(
       onTap: () {
-        setState(() => _selectedPeriod = months);
+        setState(() {
+          _selectedPeriod = months;
+          _visibleMonths = 6; // Reset pagination
+        });
         context.read<ExpenseProvider>().loadTrends(months);
       },
       child: AnimatedContainer(
@@ -239,15 +286,18 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
               showTitles: true,
               reservedSize: 32,
               // Dynamic interval based on period
-              interval: _selectedPeriod > 12
-                  ? 6
-                  : (_selectedPeriod > 6 ? 2 : 1).toDouble(),
+              interval: _selectedPeriod >= 60
+                  ? 1
+                  : (_selectedPeriod > 12 ? 6 : (_selectedPeriod > 6 ? 2 : 1))
+                      .toDouble(),
               getTitlesWidget: (val, meta) {
                 if (val.toInt() >= 0 && val.toInt() < trends.length) {
                   final key = trends[val.toInt()]['month_key'] as String;
                   final date = DateTime.parse('$key-01');
                   // Show year if period > 1 year
-                  final format = _selectedPeriod > 12 ? 'MMM yy' : 'MMM';
+                  final format = _selectedPeriod >= 60
+                      ? 'yyyy'
+                      : (_selectedPeriod > 12 ? 'MMM yy' : 'MMM');
                   final monthLabel = DateFormat(format).format(date);
                   return SideTitleWidget(
                     meta: meta,
@@ -314,6 +364,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                   (e.value['total_actual'] as num).toDouble());
             }).toList(),
             isCurved: true,
+            preventCurveOverShooting: true,
             color: AppTheme.primary,
             barWidth: 4,
             isStrokeCapRound: true,
@@ -337,6 +388,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                   (e.value['total_planned'] as num).toDouble());
             }).toList(),
             isCurved: true,
+            preventCurveOverShooting: true,
             color: AppTheme.secondary.withValues(alpha: 0.5),
             barWidth: 2,
             isStrokeCapRound: true,
@@ -359,7 +411,8 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
         mainAxisSpacing: 16,
         childAspectRatio: 1.4,
       ),
-      itemCount: trends.length > 4 ? 4 : trends.length,
+      itemCount:
+          trends.length > _visibleMonths ? _visibleMonths : trends.length,
       itemBuilder: (context, index) {
         final data = trends[trends.length - 1 - index];
         final actual = (data['total_actual'] as num).toDouble();
@@ -376,7 +429,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                  DateFormat('MMMM yyyy')
+                  DateFormat(_selectedPeriod >= 60 ? 'yyyy' : 'MMMM yyyy')
                       .format(DateTime.parse('${data['month_key']}-01')),
                   style: TextStyle(
                       color: secondaryTextColor,
