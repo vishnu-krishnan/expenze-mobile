@@ -6,9 +6,8 @@ import 'presentation/providers/auth_provider.dart';
 import 'presentation/providers/expense_provider.dart';
 import 'presentation/providers/category_provider.dart';
 import 'presentation/providers/regular_payment_provider.dart';
-import 'presentation/screens/auth/login_screen.dart';
-import 'presentation/screens/auth/register_screen.dart';
-import 'presentation/screens/auth/reset_password_screen.dart';
+import 'presentation/screens/auth/app_lock_screen.dart';
+import 'presentation/screens/onboarding/landing_page.dart';
 import 'presentation/screens/month/month_plan_screen.dart';
 import 'presentation/screens/categories/categories_screen.dart';
 import 'presentation/screens/regular/regular_payments_screen.dart';
@@ -72,13 +71,8 @@ class MyApp extends StatelessWidget {
             darkTheme: AppTheme.darkTheme,
             home: const AuthWrapper(),
             routes: {
-              '/login': (context) => const LoginScreen(),
-              '/register': (context) => const RegisterScreen(),
-              '/reset-password': (context) {
-                final args = ModalRoute.of(context)?.settings.arguments
-                    as Map<String, dynamic>?;
-                return ResetPasswordScreen(username: args?['username']);
-              },
+              '/landing': (context) => const LandingPage(),
+              '/lock': (context) => const AppLockScreen(),
               '/main': (context) => const MainNavigationWrapper(),
               '/month': (context) => const MonthPlanScreen(),
               '/categories': (context) => const CategoriesScreen(),
@@ -103,7 +97,6 @@ class AuthWrapper extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<AuthProvider>(
       builder: (context, auth, _) {
-        // Show loading while checking authentication
         if (auth.isLoading) {
           return const Scaffold(
             body: Center(
@@ -112,12 +105,15 @@ class AuthWrapper extends StatelessWidget {
           );
         }
 
-        // Navigate based on authentication status
-        if (auth.isAuthenticated) {
-          return const MainNavigationWrapper();
-        } else {
-          return const LoginScreen();
+        if (!auth.isOnboarded) {
+          return const LandingPage();
         }
+
+        if (auth.isLockEnabled && !auth.isAuthenticated) {
+          return const AppLockScreen();
+        }
+
+        return const MainNavigationWrapper();
       },
     );
   }

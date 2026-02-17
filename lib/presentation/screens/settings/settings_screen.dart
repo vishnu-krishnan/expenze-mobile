@@ -4,6 +4,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../providers/theme_provider.dart';
 import '../../providers/expense_provider.dart';
+import '../../providers/auth_provider.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -11,6 +12,7 @@ class SettingsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final themeProvider = context.watch<ThemeProvider>();
+    final authProvider = context.watch<AuthProvider>();
     final textColor = AppTheme.getTextColor(context);
     final secondaryTextColor =
         AppTheme.getTextColor(context, isSecondary: true);
@@ -54,7 +56,7 @@ class SettingsScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildSectionTitle('Account', textColor),
+                    _buildSectionTitle('Account Profile', textColor),
                     const SizedBox(height: 12),
                     _buildSettingsCard(
                       context,
@@ -63,21 +65,93 @@ class SettingsScreen extends StatelessWidget {
                           _buildSettingsItem(
                             icon: LucideIcons.user,
                             label: 'User Profile',
+                            subtitle: authProvider.user?['fullName'] ??
+                                'Set up your profile',
                             onTap: () =>
                                 Navigator.pushNamed(context, '/profile'),
                             textColor: textColor,
                             secondaryTextColor: secondaryTextColor,
                           ),
-                          const SizedBox(height: 16),
+                          Divider(
+                              height: 32,
+                              color: secondaryTextColor.withOpacity(0.1)),
                           _buildSettingsItem(
                             icon: LucideIcons.target,
                             label: 'Spending Limit',
-                            trailingText: limit > 0
-                                ? '₹${limit.toStringAsFixed(0)}'
-                                : 'Not set',
+                            subtitle: limit > 0
+                                ? 'Target: ₹${limit.toStringAsFixed(0)}'
+                                : 'No limit set',
                             onTap: () => _showLimitDialog(context, limit),
                             textColor: textColor,
                             secondaryTextColor: secondaryTextColor,
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 32),
+                    _buildSectionTitle('Security & Privacy', textColor),
+                    const SizedBox(height: 12),
+                    _buildSettingsCard(
+                      context,
+                      child: Column(
+                        children: [
+                          _buildSettingsToggle(
+                            context: context,
+                            icon: LucideIcons.lock,
+                            label: 'App Lock',
+                            subtitle: 'Require PIN to open app',
+                            value: authProvider.isLockEnabled,
+                            onChanged: (val) {
+                              if (val) {
+                                _showPinSetupDialog(context);
+                              } else {
+                                authProvider.disableAppLock();
+                              }
+                            },
+                            textColor: textColor,
+                            secondaryTextColor: secondaryTextColor,
+                          ),
+                          if (authProvider.isLockEnabled) ...[
+                            Divider(
+                                height: 32,
+                                color: secondaryTextColor.withOpacity(0.1)),
+                            _buildSettingsToggle(
+                              context: context,
+                              icon: LucideIcons.fingerprint,
+                              label: 'Biometric Lock',
+                              subtitle: 'Unlock using Fingerprint',
+                              value: authProvider.useBiometrics,
+                              onChanged: (val) {
+                                authProvider.setAppLock("", val);
+                              },
+                              textColor: textColor,
+                              secondaryTextColor: secondaryTextColor,
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 32),
+                    _buildSectionTitle('Cloud & Backup', textColor),
+                    const SizedBox(height: 12),
+                    _buildSettingsCard(
+                      context,
+                      child: Column(
+                        children: [
+                          _buildSettingsItem(
+                            icon: LucideIcons.cloud,
+                            label: 'Google Drive Sync',
+                            subtitle: 'Coming Soon',
+                            onTap: () {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                    content: Text(
+                                        'Google Drive sync will be available in the next update!')),
+                              );
+                            },
+                            textColor: textColor.withOpacity(0.5),
+                            secondaryTextColor:
+                                secondaryTextColor.withOpacity(0.5),
                           ),
                         ],
                       ),
@@ -105,7 +179,7 @@ class SettingsScreen extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 32),
-                    _buildSectionTitle('About', textColor),
+                    _buildSectionTitle('App Info', textColor),
                     const SizedBox(height: 12),
                     _buildSettingsCard(
                       context,
@@ -114,22 +188,24 @@ class SettingsScreen extends StatelessWidget {
                           _buildSettingsItem(
                             icon: LucideIcons.info,
                             label: 'Version',
-                            trailingText: '1.0.0',
-                            textColor: textColor,
-                            secondaryTextColor: secondaryTextColor,
-                          ),
-                          Divider(
-                              height: 32,
-                              color: secondaryTextColor.withOpacity(0.1)),
-                          _buildSettingsItem(
-                            icon: LucideIcons.shieldCheck,
-                            label: 'Privacy Policy',
+                            subtitle: '1.2.0 (Local-First Build)',
                             textColor: textColor,
                             secondaryTextColor: secondaryTextColor,
                           ),
                         ],
                       ),
                     ),
+                    const SizedBox(height: 40),
+                    Center(
+                      child: TextButton.icon(
+                        onPressed: () => _showResetPrompt(context),
+                        icon: const Icon(LucideIcons.refreshCcw,
+                            size: 16, color: Colors.redAccent),
+                        label: const Text('Reset Application',
+                            style: TextStyle(color: Colors.redAccent)),
+                      ),
+                    ),
+                    const SizedBox(height: 40),
                   ],
                 ),
               ),
@@ -140,16 +216,71 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
+  void _showPinSetupDialog(BuildContext context) {
+    final controller = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Set App PIN'),
+        content: TextField(
+          controller: controller,
+          keyboardType: TextInputType.number,
+          maxLength: 4,
+          decoration: const InputDecoration(hintText: 'Enter 4-digit PIN'),
+        ),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel')),
+          ElevatedButton(
+            onPressed: () {
+              if (controller.text.length == 4) {
+                context.read<AuthProvider>().setAppLock(controller.text, false);
+                Navigator.pop(context);
+              }
+            },
+            child: const Text('Set PIN'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showResetPrompt(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Reset Expenze?'),
+        content: const Text(
+            'This will delete all your local data and security settings. This action is IRREVERSIBLE.'),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Go Back')),
+          TextButton(
+            onPressed: () {
+              context.read<AuthProvider>().logout();
+              Navigator.pushNamedAndRemoveUntil(
+                  context, '/landing', (route) => false);
+            },
+            child: const Text('Reset Everything',
+                style: TextStyle(color: Colors.redAccent)),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildSectionTitle(String title, Color textColor) {
     return Padding(
       padding: const EdgeInsets.only(left: 8),
       child: Text(
-        title,
+        title.toUpperCase(),
         style: TextStyle(
-          fontSize: 14,
+          fontSize: 12,
           fontWeight: FontWeight.bold,
-          color: textColor.withOpacity(0.7),
-          letterSpacing: 0.5,
+          color: textColor.withOpacity(0.5),
+          letterSpacing: 1.5,
         ),
       ),
     );
@@ -157,7 +288,7 @@ class SettingsScreen extends StatelessWidget {
 
   Widget _buildSettingsCard(BuildContext context, {required Widget child}) {
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
       decoration: BoxDecoration(
         color: Theme.of(context).cardTheme.color,
         borderRadius: BorderRadius.circular(24),
@@ -177,58 +308,8 @@ class SettingsScreen extends StatelessWidget {
     required Color textColor,
     required Color secondaryTextColor,
   }) {
-    return Row(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            color: AppTheme.primary.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Icon(icon, size: 20, color: AppTheme.primary),
-        ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                label,
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 15,
-                  color: textColor,
-                ),
-              ),
-              Text(
-                subtitle,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: secondaryTextColor,
-                ),
-              ),
-            ],
-          ),
-        ),
-        Switch.adaptive(
-          value: value,
-          onChanged: onChanged,
-          activeColor: AppTheme.primary,
-        ),
-      ],
-    );
-  }
-
-  Widget _buildSettingsItem({
-    required IconData icon,
-    required String label,
-    String? trailingText,
-    VoidCallback? onTap,
-    required Color textColor,
-    required Color secondaryTextColor,
-  }) {
-    return InkWell(
-      onTap: onTap,
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 12),
       child: Row(
         children: [
           Container(
@@ -241,27 +322,86 @@ class SettingsScreen extends StatelessWidget {
           ),
           const SizedBox(width: 16),
           Expanded(
-            child: Text(
-              label,
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 15,
-                color: textColor,
-              ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                    color: textColor,
+                  ),
+                ),
+                Text(
+                  subtitle,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: secondaryTextColor,
+                  ),
+                ),
+              ],
             ),
           ),
-          if (trailingText != null)
-            Text(
-              trailingText,
-              style: TextStyle(
-                fontSize: 14,
-                color: secondaryTextColor,
-                fontWeight: FontWeight.w500,
-              ),
-            )
-          else
-            Icon(LucideIcons.chevronRight, size: 16, color: secondaryTextColor),
+          Switch.adaptive(
+            value: value,
+            onChanged: onChanged,
+            activeColor: AppTheme.primary,
+          ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildSettingsItem({
+    required IconData icon,
+    required String label,
+    String? subtitle,
+    VoidCallback? onTap,
+    required Color textColor,
+    required Color secondaryTextColor,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: AppTheme.primary.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(icon, size: 20, color: AppTheme.primary),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    label,
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 15,
+                      color: textColor,
+                    ),
+                  ),
+                  if (subtitle != null)
+                    Text(
+                      subtitle,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: secondaryTextColor,
+                      ),
+                    ),
+                ],
+              ),
+            ),
+            Icon(LucideIcons.chevronRight, size: 16, color: secondaryTextColor),
+          ],
+        ),
       ),
     );
   }

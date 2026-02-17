@@ -730,3 +730,90 @@ Executed a total visual overhaul to align with modern "premium" mobile trends an
 - **Branding**: Established a consistent, vibrant design language across all core screens.
 
 Date: 2026-02-16
+
+## [2026-02-16] Firebase Authentication Integration
+
+**Change Type:** Major
+
+**Decision Made:**
+Implemented Firebase Authentication as the primary identity provider, replacing the legacy local-only auth flow. This provides a more secure and industry-standard authentication system while maintaining local visibility for financial data.
+
+**Implementation:**
+1. **Infrastructure**:
+    - Integrated Google Services Gradle plugin and Firebase BoM.
+    - Configured `firebase_core` and `firebase_auth` dependencies.
+    - Initialized Firebase at the app entry point in `main.dart`.
+2. **Auth Integration**:
+    - Refactored `AuthProvider` to use `FirebaseAuth`.
+    - Implemented Google Sign-In with Firebase credential exchange (supporting `idToken` for google_sign_in 7.x).
+    - Synced Firebase user state with the local SQLite `users` table for secondary data persistence.
+    - Added comprehensive error handling for Firebase-specific authentication codes.
+3. **Compatibility**:
+    - Resolved `google_sign_in` 7.x API conflicts (token exchange and initialization patterns).
+    - Restored `resetPassword` signature to maintain compatibility with existing UI screens.
+
+**Impact:**
+- **Security**: Robust, production-ready authentication.
+- **Reliability**: Managed session persistence via Firebase Auth.
+- **Maintenance**: Aligns with modern Flutter patterns for third-party auth.
+
+**Rollback Strategy:**
+- Revert `AuthProvider` to the legacy `DatabaseHelper` local verification methods.
+- Disable Firebase initialization in `main.dart`.
+
+Date: 2026-02-16
+
+## [2026-02-16] Android Build Configuration Fix (minSdkVersion)
+
+**Change Type:** Patch
+
+**Decision Made:**
+Increased the `minSdkVersion` to **23** in the Android application configuration to resolve a manifest merger failure.
+
+**Context:**
+The latest Firebase Authentication SDK (v24.0.1+, via Firebase BoM 34.9.0) requires a minimum Android API level of 23. The default Flutter setting of 21 was causing the build task `processDebugMainManifest` to fail.
+
+**Implementation:**
+- Updated `android/app/build.gradle`: Modified `minSdk` from `flutter.minSdkVersion` (21) to an explicit value of `23`.
+
+**Impact:**
+- **Reliability:** Resolves the fatal build error and allows the app to be assembled and run on the physical device.
+- **Compatibility:** The app will now require Android 6.0 (Marshmallow) or higher, which covers >95% of active Android devices in 2026.
+
+Date: 2026-02-16
+
+## [2026-02-17] Pivot to Local-First Security & App Lock
+
+**Change Type:** Major | Breaking
+
+**Decision Made:**
+Transitioned the application from Firebase-based authentication to a Local-First security model. This prioritizes user privacy, offline functionality, and removes onboarding friction associated with cloud accounts.
+
+**Implementation:**
+1. **Security Infrastructure**:
+    - Replaced `firebase_auth` and `google_sign_in` dependency flow with `local_auth`.
+    - Refactored `AuthProvider` to manage local session states, PIN-based locks, and Biometric verification.
+    - Implemented secure local profile creation during the first-time "Get Started" flow.
+2. **Onboarding Experience**:
+    - Created a premium **Landing Page** with modern gradients and value propositions.
+    - Created **Profile Setup Page** to capture local user identity (Name, Email, Budget).
+    - Integrated **App Lock Screen** with a numeric keypad and biometric triggers.
+3. **Settings & Profile**:
+    - Enhanced **Settings Screen** with a new "Security" section to toggle App Lock and Biometrics.
+    - Added a placeholder for "Google Drive Sync" for future cloud backup functionality.
+    - Updated **Profile Screen** to support local data reset and profile editing.
+4. **App Core**:
+    - Updated `main.dart` to route users based on local onboarding and lock states.
+    - Removed Firebase initialization overhead.
+
+**Impact:**
+- **UX**: Instant app entry for new users; no more mandatory Google Sign-In.
+- **Privacy**: User data remains 100% on-device by default.
+- **Performance**: Improved startup speed by removing cloud auth initialization.
+- **Maintainability**: Reduced external dependencies and simplified auth logic.
+
+**Rollback Strategy:**
+- Revert to Firebase-integrated branch/commit.
+- Re-initialize Firebase in `main.dart` and restore legacy `AuthProvider` logic.
+
+Date: 2026-02-17

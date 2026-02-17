@@ -211,7 +211,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ],
                     ),
                     const SizedBox(height: 20),
-                    Container(
+                    SizedBox(
                       height: 54,
                       child: OutlinedButton(
                         onPressed: _isLoading ? null : _handleGoogleLogin,

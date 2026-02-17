@@ -1,0 +1,40 @@
+Business Overview - Firebase Authentication Integration
+________________________________________________________________________________
+
+Problem
+The previous authentication system was entirely local, which lacked professional security standards such as managed session persistence, password complexity enforcement, and the ability to eventually synchronize data across multiple devices.
+
+Objective
+Implement a production-grade, industry-standard identity management system using Firebase Authentication to secure user accounts while maintaining the application's unique "offline-first" financial data architecture.
+
+Feature Summary
+- Universal Identity: Seamless authentication using Email/Password or Google Sign-In.
+- Secure Sessions: Managed login sessions that persist across app restarts and device updates.
+- Hybrid Data Model: User identity is verified by the cloud (Firebase), while sensitive financial transactions remain private and local (SQLite).
+- User Branding: Automatic fetching of profile pictures and full names from verified Google accounts.
+
+High-level Workflow
+1. User chooses an authentication method (Email or Google).
+2. Firebase verifies the credentials securely.
+3. The application receives a verified User ID.
+4. The system automatically creates or updates a local "Identity Wallet" in the SQLite database to link financial records.
+5. User gains access to their dashboard with all local data intact.
+
+Business Value
+- Trust: Users feel safer using a tool backed by Google's security infrastructure.
+- Engagement: Google Sign-In provides a "one-tap" onboarding experience, reducing user drop-off.
+- Scale: The architecture is now ready for future features like Cloud Backup or cross-device synchronization.
+
+Risks
+- Dependency: Requires internet access for the initial login/registration.
+- Mitigation: Once logged in, the app remains fully functional offline thanks to the persistent local database.
+
+Cost Implications
+- Free Tier: This implementation falls entirely within the Firebase "Spark" free tier for current and projected user growth.
+
+Timeline
+- Setup: Completed
+- Integration: Completed
+- Verification: Completed
+
+Date: 2026-02-16

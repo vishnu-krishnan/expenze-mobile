@@ -45,8 +45,8 @@ dependencies:
   # Icons
   lucide_icons: ^0.257.0
 
-  # Auth - Google Sign In
-  google_sign_in: ^7.1.1
+  # Auth - Local & Biometrics
+  local_auth: ^2.3.0
   google_fonts: ^6.3.0
 
 dev_dependencies:

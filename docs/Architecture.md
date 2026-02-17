@@ -4,6 +4,7 @@
 - **Framework**: Flutter (3.x)
 - **Language**: Dart
 - **State Management**: Provider
+- **Identity**: Firebase Authentication
 - **Local Database**: SQLite (`sqflite`)
 - **Storage**: `shared_preferences`
 - **Networking**: `dio`
@@ -30,8 +31,9 @@
 - UI state is synchronized via `notifyListeners()` in Providers.
 
 ## Security Standards
-- Secure token storage.
-- Local-only data processing for sensitive info (SMS, Auth).
+- Secure token storage with Firebase Authentication identity provider.
+- Local-only data processing for financial and sensitive info (SMS, Transactions).
+- Managed session persistence with automatic token refreshing.
 - Runtime permission management.
 
-Date: 2026-02-13
+Date: 2026-02-16

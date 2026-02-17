@@ -1,381 +1,204 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-
+import 'package:local_auth/local_auth.dart';
 import '../../data/services/database_helper.dart';
 
 class AuthProvider with ChangeNotifier {
-  final GoogleSignIn _googleSignIn = GoogleSignIn.instance;
+  final LocalAuthentication _localAuth = LocalAuthentication();
   final DatabaseHelper _dbHelper = DatabaseHelper.instance;
 
-  String? _token;
   Map<String, dynamic>? _user;
   bool _isLoading = false;
   String? _error;
-  bool _isGoogleAvailable = false;
 
-  AuthProvider();
+  bool _isOnboarded = false;
+  bool _isLockEnabled = false;
+  bool _useBiometrics = false;
+  bool _isAuthenticated = false; // Internal session state (locked/unlocked)
 
   // Getters
-  bool get isAuthenticated => _token != null;
-  String? get token => _token;
+  bool get isAuthenticated => _isAuthenticated;
+  bool get isOnboarded => _isOnboarded;
+  bool get isLockEnabled => _isLockEnabled;
+  bool get useBiometrics => _useBiometrics;
   Map<String, dynamic>? get user => _user;
   bool get isLoading => _isLoading;
   String? get error => _error;
-  bool get isGoogleAvailable => _isGoogleAvailable;
 
-  // Initialize - Check if user is already logged in
   Future<void> initialize() async {
     _isLoading = true;
     notifyListeners();
 
     try {
-      // In 7.0.0+, initialization is mandatory before use
-      await _googleSignIn.initialize(
-        serverClientId: dotenv.maybeGet('GOOGLE_SERVER_CLIENT_ID'),
-      );
-      _isGoogleAvailable = true;
-    } catch (e) {
-      _isGoogleAvailable = false;
-      debugPrint('Google Sign-In initialization failed: $e');
-    }
-
-    try {
       final prefs = await SharedPreferences.getInstance();
-      _token = prefs.getString('auth_token');
+      _isOnboarded = prefs.getBool('is_onboarded') ?? false;
+      _isLockEnabled = prefs.getBool('is_lock_enabled') ?? false;
+      _useBiometrics = prefs.getBool('use_biometrics') ?? false;
+
+      // If lock is disabled, user is automatically "authenticated" for the session
+      if (!_isLockEnabled) {
+        _isAuthenticated = true;
+      }
+
+      // Load local user profile if exists
       final username = prefs.getString('user_name');
-
-      if (_token != null && username != null) {
-        // Fetch full profile from DB
-        final dbUser = await _dbHelper.getUser(username);
-        _user = {
-          'id': dbUser?['id'],
-          'username': username,
-          'fullName': dbUser?['full_name'] ??
-              prefs.getString('user_full_name') ??
-              username,
-          'email': prefs.getString('user_email'),
-          'phone': prefs.getString('user_phone'),
-          'photoUrl': prefs.getString('user_photo'),
-          'defaultBudget': prefs.getDouble('user_budget') ?? 0.0,
-          'provider': prefs.getString('auth_provider') ?? 'local',
-        };
+      if (username != null) {
+        _user = await _dbHelper.getUser(username);
       }
     } catch (e) {
-      _error = 'Failed to restore session';
-    } finally {
-      _isLoading = false;
-      notifyListeners();
+      debugPrint('Auth initialization failed: $e');
     }
-  }
 
-  // Login (Local DB Match)
-  Future<bool> login(String username, String password) async {
-    _isLoading = true;
-    _error = null;
+    _isLoading = false;
     notifyListeners();
-
-    try {
-      final dbUser = await _dbHelper.getUser(username);
-
-      if (dbUser == null) {
-        _error = 'Account not found. Please click Sign Up to create one.';
-        _isLoading = false;
-        notifyListeners();
-        return false;
-      }
-
-      if (dbUser['password'] != password) {
-        _error = 'Invalid credentials';
-        _isLoading = false;
-        notifyListeners();
-        return false;
-      }
-
-      _token = 'local_session_${DateTime.now().millisecondsSinceEpoch}';
-
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('auth_token', _token!);
-      await prefs.setString('user_name', username);
-      await prefs.setString('user_full_name', dbUser['full_name'] ?? username);
-      await prefs.setString('auth_provider', 'local');
-
-      _user = {
-        'id': dbUser['id'],
-        'username': username,
-        'fullName': dbUser['full_name'] ?? username,
-        'email': dbUser['email'],
-        'provider': 'local',
-      };
-
-      _isLoading = false;
-      notifyListeners();
-      return true;
-    } catch (e) {
-      _error = 'Login failed: ${e.toString()}';
-      _isLoading = false;
-      notifyListeners();
-      return false;
-    }
   }
 
-  // Register (Local DB)
-  Future<bool> register({
-    required String username,
-    required String password,
-    String? fullName,
+  Future<bool> setOnboardingComplete({
+    required String name,
     String? email,
+    double? budget,
   }) async {
     _isLoading = true;
-    _error = null;
     notifyListeners();
 
     try {
-      final existing = await _dbHelper.getUser(username);
-      if (existing != null) {
-        _error = 'Username already exists';
-        _isLoading = false;
-        notifyListeners();
-        return false;
-      }
-
-      final userId = await _dbHelper.registerUser(
-        username: username,
-        password: password,
-        fullName: fullName,
+      // 1. Save to Local DB
+      final userId = await _dbHelper.upsertUser(
+        username: name.toLowerCase().replaceAll(' ', '_'),
+        fullName: name,
         email: email,
+        defaultBudget: budget,
       );
 
-      _token = 'local_session_${DateTime.now().millisecondsSinceEpoch}';
-
+      // 2. Update Preferences
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('auth_token', _token!);
-      await prefs.setString('user_name', username);
-      await prefs.setString('user_full_name', fullName ?? username);
-      await prefs.setString('auth_provider', 'local');
+      await prefs.setBool('is_onboarded', true);
+      await prefs.setString(
+          'user_name', name.toLowerCase().replaceAll(' ', '_'));
 
+      _isOnboarded = true;
+      _isAuthenticated = true; // First time entry doesn't require lock
       _user = {
         'id': userId,
-        'username': username,
-        'fullName': fullName ?? username,
+        'username': name.toLowerCase().replaceAll(' ', '_'),
+        'fullName': name,
         'email': email,
-        'provider': 'local',
+        'defaultBudget': budget,
       };
 
       _isLoading = false;
       notifyListeners();
       return true;
     } catch (e) {
-      _error = 'Registration failed: ${e.toString()}';
+      _error = 'Failed to save profile';
       _isLoading = false;
       notifyListeners();
       return false;
     }
   }
 
-  // Login with Google (Identity only, Data remains local)
-  Future<bool> loginWithGoogle() async {
-    _isLoading = true;
-    _error = null;
-    notifyListeners();
-
+  Future<bool> setAppLock(String pin, bool useBiometrics) async {
     try {
-      if (!_isGoogleAvailable) {
-        _error =
-            'Google Sign-In is not configured correctly. On Android, a "Web Client ID" (serverClientId) must be provided in the code or via google-services.json.';
-        _isLoading = false;
-        notifyListeners();
-        return false;
-      }
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('is_lock_enabled', true);
+      await prefs.setString('app_pin', pin); // In production, hash this
+      await prefs.setBool('use_biometrics', useBiometrics);
 
-      // Google Sign-In 7.x flow using generic authentication
-      if (!_googleSignIn.supportsAuthenticate()) {
-        _error = 'Google Sign-In not supported on this platform';
-        _isLoading = false;
-        notifyListeners();
-        return false;
-      }
+      _isLockEnabled = true;
+      _useBiometrics = useBiometrics;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
 
-      final completer = Completer<GoogleSignInAccount?>();
-      StreamSubscription? subscription;
+  Future<void> disableAppLock() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('is_lock_enabled', false);
+    await prefs.remove('app_pin');
+    _isLockEnabled = false;
+    notifyListeners();
+  }
 
-      subscription = _googleSignIn.authenticationEvents.listen((event) {
-        if (event is GoogleSignInAuthenticationEventSignIn) {
-          if (!completer.isCompleted) {
-            completer.complete(event.user);
-          }
-        }
-      }, onError: (err) {
-        if (!completer.isCompleted) {
-          completer.completeError(err);
-        }
-      });
+  Future<bool> verifyPin(String pin) async {
+    final prefs = await SharedPreferences.getInstance();
+    final savedPin = prefs.getString('app_pin');
 
-      try {
-        await _googleSignIn.authenticate();
-        // Wait for the stream to emit a user
-        final account = await completer.future.timeout(
-          const Duration(minutes: 2),
-          onTimeout: () {
-            throw TimeoutException('Sign in timed out');
-          },
-        );
+    if (savedPin == pin) {
+      _isAuthenticated = true;
+      notifyListeners();
+      return true;
+    }
+    return false;
+  }
 
-        subscription.cancel();
+  Future<bool> authenticateWithBiometrics() async {
+    try {
+      final bool canAuthenticateWithBiometrics =
+          await _localAuth.canCheckBiometrics;
+      final bool canAuthenticate =
+          canAuthenticateWithBiometrics || await _localAuth.isDeviceSupported();
 
-        if (account == null) {
-          _isLoading = false;
-          notifyListeners();
-          return false;
-        }
+      if (!canAuthenticate) return false;
 
-        _token = 'local_google_${account.id}';
-        final username = account.displayName ?? account.email;
+      final bool didAuthenticate = await _localAuth.authenticate(
+        localizedReason: 'Please authenticate to unlock Expenze',
+        options: const AuthenticationOptions(
+          stickyAuth: true,
+          biometricOnly: true,
+        ),
+      );
 
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setString('auth_token', _token!);
-        await prefs.setString('user_name', username);
-        await prefs.setString('user_email', account.email);
-        if (account.photoUrl != null) {
-          await prefs.setString('user_photo', account.photoUrl!);
-        }
-        await prefs.setString('auth_provider', 'google');
-
-        // Sync with local DB
-        final userId = await _dbHelper.upsertUser(
-          username: username,
-          email: account.email,
-        );
-
-        _user = {
-          'id': userId,
-          'username': username,
-          'email': account.email,
-          'photoUrl': account.photoUrl,
-          'provider': 'google',
-        };
-
-        _isLoading = false;
+      if (didAuthenticate) {
+        _isAuthenticated = true;
         notifyListeners();
         return true;
-      } catch (e) {
-        _error = 'Google sign-in failed: ${e.toString()}';
-        _isLoading = false;
-        notifyListeners();
-        return false;
-      } finally {
-        subscription?.cancel();
       }
+      return false;
     } catch (e) {
-      _error = 'Google Init failed: ${e.toString()}';
-      _isLoading = false;
-      notifyListeners();
+      debugPrint('Biometric auth error: $e');
       return false;
     }
   }
 
-  // Logout
   Future<void> logout() async {
-    _isLoading = true;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.clear(); // Reset everything
+    _user = null;
+    _isOnboarded = false;
+    _isLockEnabled = false;
+    _isAuthenticated = false;
     notifyListeners();
-
-    try {
-      // Clear Google session
-      await _googleSignIn.signOut();
-    } catch (_) {}
-
-    try {
-      // Clear Preferences
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.remove('auth_token');
-      await prefs.remove('user_name');
-      await prefs.remove('user_email');
-      await prefs.remove('user_photo');
-      await prefs.remove('auth_provider');
-
-      _token = null;
-      _user = null;
-    } catch (e) {
-      _error = 'Logout error: ${e.toString()}';
-    } finally {
-      _isLoading = false;
-      notifyListeners();
-    }
   }
 
-  Future<void> updateProfile(
-      {String? fullName,
-      String? username,
-      String? phone,
-      double? defaultBudget}) async {
-    _isLoading = true;
-    _error = null;
-    notifyListeners();
+  Future<void> updateProfile({
+    String? fullName,
+    String? username,
+    String? phone,
+    double? defaultBudget,
+  }) async {
+    if (_user?['id'] == null) return;
 
     try {
-      final prefs = await SharedPreferences.getInstance();
-      if (fullName != null) await prefs.setString('user_full_name', fullName);
-      if (username != null) await prefs.setString('user_name', username);
-      if (phone != null) await prefs.setString('user_phone', phone);
-      if (defaultBudget != null) {
-        await prefs.setDouble('user_budget', defaultBudget);
-      }
-
-      _user = {
-        ...(_user ?? {}),
-        if (fullName != null) 'fullName': fullName,
+      await _dbHelper.updateUserProfile(_user!['id'], {
+        if (fullName != null) 'full_name': fullName,
         if (username != null) 'username': username,
         if (phone != null) 'phone': phone,
-        if (defaultBudget != null) 'defaultBudget': defaultBudget,
-      };
+        if (defaultBudget != null) 'default_budget': defaultBudget,
+      });
 
-      // Also update in DB
-      if (_user?['id'] != null) {
-        await _dbHelper.updateUserProfile(_user!['id'], {
-          if (fullName != null) 'full_name': fullName,
-          if (username != null) 'username': username,
-          if (phone != null) 'phone': phone,
-          if (defaultBudget != null) 'default_budget': defaultBudget,
-        });
+      final updatedUser = await _dbHelper.getUser(_user!['username']);
+      if (updatedUser != null) {
+        _user = updatedUser;
+        notifyListeners();
       }
     } catch (e) {
       _error = 'Update failed';
-    } finally {
-      _isLoading = false;
       notifyListeners();
     }
   }
 
-  Future<bool> resetPassword(String username, String newPassword) async {
-    _isLoading = true;
-    _error = null;
-    notifyListeners();
-
-    try {
-      final user = await _dbHelper.getUser(username);
-      if (user == null) {
-        _error = 'User not found';
-        _isLoading = false;
-        notifyListeners();
-        return false;
-      }
-
-      await _dbHelper.updatePassword(username, newPassword);
-      _isLoading = false;
-      notifyListeners();
-      return true;
-    } catch (e) {
-      _error = 'Failed to reset password';
-      _isLoading = false;
-      notifyListeners();
-      return false;
-    }
-  }
-
-  void clearError() {
-    _error = null;
-    notifyListeners();
-  }
+  void clearError() => {_error = null, notifyListeners()};
 }

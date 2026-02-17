@@ -347,8 +347,9 @@ class _RegularPaymentsScreenState extends State<RegularPaymentsScreen> {
                               firstDate: DateTime(2000),
                               lastDate: DateTime(2100),
                             );
-                            if (picked != null)
+                            if (picked != null) {
                               setModalState(() => startDate = picked);
+                            }
                           },
                           child: _buildPickerBox(
                               'Start Date',
@@ -366,8 +367,9 @@ class _RegularPaymentsScreenState extends State<RegularPaymentsScreen> {
                               firstDate: startDate,
                               lastDate: DateTime(2100),
                             );
-                            if (picked != null)
+                            if (picked != null) {
                               setModalState(() => endDate = picked);
+                            }
                           },
                           onLongPress: () =>
                               setModalState(() => endDate = null),
@@ -389,7 +391,9 @@ class _RegularPaymentsScreenState extends State<RegularPaymentsScreen> {
                       onPressed: () async {
                         if (nameController.text.isEmpty ||
                             selectedCategoryId == null ||
-                            amountController.text.isEmpty) return;
+                            amountController.text.isEmpty) {
+                          return;
+                        }
 
                         final amount =
                             double.tryParse(amountController.text) ?? 0.0;

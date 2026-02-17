@@ -82,8 +82,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
               child: Consumer<AuthProvider>(
                 builder: (context, auth, child) {
                   final user = auth.user;
-                  if (user == null)
+                  if (user == null) {
                     return const Center(child: Text('Not logged in'));
+                  }
 
                   return SingleChildScrollView(
                     padding: const EdgeInsets.symmetric(
@@ -227,18 +228,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Widget _buildLogoutButton(AuthProvider auth) {
     return ElevatedButton(
-      onPressed: () async {
-        await auth.logout();
-        if (context.mounted) {
-          Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
-        }
-      },
+      onPressed: () => _showLogoutPrompt(context, auth),
       style: ElevatedButton.styleFrom(
         backgroundColor: Theme.of(context).brightness == Brightness.dark
             ? AppTheme.bgCardDark
             : Colors.white,
         foregroundColor: AppTheme.danger,
-        side: BorderSide(color: AppTheme.danger.withValues(alpha: 0.2)),
+        side: BorderSide(color: AppTheme.danger.withOpacity(0.2)),
         minimumSize: const Size(double.infinity, 60),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         elevation: 0,
@@ -248,7 +244,34 @@ class _ProfileScreenState extends State<ProfileScreen> {
         children: [
           Icon(LucideIcons.logOut, size: 20),
           SizedBox(width: 12),
-          Text('Sign Out', style: TextStyle(fontWeight: FontWeight.bold)),
+          Text('Reset App Data', style: TextStyle(fontWeight: FontWeight.bold)),
+        ],
+      ),
+    );
+  }
+
+  void _showLogoutPrompt(BuildContext context, AuthProvider auth) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Reset Everything?'),
+        content: const Text(
+            'This will delete all your local data and security settings. This action is IRREVERSIBLE.'),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Go Back')),
+          TextButton(
+            onPressed: () async {
+              await auth.logout();
+              if (mounted) {
+                Navigator.pushNamedAndRemoveUntil(
+                    context, '/landing', (route) => false);
+              }
+            },
+            child: const Text('Reset Everything',
+                style: TextStyle(color: Colors.redAccent)),
+          ),
         ],
       ),
     );

@@ -497,7 +497,9 @@ class _MonthPlanScreenState extends State<MonthPlanScreen> {
                   onPressed: () async {
                     if (nameController.text.isEmpty ||
                         selectedCategoryId == null ||
-                        amountController.text.isEmpty) return;
+                        amountController.text.isEmpty) {
+                      return;
+                    }
 
                     final updated = expense.copyWith(
                       categoryId: selectedCategoryId,

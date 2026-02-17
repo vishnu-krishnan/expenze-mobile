@@ -253,62 +253,82 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text('Total Spent',
-                          style: TextStyle(
-                              color: Colors.white70,
-                              fontSize: 13,
-                              fontWeight: FontWeight.w500)),
-                      // Date Selector inside Card
-                      Row(
-                        children: [
-                          IconButton(
-                            icon: const Icon(LucideIcons.chevronLeft,
-                                color: Colors.white70, size: 18),
-                            onPressed: () => _handleMonthChange(-1),
-                            padding: EdgeInsets.zero,
-                            constraints: const BoxConstraints(),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 8),
-                            child: Text(
-                              _formatMonthName(provider.currentMonthKey),
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
+                      const Flexible(
+                        child: Text('Total Spent',
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                                color: Colors.white70,
                                 fontSize: 13,
+                                fontWeight: FontWeight.w500)),
+                      ),
+                      // Date Selector inside Card
+                      Flexible(
+                        flex: 2,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                              icon: const Icon(LucideIcons.chevronLeft,
+                                  color: Colors.white70, size: 18),
+                              onPressed: () => _handleMonthChange(-1),
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(),
+                            ),
+                            Flexible(
+                              child: Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 8),
+                                child: Text(
+                                  _formatMonthName(provider.currentMonthKey),
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 13,
+                                  ),
+                                ),
                               ),
                             ),
-                          ),
-                          IconButton(
-                            icon: const Icon(LucideIcons.chevronRight,
-                                color: Colors.white70, size: 18),
-                            onPressed: () => _handleMonthChange(1),
-                            padding: EdgeInsets.zero,
-                            constraints: const BoxConstraints(),
-                          ),
-                        ],
+                            IconButton(
+                              icon: const Icon(LucideIcons.chevronRight,
+                                  color: Colors.white70, size: 18),
+                              onPressed: () => _handleMonthChange(1),
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(),
+                            ),
+                          ],
+                        ),
                       ),
                     ],
                   ),
                   const SizedBox(height: 4),
-                  Text(
-                    '₹${actual.toStringAsFixed(0)}', // Simplified formatting
-                    style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 32,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: -1),
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      '₹${actual.toStringAsFixed(0)}',
+                      style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 32,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: -1),
+                    ),
                   ),
                   const SizedBox(height: 16),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      _buildBalanceInfo('Remaining', remaining, statusColor),
-                      _buildBalanceInfo(
-                          'Spending Limit',
-                          summary['limit'] ?? (planned > 0 ? planned : 0.0),
-                          Colors.white,
-                          alignment: CrossAxisAlignment.end),
+                      Expanded(
+                          child: _buildBalanceInfo(
+                              'Remaining', remaining, statusColor)),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: _buildBalanceInfo(
+                            'Spending Limit',
+                            summary['limit'] ?? (planned > 0 ? planned : 0.0),
+                            Colors.white,
+                            alignment: CrossAxisAlignment.end),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 16),
@@ -604,7 +624,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       onPressed: () async {
                         if (nameController.text.isEmpty ||
                             selectedCategoryId == null ||
-                            amountController.text.isEmpty) return;
+                            amountController.text.isEmpty) {
+                          return;
+                        }
                         final provider = context.read<ExpenseProvider>();
                         await provider.addExpense(Expense(
                           monthKey: provider.currentMonthKey,
