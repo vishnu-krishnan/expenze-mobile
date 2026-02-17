@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:provider/provider.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../providers/auth_provider.dart';
 
 class AppLockScreen extends StatefulWidget {
@@ -50,6 +51,11 @@ class _AppLockScreenState extends State<AppLockScreen> {
         _pin = '';
         _isError = true;
       });
+
+      // Haptic feedback could be added here
+      Future.delayed(const Duration(seconds: 1), () {
+        if (mounted) setState(() => _isError = false);
+      });
     }
   }
 
@@ -66,6 +72,7 @@ class _AppLockScreenState extends State<AppLockScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final auth = Provider.of<AuthProvider>(context, listen: false);
+      // Automatically trigger biometrics if enabled
       if (auth.useBiometrics) {
         _handleBiometric();
       }
@@ -75,91 +82,157 @@ class _AppLockScreenState extends State<AppLockScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF1E1B4B),
-      body: SafeArea(
-        child: Column(
-          children: [
-            const Spacer(),
-            // Logo/Icon
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.05),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                LucideIcons.lock,
-                color: Colors.white,
-                size: 32,
-              ),
-            ),
-            const SizedBox(height: 24),
-            Text(
-              'Welcome Back',
-              style: GoogleFonts.outfit(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
+      body: Stack(
+        children: [
+          // Theme-aligned Background Gradient (Matching Landing Page)
+          Container(
+            width: double.infinity,
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Color(0xFF2D8272), // primaryDark
+                  Color(0xFF79D2C1), // primary
+                  Color(0xFF9CDDD1), // secondary
+                  Colors.white,
+                ],
+                stops: [0.0, 0.4, 0.7, 1.0],
               ),
             ),
-            const SizedBox(height: 8),
-            Text(
-              'Enter PIN to unlock Expenze',
-              style: GoogleFonts.inter(
-                fontSize: 16,
-                color: Colors.white.withOpacity(0.6),
-              ),
-            ),
-            const SizedBox(height: 40),
-            // PIN Indicators
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: List.generate(4, (index) {
-                return Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 10),
-                  width: 16,
-                  height: 16,
+          ),
+
+          SafeArea(
+            child: Column(
+              children: [
+                const Spacer(flex: 2),
+
+                // Security Icon with Glow
+                Container(
+                  padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
-                    color: index < _pin.length
-                        ? const Color(0xFF10B981)
-                        : Colors.white.withOpacity(0.1),
+                    color: Colors.white.withOpacity(0.05),
                     shape: BoxShape.circle,
-                    border: _isError && _pin.isEmpty
-                        ? Border.all(color: Colors.redAccent, width: 2)
-                        : null,
+                    border: Border.all(color: Colors.white.withOpacity(0.1)),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppTheme.primary.withOpacity(0.1),
+                        blurRadius: 40,
+                        spreadRadius: 5,
+                      )
+                    ],
                   ),
-                );
-              }),
-            ),
-            if (_isError)
-              Padding(
-                padding: const EdgeInsets.only(top: 20),
-                child: Text(
-                  'Invalid PIN. Try again.',
-                  style: GoogleFonts.inter(color: Colors.redAccent),
+                  child: Image.asset(
+                    'assets/images/expenze_logo.png',
+                    width: 56,
+                    height: 56,
+                  ),
                 ),
-              ),
-            const Spacer(),
-            // Keypad
-            _buildKeypad(),
-            const SizedBox(height: 40),
-          ],
-        ),
+
+                const SizedBox(height: 32),
+
+                Text(
+                  'EXPENDZE SECURE',
+                  style: GoogleFonts.outfit(
+                    fontSize: 24,
+                    fontWeight: FontWeight.w900,
+                    color: Colors.white,
+                    letterSpacing: 2,
+                  ),
+                ),
+
+                const SizedBox(height: 8),
+
+                Text(
+                  'Enter 4-digit PIN to unlock',
+                  style: GoogleFonts.inter(
+                    fontSize: 16,
+                    color: Colors.white.withOpacity(0.6),
+                  ),
+                ),
+
+                const SizedBox(height: 48),
+
+                // Modern PIN Indicators
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: List.generate(4, (index) {
+                    final isActive = index < _pin.length;
+                    return AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      margin: const EdgeInsets.symmetric(horizontal: 14),
+                      width: 18,
+                      height: 18,
+                      decoration: BoxDecoration(
+                        color: _isError
+                            ? Colors.redAccent.withOpacity(0.4)
+                            : isActive
+                                ? AppTheme.primary
+                                : Colors.white.withOpacity(0.1),
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: _isError
+                              ? Colors.redAccent
+                              : isActive
+                                  ? AppTheme.primary
+                                  : Colors.white.withOpacity(0.3),
+                          width: 2,
+                        ),
+                        boxShadow: isActive && !_isError
+                            ? [
+                                BoxShadow(
+                                  color: AppTheme.primary.withOpacity(0.4),
+                                  blurRadius: 10,
+                                )
+                              ]
+                            : [],
+                      ),
+                    );
+                  }),
+                ),
+
+                const SizedBox(height: 24),
+
+                // Error Text
+                SizedBox(
+                  height: 20,
+                  child: _isError
+                      ? Text(
+                          'Incorrect PIN. Please try again.',
+                          style: GoogleFonts.inter(
+                            color: Colors.redAccent,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        )
+                      : null,
+                ),
+
+                const Spacer(flex: 3),
+
+                // Keypad
+                _buildKeypad(),
+
+                const SizedBox(height: 48),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
 
   Widget _buildKeypad() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 40),
+      padding: const EdgeInsets.symmetric(horizontal: 50),
       child: Column(
         children: [
           _buildKeyRow(['1', '2', '3']),
-          const SizedBox(height: 20),
+          const SizedBox(height: 24),
           _buildKeyRow(['4', '5', '6']),
-          const SizedBox(height: 20),
+          const SizedBox(height: 24),
           _buildKeyRow(['7', '8', '9']),
-          const SizedBox(height: 20),
+          const SizedBox(height: 24),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -185,8 +258,8 @@ class _AppLockScreenState extends State<AppLockScreen> {
       onTap: () => _onKeyPress(value),
       borderRadius: BorderRadius.circular(40),
       child: Container(
-        width: 70,
-        height: 70,
+        width: 74,
+        height: 74,
         alignment: Alignment.center,
         decoration: BoxDecoration(
           color: Colors.white.withOpacity(0.05),
@@ -206,19 +279,21 @@ class _AppLockScreenState extends State<AppLockScreen> {
 
   Widget _buildBiometricButton() {
     final auth = Provider.of<AuthProvider>(context, listen: false);
-    if (!auth.useBiometrics) {
-      return const SizedBox(width: 70, height: 70);
-    }
+    // Even if not "enabled" in settings, if the user requested it and it's available, show it.
+    // However, usually we should respect the setting.
+    // The user said: "if fingerprint is available and turned on the phone, implement the fingerprint lock"
     return InkWell(
       onTap: _handleBiometric,
       borderRadius: BorderRadius.circular(40),
       child: Container(
-        width: 70,
-        height: 70,
+        width: 74,
+        height: 74,
         alignment: Alignment.center,
-        child: const Icon(
+        child: Icon(
           LucideIcons.fingerprint,
-          color: const Color(0xFF10B981),
+          color: auth.useBiometrics
+              ? AppTheme.primary
+              : Colors.white.withOpacity(0.2),
           size: 32,
         ),
       ),
@@ -230,12 +305,12 @@ class _AppLockScreenState extends State<AppLockScreen> {
       onTap: _onBackspace,
       borderRadius: BorderRadius.circular(40),
       child: Container(
-        width: 70,
-        height: 70,
+        width: 74,
+        height: 74,
         alignment: Alignment.center,
         child: const Icon(
           LucideIcons.delete,
-          color: Colors.white,
+          color: Colors.white70,
           size: 28,
         ),
       ),

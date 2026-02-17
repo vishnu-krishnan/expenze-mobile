@@ -817,3 +817,96 @@ Transitioned the application from Firebase-based authentication to a Local-First
 - Re-initialize Firebase in `main.dart` and restore legacy `AuthProvider` logic.
 
 Date: 2026-02-17
+
+## [2026-02-17] UI/UX Polish: Premium Onboarding Flow
+
+**Change Type:** Minor | Patch
+
+**Decision Made:**
+Upgraded the onboarding experience to professional production standards. This involved refining copy, aligning visual elements with the app's teal color scheme, and implementing glassmorphic design patterns.
+
+**Implementation:**
+1. **Landing Page Enhancement**:
+    - Replaced the indigo color palette with the app's signature teal (`AppTheme.primary` and `primaryDark`).
+    - Updated copy to "A friendly app for your expenses" with a professional and welcoming tone.
+    - Added decorative abstract elements and glassmorphic feature cards.
+2. **Profile Setup Alignment**:
+    - Updated the `ProfileSetupPage` to match the new visual identity.
+    - Refined input field styling with subtle borders and inclusive iconography.
+3. **App Lock Refinement**:
+    - Polished the numeric keypad and PIN indicators for better feedback and security-centric aesthetics.
+    - Integrated consistent teal accents into the biometric triggers.
+
+**Impact:**
+- **UX**: More cohesive and professional first impression for new users.
+- **Brand Identity**: Strengthened the app's visual language by adhering to the defined `AppTheme` palette.
+
+Date: 2026-02-17
+
+## [2026-02-17] Content Update: Landing Page Copy
+
+**Change Type:** Patch
+
+**Decision Made:**
+Updated the Landing Page content with more compelling and informative copy to better communicate the app's value proposition and local-first philosophy.
+
+**Implementation:**
+- Updated Headline: "Take control of your money with confidence."
+- Updated Description: Detailed explanation of simplified, stress-free tracking without accounts.
+- Refined Feature Bullet Points: Explicitly mentioned the "Your Data, Your Choice" philosophy and fallback to local-first.
+- Updated CTA: Changed button text to "Take Control Now".
+
+**Impact:**
+- **UX**: Improved messaging clarity and user motivation.
+- **Onboarding**: Stronger alignment with the user's desire for financial control and privacy.
+
+Date: 2026-02-17
+
+## [2026-02-17] Security Polish: Biometric Fix & Lock Screen Alignment
+
+**Change Type:** Minor | Patch
+
+**Decision Made:**
+Resolved issues with the App Lock screen where the color scheme was inconsistent with the landing page and biometric (fingerprint) authentication was non-functional on Android.
+
+**Implementation:**
+1. **Lock Screen Aesthetic**:
+    - Synchronized `AppLockScreen` gradient with the `LandingPage` teal-to-white palette for a cohesive brand experience.
+    - Updated PIN indicators and icons to provide high-visibility feedback on the new background.
+2. **Biometric Integration (Android)**:
+    - Added `android.permission.USE_BIOMETRIC` to `AndroidManifest.xml`.
+    - Migrated `MainActivity.kt` to extend `FlutterFragmentActivity`, a requirement for the `local_auth` package to display biometric prompts.
+3. **Setup Logic**:
+    - Fixed a bug in `AuthProvider` where calling `setAppLock` with an empty string would overwrite the saved PIN.
+    - Updated `SettingsScreen` setup dialog to enable biometrics by default when a security PIN is created.
+    - Integrated automatic biometric prompts on `AppLockScreen` initialization if enabled.
+
+**Impact:**
+- **Reliability**: Biometric authentication now functions correctly on Android devices.
+- **UX**: Seamless visual transition between onboarding/landing and the security gate.
+- **Security**: Reinforced the "Privacy First" mantra with correctly implemented device-level locks.
+
+Date: 2026-02-17
+
+## [2026-02-17] Branding: Custom App Icon & Logo Integration
+
+**Change Type:** Minor | Patch
+
+**Decision Made:**
+Integrated the custom high-resolution branding assets provided for Expenze, replacing generic Lucide icons with the official logo across the application and device-level launches.
+
+**Implementation:**
+1. **Asset Management**:
+    - Centralized the 1024x1024 master logo at `assets/images/expenze_logo.png`.
+2. **Icon Generation**:
+    - Added `flutter_launcher_icons` to dev-dependencies.
+    - Generated full Android (Adaptive & Standard) and iOS icon sets from the master PNG to ensure high-fidelity app presence on home screens.
+3. **UI Integration**:
+    - Updated `LandingPage` brand identity section to display the official logo image instead of the wallet icon.
+    - Replaced the security shield on `AppLockScreen` with the branded logo asset to reinforce trust and ownership.
+
+**Impact:**
+- **Brand Identity**: Significant jump in visual credibility and recognition.
+- **Production Readiness**: Meeting platform standards for high-resolution app icons across Android and iOS.
+
+Date: 2026-02-17

@@ -102,11 +102,25 @@ class AuthProvider with ChangeNotifier {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool('is_lock_enabled', true);
-      await prefs.setString('app_pin', pin); // In production, hash this
+      if (pin.isNotEmpty) {
+        await prefs.setString('app_pin', pin);
+      }
       await prefs.setBool('use_biometrics', useBiometrics);
 
       _isLockEnabled = true;
       _useBiometrics = useBiometrics;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  Future<bool> updateBiometrics(bool enabled) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('use_biometrics', enabled);
+      _useBiometrics = enabled;
       notifyListeners();
       return true;
     } catch (e) {

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:provider/provider.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../providers/auth_provider.dart';
 
 class ProfileSetupPage extends StatefulWidget {
@@ -19,7 +20,11 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
   void _handleSubmit() async {
     if (_nameController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter your name')),
+        const SnackBar(
+          content: Text('Please enter your name'),
+          backgroundColor: AppTheme.danger,
+          behavior: SnackBarBehavior.floating,
+        ),
       );
       return;
     }
@@ -38,19 +43,22 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: isDark ? AppTheme.bgPrimaryDark : AppTheme.bgPrimary,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(LucideIcons.chevronLeft, color: Colors.black),
+          icon: Icon(LucideIcons.chevronLeft,
+              color: isDark ? Colors.white : AppTheme.primaryDark),
           onPressed: () => Navigator.pop(context),
         ),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0),
+          padding: const EdgeInsets.symmetric(horizontal: 32.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -58,9 +66,10 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
               Text(
                 'Create Your Profile',
                 style: GoogleFonts.outfit(
-                  fontSize: 32,
+                  fontSize: 34,
                   fontWeight: FontWeight.bold,
-                  color: const Color(0xFF1E1B4B),
+                  color: isDark ? Colors.white : AppTheme.primaryDark,
+                  letterSpacing: -1,
                 ),
               ),
               const SizedBox(height: 12),
@@ -68,55 +77,39 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
                 'Help us personalize your experience. This data stays on your device.',
                 style: GoogleFonts.inter(
                   fontSize: 16,
-                  color: Colors.grey[600],
+                  color: isDark ? Colors.white70 : AppTheme.textSecondary,
+                  height: 1.5,
                 ),
               ),
-              const SizedBox(height: 40),
+              const SizedBox(height: 48),
               _buildInputField(
                 label: 'YOUR NAME',
                 hint: 'How should we call you?',
                 controller: _nameController,
                 icon: LucideIcons.user,
+                isDark: isDark,
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 28),
               _buildInputField(
                 label: 'EMAIL (OPTIONAL)',
                 hint: 'For identification only',
                 controller: _emailController,
                 icon: LucideIcons.mail,
                 keyboardType: TextInputType.emailAddress,
+                isDark: isDark,
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 28),
               _buildInputField(
                 label: 'MONTHLY BUDGET (OPTIONAL)',
                 hint: '0.00',
                 controller: _budgetController,
                 icon: LucideIcons.indianRupee,
                 keyboardType: TextInputType.number,
+                isDark: isDark,
               ),
-              const SizedBox(height: 60),
-              SizedBox(
-                width: double.infinity,
-                height: 60,
-                child: ElevatedButton(
-                  onPressed: _handleSubmit,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF6366F1),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    elevation: 0,
-                  ),
-                  child: Text(
-                    'Complete Setup',
-                    style: GoogleFonts.outfit(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-              ),
+              const SizedBox(height: 64),
+              _buildSubmitButton(context),
+              const SizedBox(height: 40),
             ],
           ),
         ),
@@ -129,6 +122,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
     required String hint,
     required TextEditingController controller,
     required IconData icon,
+    required bool isDark,
     TextInputType keyboardType = TextInputType.text,
   }) {
     return Column(
@@ -136,33 +130,83 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
       children: [
         Text(
           label,
-          style: GoogleFonts.inter(
-            fontSize: 12,
-            fontWeight: FontWeight.bold,
-            letterSpacing: 1.2,
-            color: Colors.grey[500],
+          style: GoogleFonts.outfit(
+            fontSize: 13,
+            fontWeight: FontWeight.w800,
+            letterSpacing: 1.5,
+            color: isDark
+                ? AppTheme.primary
+                : AppTheme.primaryDark.withOpacity(0.6),
           ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 14),
         Container(
           decoration: BoxDecoration(
-            color: Colors.grey[100],
-            borderRadius: BorderRadius.circular(16),
+            color:
+                isDark ? AppTheme.bgCardDark : AppTheme.info.withOpacity(0.3),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: isDark
+                  ? AppTheme.borderDark
+                  : AppTheme.primary.withOpacity(0.2),
+            ),
           ),
           child: TextField(
             controller: controller,
             keyboardType: keyboardType,
-            style: GoogleFonts.inter(fontSize: 16),
+            style: GoogleFonts.inter(
+                fontSize: 16,
+                color: isDark ? Colors.white : AppTheme.textPrimary),
             decoration: InputDecoration(
               hintText: hint,
-              hintStyle: GoogleFonts.inter(color: Colors.grey[400]),
-              prefixIcon: Icon(icon, color: const Color(0xFF6366F1), size: 20),
+              hintStyle: GoogleFonts.inter(
+                  color: isDark ? Colors.white30 : AppTheme.textLight),
+              prefixIcon: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 18),
+                child: Icon(icon, color: AppTheme.primary, size: 22),
+              ),
               border: InputBorder.none,
-              contentPadding: const EdgeInsets.all(20),
+              contentPadding: const EdgeInsets.symmetric(vertical: 20),
             ),
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildSubmitButton(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      height: 64,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: AppTheme.primary.withOpacity(0.2),
+            blurRadius: 15,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: ElevatedButton(
+        onPressed: _handleSubmit,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppTheme.primary,
+          foregroundColor: AppTheme.primaryDark,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          elevation: 0,
+        ),
+        child: Text(
+          'Complete Setup',
+          style: GoogleFonts.outfit(
+            fontSize: 18,
+            fontWeight: FontWeight.w800,
+            letterSpacing: 0.5,
+          ),
+        ),
+      ),
     );
   }
 }

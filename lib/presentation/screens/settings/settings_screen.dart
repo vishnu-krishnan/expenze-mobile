@@ -122,7 +122,7 @@ class SettingsScreen extends StatelessWidget {
                               subtitle: 'Unlock using Fingerprint',
                               value: authProvider.useBiometrics,
                               onChanged: (val) {
-                                authProvider.setAppLock("", val);
+                                authProvider.updateBiometrics(val);
                               },
                               textColor: textColor,
                               secondaryTextColor: secondaryTextColor,
@@ -221,27 +221,44 @@ class SettingsScreen extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Set App PIN'),
-        content: TextField(
-          controller: controller,
-          keyboardType: TextInputType.number,
-          maxLength: 4,
-          decoration: const InputDecoration(hintText: 'Enter 4-digit PIN'),
+        title: const Text('Security Setup',
+            style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: -0.5)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+                'Set a 4-digit PIN to protect your financial data and enable biometric unlocking.'),
+            const SizedBox(height: 20),
+            TextField(
+              controller: controller,
+              keyboardType: TextInputType.number,
+              maxLength: 4,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                  fontSize: 24, fontWeight: FontWeight.bold, letterSpacing: 10),
+              decoration: AppTheme.inputDecoration('PIN', LucideIcons.lock,
+                  context: context),
+            ),
+          ],
         ),
         actions: [
           TextButton(
               onPressed: () => Navigator.pop(context),
               child: const Text('Cancel')),
           ElevatedButton(
-            onPressed: () {
+            onPressed: () async {
               if (controller.text.length == 4) {
-                context.read<AuthProvider>().setAppLock(controller.text, false);
-                Navigator.pop(context);
+                final auth = context.read<AuthProvider>();
+                // Enable PIN and default biometrics to true if supported
+                await auth.setAppLock(controller.text, true);
+                if (context.mounted) Navigator.pop(context);
               }
             },
-            child: const Text('Set PIN'),
+            style: AppTheme.primaryButtonStyle,
+            child: const Text('Secure App'),
           ),
         ],
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
       ),
     );
   }
