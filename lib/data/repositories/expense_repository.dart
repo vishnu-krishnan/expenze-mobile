@@ -18,6 +18,20 @@ class ExpenseRepository {
     return List.generate(maps.length, (i) => Expense.fromMap(maps[i]));
   }
 
+  // Get expenses for a specific category and month
+  Future<List<Expense>> getExpensesByCategory(
+      String monthKey, int categoryId) async {
+    final db = await _dbHelper.database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'expenses',
+      where: 'month_key = ? AND category_id = ?',
+      whereArgs: [monthKey, categoryId],
+      orderBy: 'created_at DESC',
+    );
+
+    return List.generate(maps.length, (i) => Expense.fromMap(maps[i]));
+  }
+
   // Get expense by ID
   Future<Expense?> getExpenseById(int id) async {
     final db = await _dbHelper.database;
@@ -153,13 +167,14 @@ class ExpenseRepository {
         c.icon,
         c.color,
         SUM(e.planned_amount) as total_planned,
-        SUM(e.actual_amount) as total_actual
+        SUM(e.actual_amount) as total_actual,
+        MAX(e.created_at) as last_activity
       FROM expenses e
       LEFT JOIN categories c ON e.category_id = c.id
       WHERE e.month_key = ?
       GROUP BY c.id
       HAVING total_planned > 0 OR total_actual > 0
-      ORDER BY total_actual DESC, total_planned DESC
+      ORDER BY last_activity DESC
     ''', [monthKey]);
 
     return result;

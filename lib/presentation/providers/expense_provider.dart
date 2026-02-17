@@ -4,6 +4,8 @@ import '../../data/repositories/expense_repository.dart';
 import 'package:intl/intl.dart';
 import '../../core/utils/logger.dart';
 
+enum SortOption { recent, amountAsc, amountDesc }
+
 class ExpenseProvider with ChangeNotifier {
   final ExpenseRepository _repository = ExpenseRepository();
 
@@ -20,6 +22,7 @@ class ExpenseProvider with ChangeNotifier {
   String _currentMonthKey = DateTime.now().toIso8601String().substring(0, 7);
   List<Map<String, dynamic>> _trends = [];
   List<Map<String, dynamic>> _categoryBreakdown = [];
+  SortOption _currentSortOption = SortOption.recent;
   double _avgMonthlySpent = 0;
   double _maxMonthlySpent = 0;
 
@@ -29,6 +32,7 @@ class ExpenseProvider with ChangeNotifier {
   String get currentMonthKey => _currentMonthKey;
   List<Map<String, dynamic>> get trends => _trends;
   List<Map<String, dynamic>> get categoryBreakdown => _categoryBreakdown;
+  SortOption get currentSortOption => _currentSortOption;
   double get avgMonthlySpent => _avgMonthlySpent;
   double get maxMonthlySpent => _maxMonthlySpent;
 
@@ -48,10 +52,12 @@ class ExpenseProvider with ChangeNotifier {
 
       _expenses = await _repository.getExpensesByMonth(monthKey);
       final rawSummary = await _repository.getMonthSummary(monthKey);
-      _categoryBreakdown = await _repository.getCategoryBreakdown(monthKey);
+      _categoryBreakdown = List<Map<String, dynamic>>.from(
+          await _repository.getCategoryBreakdown(monthKey));
 
       final actual = (rawSummary['actual'] as num).toDouble();
       final planned = (rawSummary['planned'] as num).toDouble();
+
       final limit = (rawSummary['limit'] as num).toDouble();
 
       // If limit is set (>0), use it for remaining calculation, otherwise use planned sum
@@ -63,6 +69,8 @@ class ExpenseProvider with ChangeNotifier {
         'limit': limit,
         'remaining': (targetAmount - actual).toDouble(),
       };
+
+      applySort();
     } catch (e) {
       logger.e('Error loading expenses', error: e);
     } finally {
@@ -170,4 +178,43 @@ class ExpenseProvider with ChangeNotifier {
   Future<List<String>> getImportedSmsIds() => _repository.getImportedSmsIds();
 
   double get totalActual => _expenses.fold(0, (sum, e) => sum + e.actualAmount);
+
+  void setSortOption(SortOption option) {
+    if (_currentSortOption == option) return;
+    _currentSortOption = option;
+    applySort();
+    notifyListeners();
+  }
+
+  void applySort() {
+    if (_categoryBreakdown.isEmpty) return;
+
+    final sortedList = List<Map<String, dynamic>>.from(_categoryBreakdown);
+    sortedList.sort((a, b) {
+      if (_currentSortOption == SortOption.recent) {
+        final aDate = a['last_activity'] as String?;
+        final bDate = b['last_activity'] as String?;
+        if (aDate == null && bDate == null) return 0;
+        if (aDate == null) return 1;
+        if (bDate == null) return -1;
+        return bDate.compareTo(aDate); // Descending
+      }
+
+      final aActual = (a['total_actual'] as num?)?.toDouble() ?? 0.0;
+      final bActual = (b['total_actual'] as num?)?.toDouble() ?? 0.0;
+      final aPlanned = (a['total_planned'] as num?)?.toDouble() ?? 0.0;
+      final bPlanned = (b['total_planned'] as num?)?.toDouble() ?? 0.0;
+
+      final aVal = aActual > 0 ? aActual : aPlanned;
+      final bVal = bActual > 0 ? bActual : bPlanned;
+
+      if (_currentSortOption == SortOption.amountAsc) {
+        return aVal.compareTo(bVal);
+      } else {
+        return bVal.compareTo(aVal);
+      }
+    });
+
+    _categoryBreakdown = sortedList;
+  }
 }

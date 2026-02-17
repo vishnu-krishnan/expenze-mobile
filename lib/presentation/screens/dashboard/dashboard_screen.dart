@@ -6,6 +6,7 @@ import '../../providers/expense_provider.dart';
 import '../../providers/category_provider.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../data/models/expense.dart';
+import 'recent_expenses_screen.dart' hide RecentDoubleExtension;
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -142,7 +143,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          'Category Breakdown',
+                          'Recent Expense Category',
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
@@ -150,8 +151,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             letterSpacing: -0.5,
                           ),
                         ),
-                        Icon(LucideIcons.arrowRight,
-                            size: 18, color: secondaryTextColor),
+                        GestureDetector(
+                          onTap: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) =>
+                                    const RecentExpensesScreen()),
+                          ),
+                          child: Icon(LucideIcons.arrowRight,
+                              size: 18, color: secondaryTextColor),
+                        ),
                       ],
                     ),
                   ),
@@ -164,7 +173,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         final item = provider.categoryBreakdown[index];
                         return _buildCategoryItem(context, item);
                       },
-                      childCount: provider.categoryBreakdown.length,
+                      childCount: provider.categoryBreakdown.take(3).length,
                     ),
                   ),
                 ),
@@ -500,9 +509,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         fontWeight: FontWeight.w800,
                         fontSize: 15,
                         color: textColor)),
-                const SizedBox(height: 2),
-                Text('Updated recently',
-                    style: TextStyle(color: secondaryTextColor, fontSize: 11)),
               ],
             ),
           ),
@@ -514,9 +520,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       fontWeight: FontWeight.w900,
                       fontSize: 16,
                       color: textColor)),
-              Text(actual > 0 ? 'Actual' : 'Planned',
+              Text(
+                  (planned == 0 && actual > 0)
+                      ? 'Unplanned'
+                      : (actual > 0 ? 'Actual' : 'Planned'),
                   style: TextStyle(
-                      color: actual > 0 ? AppTheme.primary : secondaryTextColor,
+                      color: (planned == 0 && actual > 0)
+                          ? AppTheme.warning
+                          : (actual > 0
+                              ? AppTheme.primary
+                              : secondaryTextColor),
                       fontSize: 10,
                       fontWeight: FontWeight.bold)),
             ],
@@ -568,7 +581,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               color: Colors.grey.withValues(alpha: 0.3),
                               borderRadius: BorderRadius.circular(2)))),
                   const SizedBox(height: 24),
-                  Text('New Expense Plan',
+                  Text('New Expense',
                       style: TextStyle(
                           fontSize: 22,
                           fontWeight: FontWeight.w900,
@@ -619,19 +632,23 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           return;
                         }
                         final provider = context.read<ExpenseProvider>();
+                        final amount =
+                            double.tryParse(amountController.text) ?? 0;
                         await provider.addExpense(Expense(
                           monthKey: provider.currentMonthKey,
                           categoryId: selectedCategoryId,
                           name: nameController.text,
-                          plannedAmount:
-                              double.tryParse(amountController.text) ?? 0,
+                          plannedAmount: 0.0,
+                          actualAmount: amount,
+                          isPaid: true,
+                          paidDate: DateTime.now().toIso8601String(),
                         ));
-                        if (mounted) Navigator.pop(context);
+                        if (context.mounted) Navigator.pop(context);
                       },
                       style: ElevatedButton.styleFrom(
                           shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(18))),
-                      child: const Text('Add to Plan',
+                      child: const Text('Add',
                           style: TextStyle(
                               fontSize: 16, fontWeight: FontWeight.bold)),
                     ),
