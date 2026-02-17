@@ -234,7 +234,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ? AppTheme.bgCardDark
             : Colors.white,
         foregroundColor: AppTheme.danger,
-        side: BorderSide(color: AppTheme.danger.withOpacity(0.2)),
+        side: BorderSide(color: AppTheme.danger.withValues(alpha: 0.2)),
         minimumSize: const Size(double.infinity, 60),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         elevation: 0,

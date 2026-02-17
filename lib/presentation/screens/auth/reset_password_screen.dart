@@ -75,7 +75,8 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
       });
 
       Future.delayed(const Duration(seconds: 2), () {
-        if (mounted) Navigator.pushReplacementNamed(context, '/login');
+        if (!mounted) return;
+        Navigator.pushReplacementNamed(context, '/login');
       });
     } else {
       setState(() => _errorMessage = auth.error ?? 'Failed to reset password');
@@ -250,9 +251,9 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
       padding: const EdgeInsets.all(12),
       margin: const EdgeInsets.only(bottom: 24),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Row(
         children: [

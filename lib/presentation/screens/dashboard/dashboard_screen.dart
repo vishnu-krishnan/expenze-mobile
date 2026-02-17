@@ -214,7 +214,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           borderRadius: BorderRadius.circular(32),
           boxShadow: [
             BoxShadow(
-              color: AppTheme.primary.withOpacity(0.3),
+              color: AppTheme.primary.withValues(alpha: 0.3),
               blurRadius: 25,
               offset: const Offset(0, 15),
             ),
@@ -227,7 +227,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               top: -20,
               child: CircleAvatar(
                 radius: 80,
-                backgroundColor: Colors.white.withOpacity(0.05),
+                backgroundColor: Colors.white.withValues(alpha: 0.05),
               ),
             ),
             Padding(
@@ -365,7 +365,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         Container(
           height: 8,
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.15),
+            color: Colors.white.withValues(alpha: 0.15),
             borderRadius: BorderRadius.circular(4),
           ),
           child: Align(
@@ -377,7 +377,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   color: color,
                   borderRadius: BorderRadius.circular(4),
                   boxShadow: [
-                    BoxShadow(color: color.withOpacity(0.5), blurRadius: 4),
+                    BoxShadow(
+                        color: color.withValues(alpha: 0.5), blurRadius: 4),
                   ],
                 ),
               ),
@@ -430,7 +431,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: color.withOpacity(0.1),
+                color: color.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
               child: Icon(icon, color: color, size: 22),
@@ -477,7 +478,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             height: 52,
             width: 52,
             decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
+              color: color.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(16),
             ),
             alignment: Alignment.center,
@@ -559,7 +560,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           width: 40,
                           height: 4,
                           decoration: BoxDecoration(
-                              color: Colors.grey.withOpacity(0.3),
+                              color: Colors.grey.withValues(alpha: 0.3),
                               borderRadius: BorderRadius.circular(2)))),
                   const SizedBox(height: 24),
                   Text('New Expense Plan',

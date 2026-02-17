@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../data/services/database_helper.dart';
 import '../../data/models/category.dart';
+import '../../core/utils/logger.dart';
 
 class CategoryProvider with ChangeNotifier {
   final DatabaseHelper _dbHelper = DatabaseHelper.instance;
@@ -22,7 +23,7 @@ class CategoryProvider with ChangeNotifier {
       final List<Map<String, dynamic>> maps = await db.query('categories');
       _categories = maps.map((m) => Category.fromMap(m)).toList();
     } catch (e) {
-      print('Error loading categories: $e');
+      logger.e('Error loading categories', error: e);
     } finally {
       _isLoading = false;
       notifyListeners();

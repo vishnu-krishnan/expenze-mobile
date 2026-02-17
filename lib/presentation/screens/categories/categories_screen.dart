@@ -85,14 +85,20 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
           const SliverToBoxAdapter(child: SizedBox(height: 140)),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        heroTag: 'categories_fab',
-        onPressed: () => Navigator.push(context,
-            MaterialPageRoute(builder: (context) => const CategoryAddScreen())),
-        backgroundColor: AppTheme.primary,
-        elevation: 8,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-        child: const Icon(LucideIcons.plus, color: Colors.white, size: 28),
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.only(bottom: 120),
+        child: FloatingActionButton(
+          heroTag: 'categories_fab',
+          onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => const CategoryAddScreen())),
+          backgroundColor: AppTheme.primary,
+          elevation: 8,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+          child: const Icon(LucideIcons.plus, color: Colors.white, size: 28),
+        ),
       ),
     );
   }
@@ -105,11 +111,11 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
           Container(
             padding: const EdgeInsets.all(32),
             decoration: BoxDecoration(
-              color: AppTheme.primary.withOpacity(0.05),
+              color: AppTheme.primary.withValues(alpha: 0.05),
               shape: BoxShape.circle,
             ),
             child: Icon(LucideIcons.layoutGrid,
-                size: 64, color: AppTheme.primary.withOpacity(0.4)),
+                size: 64, color: AppTheme.primary.withValues(alpha: 0.4)),
           ),
           const SizedBox(height: 24),
           Text('No categories found',
@@ -141,9 +147,9 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
           height: 52,
           width: 52,
           decoration: BoxDecoration(
-            color: color.withOpacity(0.1),
+            color: color.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: color.withOpacity(0.2)),
+            border: Border.all(color: color.withValues(alpha: 0.2)),
           ),
           alignment: Alignment.center,
           child: Text(cat.icon ?? '📁', style: const TextStyle(fontSize: 24)),
@@ -156,7 +162,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
           children: [
             IconButton(
               icon: Icon(LucideIcons.edit3,
-                  size: 18, color: secondaryTextColor.withOpacity(0.6)),
+                  size: 18, color: secondaryTextColor.withValues(alpha: 0.6)),
               onPressed: () => Navigator.push(
                   context,
                   MaterialPageRoute(

@@ -77,7 +77,7 @@ class SettingsScreen extends StatelessWidget {
                         ),
                         Divider(
                             height: 32,
-                            color: secondaryTextColor.withOpacity(0.1)),
+                            color: secondaryTextColor.withValues(alpha: 0.1)),
                         _buildSettingsItem(
                           icon: LucideIcons.target,
                           label: 'Spending Limit',
@@ -117,7 +117,7 @@ class SettingsScreen extends StatelessWidget {
                         if (authProvider.isLockEnabled) ...[
                           Divider(
                               height: 32,
-                              color: secondaryTextColor.withOpacity(0.1)),
+                              color: secondaryTextColor.withValues(alpha: 0.1)),
                           _buildSettingsToggle(
                             context: context,
                             icon: LucideIcons.fingerprint,
@@ -152,9 +152,9 @@ class SettingsScreen extends StatelessWidget {
                                       'Google Drive sync will be available in the next update!')),
                             );
                           },
-                          textColor: textColor.withOpacity(0.5),
+                          textColor: textColor.withValues(alpha: 0.5),
                           secondaryTextColor:
-                              secondaryTextColor.withOpacity(0.5),
+                              secondaryTextColor.withValues(alpha: 0.5),
                         ),
                       ],
                     ),
@@ -298,7 +298,7 @@ class SettingsScreen extends StatelessWidget {
         style: TextStyle(
           fontSize: 12,
           fontWeight: FontWeight.bold,
-          color: textColor.withOpacity(0.5),
+          color: textColor.withValues(alpha: 0.5),
           letterSpacing: 1.5,
         ),
       ),
@@ -334,7 +334,7 @@ class SettingsScreen extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: AppTheme.primary.withOpacity(0.1),
+              color: AppTheme.primary.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(icon, size: 20, color: AppTheme.primary),
@@ -390,7 +390,7 @@ class SettingsScreen extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: AppTheme.primary.withOpacity(0.1),
+                color: AppTheme.primary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(icon, size: 20, color: AppTheme.primary),

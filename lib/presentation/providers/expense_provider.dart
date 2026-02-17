@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../data/models/expense.dart';
 import '../../data/repositories/expense_repository.dart';
+import 'package:intl/intl.dart';
+import '../../core/utils/logger.dart';
 
 class ExpenseProvider with ChangeNotifier {
   final ExpenseRepository _repository = ExpenseRepository();
@@ -62,7 +64,7 @@ class ExpenseProvider with ChangeNotifier {
         'remaining': (targetAmount - actual).toDouble(),
       };
     } catch (e) {
-      print('Error loading expenses: $e');
+      logger.e('Error loading expenses', error: e);
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -73,12 +75,41 @@ class ExpenseProvider with ChangeNotifier {
     _isLoading = true;
     notifyListeners();
     try {
-      _trends = await _repository.getTrends(months);
+      final rawTrends = await _repository.getTrends(months);
+
+      // Fill missing months to ensure the chart shows the full selected period
+      final List<Map<String, dynamic>> filledTrends = [];
+      final now = DateTime.now();
+
+      for (int i = months - 1; i >= 0; i--) {
+        // Calculate date for this month index (going back from now)
+        final date = DateTime(now.year, now.month - i, 1);
+        final key = DateFormat('yyyy-MM').format(date);
+
+        // Find existing data for this month
+        final existing = rawTrends.firstWhere(
+          (e) => e['month_key'] == key,
+          orElse: () => {},
+        );
+
+        if (existing.isNotEmpty) {
+          filledTrends.add(existing);
+        } else {
+          filledTrends.add({
+            'month_key': key,
+            'total_planned': 0.0,
+            'total_actual': 0.0,
+          });
+        }
+      }
+
+      _trends = filledTrends;
+
       final summary = await _repository.getAnalyticsSummary(months);
       _avgMonthlySpent = summary['avg_spent'] ?? 0;
       _maxMonthlySpent = summary['max_spent'] ?? 0;
     } catch (e) {
-      print('Error loading trends: $e');
+      logger.e('Error loading trends', error: e);
     } finally {
       _isLoading = false;
       notifyListeners();

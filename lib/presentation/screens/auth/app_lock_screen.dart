@@ -102,7 +102,7 @@ class _AppLockScreenState extends State<AppLockScreen> {
                 height: 300,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: Colors.white.withOpacity(0.05),
+                  color: Colors.white.withValues(alpha: 0.05),
                 ),
               ),
             ),
@@ -116,12 +116,13 @@ class _AppLockScreenState extends State<AppLockScreen> {
                   Container(
                     padding: const EdgeInsets.all(24),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.05),
+                      color: Colors.white.withValues(alpha: 0.05),
                       shape: BoxShape.circle,
-                      border: Border.all(color: Colors.white.withOpacity(0.1)),
+                      border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.1)),
                       boxShadow: [
                         BoxShadow(
-                          color: AppTheme.primary.withOpacity(0.1),
+                          color: AppTheme.primary.withValues(alpha: 0.1),
                           blurRadius: 40,
                           spreadRadius: 5,
                         )
@@ -170,23 +171,24 @@ class _AppLockScreenState extends State<AppLockScreen> {
                         height: 18,
                         decoration: BoxDecoration(
                           color: _isError
-                              ? Colors.redAccent.withOpacity(0.4)
+                              ? Colors.redAccent.withValues(alpha: 0.4)
                               : isActive
                                   ? AppTheme.primary
-                                  : Colors.white.withOpacity(0.1),
+                                  : Colors.white.withValues(alpha: 0.1),
                           shape: BoxShape.circle,
                           border: Border.all(
                             color: _isError
                                 ? Colors.redAccent
                                 : isActive
                                     ? AppTheme.primary
-                                    : Colors.white.withOpacity(0.3),
+                                    : Colors.white.withValues(alpha: 0.3),
                             width: 2,
                           ),
                           boxShadow: isActive && !_isError
                               ? [
                                   BoxShadow(
-                                    color: AppTheme.primary.withOpacity(0.4),
+                                    color:
+                                        AppTheme.primary.withValues(alpha: 0.4),
                                     blurRadius: 10,
                                   )
                                 ]
@@ -268,7 +270,7 @@ class _AppLockScreenState extends State<AppLockScreen> {
         height: 74,
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: AppTheme.getTextColor(context).withOpacity(0.05),
+          color: AppTheme.getTextColor(context).withValues(alpha: 0.05),
           shape: BoxShape.circle,
         ),
         child: Text(
@@ -300,7 +302,7 @@ class _AppLockScreenState extends State<AppLockScreen> {
           color: auth.useBiometrics
               ? AppTheme.primary
               : AppTheme.getTextColor(context, isSecondary: true)
-                  .withOpacity(0.3),
+                  .withValues(alpha: 0.3),
           size: 32,
         ),
       ),

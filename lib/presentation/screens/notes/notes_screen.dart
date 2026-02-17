@@ -43,13 +43,14 @@ class _NotesScreenState extends State<NotesScreen> {
         child: Column(
           children: [
             AppBar(
-              title: Text('Utilities',
+              title: Text('Notes',
                   style: TextStyle(
                       color: textColor,
                       fontWeight: FontWeight.w900,
                       fontSize: 26,
                       letterSpacing: -1)),
               centerTitle: true,
+              automaticallyImplyLeading: false,
               backgroundColor: Colors.transparent,
               elevation: 0,
             ),
@@ -286,6 +287,7 @@ class _NotesScreenState extends State<NotesScreen> {
                                 .format(selectedDate!),
                         style: TextStyle(color: textColor)),
                     onTap: () async {
+                      if (!context.mounted) return;
                       final date = await showDatePicker(
                         context: context,
                         initialDate: selectedDate ?? DateTime.now(),
@@ -293,6 +295,7 @@ class _NotesScreenState extends State<NotesScreen> {
                         lastDate: DateTime.now().add(const Duration(days: 365)),
                       );
                       if (date != null) {
+                        if (!context.mounted) return;
                         final time = await showTimePicker(
                           context: context,
                           initialTime: selectedDate != null

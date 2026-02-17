@@ -59,8 +59,8 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
               backgroundColor: Colors.transparent,
               elevation: 0,
               leading: IconButton(
-                icon: Icon(LucideIcons.chevronLeft,
-                    color: AppTheme.getTextColor(context)),
+                icon: Icon(Icons.arrow_back_ios_new,
+                    size: 20, color: AppTheme.getTextColor(context)),
                 onPressed: () => Navigator.pop(context),
               ),
             ),
@@ -152,19 +152,20 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
             letterSpacing: 1.5,
             color: isDark
                 ? AppTheme.primary
-                : AppTheme.primaryDark.withOpacity(0.6),
+                : AppTheme.primaryDark.withValues(alpha: 0.6),
           ),
         ),
         const SizedBox(height: 14),
         Container(
           decoration: BoxDecoration(
-            color:
-                isDark ? AppTheme.bgCardDark : AppTheme.info.withOpacity(0.3),
+            color: isDark
+                ? AppTheme.bgCardDark
+                : AppTheme.info.withValues(alpha: 0.3),
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
               color: isDark
                   ? AppTheme.borderDark
-                  : AppTheme.primary.withOpacity(0.2),
+                  : AppTheme.primary.withValues(alpha: 0.2),
             ),
           ),
           child: TextField(
@@ -198,7 +199,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: AppTheme.primary.withOpacity(0.2),
+            color: AppTheme.primary.withValues(alpha: 0.2),
             blurRadius: 15,
             offset: const Offset(0, 8),
           ),

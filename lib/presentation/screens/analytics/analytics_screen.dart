@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:lucide_icons/lucide_icons.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../providers/expense_provider.dart';
 
@@ -38,7 +38,14 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
             backgroundColor: Colors.transparent,
             expandedHeight: 100,
             floating: true,
-            pinned: false,
+            pinned: true, // Keep back button accessible
+            leading: Navigator.canPop(context)
+                ? IconButton(
+                    icon: Icon(Icons.arrow_back_ios_new,
+                        size: 20, color: textColor),
+                    onPressed: () => Navigator.pop(context),
+                  )
+                : null,
             flexibleSpace: FlexibleSpaceBar(
               titlePadding: EdgeInsets.zero,
               background: Padding(
@@ -111,7 +118,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
     return Container(
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
-        color: AppTheme.primary.withOpacity(0.12),
+        color: AppTheme.primary.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(14),
       ),
       child: Row(
@@ -145,7 +152,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
             color: isSelected
                 ? Colors.white
                 : AppTheme.getTextColor(context, isSecondary: true)
-                    .withOpacity(0.8),
+                    .withValues(alpha: 0.8),
             fontSize: 11,
             fontWeight: FontWeight.bold,
           ),
@@ -175,7 +182,14 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                       fontWeight: FontWeight.w800,
                       fontSize: 15,
                       color: textColor)),
-              Icon(LucideIcons.trendingUp, size: 16, color: AppTheme.primary),
+              Row(
+                children: [
+                  _buildLegendItem('Actual', AppTheme.primary),
+                  const SizedBox(width: 12),
+                  _buildLegendItem(
+                      'Planned', AppTheme.secondary.withValues(alpha: 0.5)),
+                ],
+              ),
             ],
           ),
           const SizedBox(height: 30),
@@ -185,41 +199,115 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
     );
   }
 
+  Widget _buildLegendItem(String label, Color color) {
+    return Row(
+      children: [
+        Container(
+          width: 8,
+          height: 8,
+          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+        ),
+        const SizedBox(width: 4),
+        Text(label,
+            style: TextStyle(
+                fontSize: 10,
+                color: AppTheme.getTextColor(context, isSecondary: true))),
+      ],
+    );
+  }
+
   Widget _buildLineChart(List<Map<String, dynamic>> trends) {
     if (trends.isEmpty) return const Center(child: Text('Not enough data'));
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final secondaryTextColor =
+        AppTheme.getTextColor(context, isSecondary: true);
+
     return LineChart(
       LineChartData(
-        gridData: const FlGridData(show: false),
+        gridData: FlGridData(
+          show: true,
+          drawVerticalLine: false,
+          getDrawingHorizontalLine: (value) => FlLine(
+            color: secondaryTextColor.withValues(alpha: 0.1),
+            strokeWidth: 1,
+          ),
+        ),
         titlesData: FlTitlesData(
           bottomTitles: AxisTitles(
             sideTitles: SideTitles(
               showTitles: true,
+              reservedSize: 32,
+              // Dynamic interval based on period
+              interval: _selectedPeriod > 12
+                  ? 6
+                  : (_selectedPeriod > 6 ? 2 : 1).toDouble(),
               getTitlesWidget: (val, meta) {
                 if (val.toInt() >= 0 && val.toInt() < trends.length) {
                   final key = trends[val.toInt()]['month_key'] as String;
-                  return Padding(
-                    padding: const EdgeInsets.only(top: 8),
-                    child: Text(key.split('-')[1],
+                  final date = DateTime.parse('$key-01');
+                  // Show year if period > 1 year
+                  final format = _selectedPeriod > 12 ? 'MMM yy' : 'MMM';
+                  final monthLabel = DateFormat(format).format(date);
+                  return SideTitleWidget(
+                    meta: meta,
+                    space: 8,
+                    child: Text(monthLabel,
                         style: TextStyle(
                             fontSize: 10,
-                            color: AppTheme.getTextColor(context,
-                                isSecondary: true))),
+                            fontWeight: FontWeight.bold,
+                            color: secondaryTextColor)),
                   );
                 }
                 return const SizedBox();
               },
             ),
           ),
-          leftTitles:
-              const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          leftTitles: AxisTitles(
+            sideTitles: SideTitles(
+              showTitles: true,
+              getTitlesWidget: (val, meta) {
+                if (val == 0) return const SizedBox();
+                String text;
+                if (val >= 1000) {
+                  text = '${(val / 1000).toStringAsFixed(0)}k';
+                } else {
+                  text = val.toStringAsFixed(0);
+                }
+                return Text(text,
+                    style: TextStyle(fontSize: 10, color: secondaryTextColor),
+                    textAlign: TextAlign.center);
+              },
+              reservedSize: 35,
+            ),
+          ),
           rightTitles:
               const AxisTitles(sideTitles: SideTitles(showTitles: false)),
           topTitles:
               const AxisTitles(sideTitles: SideTitles(showTitles: false)),
         ),
+        minY: 0,
+        lineTouchData: LineTouchData(
+          touchTooltipData: LineTouchTooltipData(
+            getTooltipColor: (_) => isDark ? AppTheme.bgCardDark : Colors.white,
+            getTooltipItems: (List<LineBarSpot> touchedSpots) {
+              return touchedSpots.map((spot) {
+                final isActual = spot.barIndex == 0;
+                return LineTooltipItem(
+                  '${isActual ? "Actual" : "Planned"}: ₹${spot.y.toInt()}',
+                  TextStyle(
+                    color: isActual ? AppTheme.primary : AppTheme.secondary,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 12,
+                  ),
+                );
+              }).toList();
+            },
+          ),
+        ),
         borderData: FlBorderData(show: false),
         lineBarsData: [
+          // Actual Spending Line
           LineChartBarData(
             spots: trends.asMap().entries.map((e) {
               return FlSpot(e.key.toDouble(),
@@ -229,18 +317,31 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
             color: AppTheme.primary,
             barWidth: 4,
             isStrokeCapRound: true,
-            dotData: const FlDotData(show: false),
+            dotData: const FlDotData(show: true),
             belowBarData: BarAreaData(
               show: true,
               gradient: LinearGradient(
                 colors: [
-                  AppTheme.primary.withOpacity(0.3),
-                  AppTheme.primary.withOpacity(0)
+                  AppTheme.primary.withValues(alpha: 0.2),
+                  AppTheme.primary.withValues(alpha: 0)
                 ],
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
               ),
             ),
+          ),
+          // Planned Spending Line (Dashed)
+          LineChartBarData(
+            spots: trends.asMap().entries.map((e) {
+              return FlSpot(e.key.toDouble(),
+                  (e.value['total_planned'] as num).toDouble());
+            }).toList(),
+            isCurved: true,
+            color: AppTheme.secondary.withValues(alpha: 0.5),
+            barWidth: 2,
+            isStrokeCapRound: true,
+            dashArray: [5, 5],
+            dotData: const FlDotData(show: false),
           ),
         ],
       ),
@@ -274,7 +375,9 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(data['month_key'],
+              Text(
+                  DateFormat('MMMM yyyy')
+                      .format(DateTime.parse('${data['month_key']}-01')),
                   style: TextStyle(
                       color: secondaryTextColor,
                       fontSize: 10,
@@ -305,7 +408,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
         borderRadius: BorderRadius.circular(32),
         boxShadow: [
           BoxShadow(
-            color: AppTheme.primary.withOpacity(0.3),
+            color: AppTheme.primary.withValues(alpha: 0.3),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
@@ -313,21 +416,11 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
       ),
       child: Row(
         children: [
-          _buildSummaryItem(
-              'Average',
-              provider.trends.isEmpty
-                  ? '₹0'
-                  : '₹${(provider.trends.map((e) => e['total_actual'] as num).reduce((a, b) => a + b) / provider.trends.length).toStringAsFixed(0)}',
-              Colors.white,
-              Colors.white70),
+          _buildSummaryItem('Average', '₹${provider.avgMonthlySpent.toInt()}',
+              Colors.white, Colors.white70),
           Container(height: 40, width: 1, color: Colors.white24),
-          _buildSummaryItem(
-              'Highest',
-              provider.trends.isEmpty
-                  ? '₹0'
-                  : '₹${provider.trends.map((e) => e['total_actual'] as num).reduce((a, b) => a > b ? a : b).toStringAsFixed(0)}',
-              Colors.white,
-              Colors.white70),
+          _buildSummaryItem('Highest', '₹${provider.maxMonthlySpent.toInt()}',
+              Colors.white, Colors.white70),
         ],
       ),
     );

@@ -801,6 +801,33 @@ Transitioned the application from Firebase-based authentication to a Local-First
 3. **Settings & Profile**:
     - Enhanced **Settings Screen** with a new "Security" section to toggle App Lock and Biometrics.
     - Added a placeholder for "Google Drive Sync" for future cloud backup functionality.
+
+Date: 2026-02-17
+
+## [2026-02-17] Production Readiness: Lint & Architecture Compliance
+
+**Change Type:** Minor | Patch
+
+**Decision Made:**
+Resolved critical build blockers and stability issues to ensure production readiness. This includes re-introducing missing Auth methods, implementing structured logging, and enforcing Context guarding.
+
+**Implementation:**
+1. **Auth Compatibility**: Re-introduced `login`, `register`, `resetPassword`, and `loginWithGoogle` in `AuthProvider` to resolve compilation errors in legacy screens.
+2. **Structured Logging**: 
+    - Integrated `logger` package with a global instance in `lib/core/utils/logger.dart`.
+    - Replaced raw `print` statements in `CategoryProvider` and `ExpenseProvider` with `logger.e` for better observability.
+3. **Stability & Context Guarding**: 
+    - Audited multiple screens (`NotesScreen`, `LoginScreen`, `RegisterScreen`, `ResetPasswordScreen`) for `BuildContext` usage across async gaps.
+    - Added `if (!mounted)` or `if (context.mounted)` guards to prevent runtime crashes.
+4. **Documentation**:
+    - Created `docs/business-overview-lint-fixes.md` and `docs/technical-specification-lint-fixes.md` for full transparency.
+
+**Impact:**
+- **Reliability**: Reduced risk of crashes during navigation and background operations.
+- **Observability**: Consistent, structured logging across providers.
+- **Maintainability**: Fixed build errors and improved code quality.
+
+Date: 2026-02-17
     - Updated **Profile Screen** to support local data reset and profile editing.
 4. **App Core**:
     - Updated `main.dart` to route users based on local onboarding and lock states.

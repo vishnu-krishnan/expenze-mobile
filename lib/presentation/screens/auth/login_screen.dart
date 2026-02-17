@@ -36,9 +36,10 @@ class _LoginScreenState extends State<LoginScreen> {
       _passwordController.text,
     );
 
-    if (mounted) setState(() => _isLoading = false);
+    if (!mounted) return;
+    setState(() => _isLoading = false);
 
-    if (success && mounted) {
+    if (success) {
       Navigator.of(context).pushReplacementNamed('/main');
     }
   }
@@ -73,7 +74,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.06),
+                    color: Colors.black.withValues(alpha: 0.06),
                     blurRadius: 20,
                     offset: const Offset(0, 4),
                   ),
@@ -216,7 +217,8 @@ class _LoginScreenState extends State<LoginScreen> {
                       child: OutlinedButton(
                         onPressed: _isLoading ? null : _handleGoogleLogin,
                         style: OutlinedButton.styleFrom(
-                          side: BorderSide(color: Colors.grey.withOpacity(0.2)),
+                          side: BorderSide(
+                              color: Colors.grey.withValues(alpha: 0.2)),
                           shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(16)),
                         ),
@@ -271,9 +273,9 @@ class _LoginScreenState extends State<LoginScreen> {
       padding: const EdgeInsets.all(12),
       margin: const EdgeInsets.only(bottom: 20),
       decoration: BoxDecoration(
-        color: AppTheme.danger.withOpacity(0.08),
+        color: AppTheme.danger.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: AppTheme.danger.withOpacity(0.2)),
+        border: Border.all(color: AppTheme.danger.withValues(alpha: 0.2)),
       ),
       child: Row(
         children: [

@@ -35,7 +35,7 @@ class AppTheme {
 
   static List<BoxShadow> softShadow = [
     BoxShadow(
-      color: Colors.black.withOpacity(0.05),
+      color: Colors.black.withValues(alpha: 0.05),
       blurRadius: 20,
       offset: const Offset(0, 10),
     ),
@@ -45,11 +45,11 @@ class AppTheme {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return BoxDecoration(
       color: isDark
-          ? Colors.white.withOpacity(0.03)
-          : Colors.white.withOpacity(0.8),
+          ? Colors.white.withValues(alpha: 0.03)
+          : Colors.white.withValues(alpha: 0.8),
       borderRadius: BorderRadius.circular(24),
-      border:
-          Border.all(color: (isDark ? borderDark : border).withOpacity(0.3)),
+      border: Border.all(
+          color: (isDark ? borderDark : border).withValues(alpha: 0.3)),
     );
   }
 

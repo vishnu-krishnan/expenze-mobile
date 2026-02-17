@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:local_auth/local_auth.dart';
 import '../../data/services/database_helper.dart';
+import '../../core/utils/logger.dart';
 
 class AuthProvider with ChangeNotifier {
   final LocalAuthentication _localAuth = LocalAuthentication();
@@ -47,7 +48,7 @@ class AuthProvider with ChangeNotifier {
         _user = await _dbHelper.getUser(username);
       }
     } catch (e) {
-      debugPrint('Auth initialization failed: $e');
+      logger.e('Auth initialization failed', error: e);
     }
 
     _isLoading = false;
@@ -172,7 +173,7 @@ class AuthProvider with ChangeNotifier {
       }
       return false;
     } catch (e) {
-      debugPrint('Biometric auth error: $e');
+      logger.e('Biometric auth error', error: e);
       return false;
     }
   }
@@ -212,6 +213,72 @@ class AuthProvider with ChangeNotifier {
       _error = 'Update failed';
       notifyListeners();
     }
+  }
+
+  Future<bool> login(String username, String password) async {
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      // Local check: Verify if user exists and passcode matches or if it's the onboarded user
+      final prefs = await SharedPreferences.getInstance();
+      final savedUser = prefs.getString('user_name');
+      final savedPin = prefs.getString('app_pin');
+
+      if (username.toLowerCase().replaceAll(' ', '_') == savedUser &&
+          (savedPin == null || savedPin == password)) {
+        _isAuthenticated = true;
+        _user = await _dbHelper.getUser(username);
+        _isLoading = false;
+        notifyListeners();
+        return true;
+      }
+
+      _error = 'Invalid credentials';
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    } catch (e) {
+      _error = 'Login failed';
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
+  Future<bool> register({
+    required String username,
+    required String password,
+    String? fullName,
+    String? email,
+  }) async {
+    return await setOnboardingComplete(
+      name: fullName ?? username,
+      email: email,
+      budget: 0,
+    );
+  }
+
+  Future<bool> resetPassword(String username, String password) async {
+    // Stub for Local-first architecture: In a real app lock scenario,
+    // this would update the local PIN.
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final savedUser = prefs.getString('user_name');
+      if (username.toLowerCase().replaceAll(' ', '_') == savedUser) {
+        await prefs.setString('app_pin', password);
+        return true;
+      }
+      return false;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  Future<bool> loginWithGoogle() async {
+    // Stub for Local-first architecture
+    // In local-first, we prefer onboarding/local auth
+    return false;
   }
 
   void clearError() => {_error = null, notifyListeners()};

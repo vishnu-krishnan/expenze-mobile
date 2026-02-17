@@ -183,7 +183,7 @@ class _MonthPlanScreenState extends State<MonthPlanScreen> {
         borderRadius: BorderRadius.circular(30),
         boxShadow: [
           BoxShadow(
-            color: AppTheme.primary.withOpacity(0.3),
+            color: AppTheme.primary.withValues(alpha: 0.3),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
@@ -228,7 +228,7 @@ class _MonthPlanScreenState extends State<MonthPlanScreen> {
             borderRadius: BorderRadius.circular(10),
             child: LinearProgressIndicator(
               value: (actual / (target > 0 ? target : 1)).clamp(0.0, 1.0),
-              backgroundColor: Colors.white.withOpacity(0.2),
+              backgroundColor: Colors.white.withValues(alpha: 0.2),
               valueColor: AlwaysStoppedAnimation<Color>(
                 (actual / (target > 0 ? target : 1)) > 1.0
                     ? const Color(0xFFFF5252) // Red

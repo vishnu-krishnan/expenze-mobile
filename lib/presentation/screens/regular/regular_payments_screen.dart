@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../providers/regular_payment_provider.dart';
 import '../../providers/category_provider.dart';
+import '../../providers/theme_provider.dart';
 import '../../../data/models/category.dart' as model;
 
 class RegularPaymentsScreen extends StatefulWidget {
@@ -25,73 +26,82 @@ class _RegularPaymentsScreenState extends State<RegularPaymentsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final themeProvider = context.watch<ThemeProvider>();
+    final isDark = themeProvider.isDarkMode;
     final textColor = AppTheme.getTextColor(context);
     final secondaryTextColor =
         AppTheme.getTextColor(context, isSecondary: true);
 
     return Scaffold(
       backgroundColor: Colors.transparent,
-      body: CustomScrollView(
-        physics: const BouncingScrollPhysics(),
-        slivers: [
-          SliverAppBar(
-            backgroundColor: Colors.transparent,
-            expandedHeight: 100,
-            floating: true,
-            pinned: false,
-            flexibleSpace: FlexibleSpaceBar(
-              titlePadding: EdgeInsets.zero,
-              background: Padding(
-                padding: const EdgeInsets.fromLTRB(26, 10, 26, 0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text('Recurring Payments',
-                        style: TextStyle(
-                            color: secondaryTextColor,
-                            fontSize: 14,
-                            letterSpacing: 0.5)),
-                    Text('Auto-pay Bills',
-                        style: TextStyle(
-                            fontSize: 26,
-                            fontWeight: FontWeight.w900,
-                            color: textColor,
-                            letterSpacing: -1)),
-                  ],
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: isDark
+            ? AppTheme.darkBackgroundDecoration
+            : AppTheme.backgroundDecoration,
+        child: CustomScrollView(
+          physics: const BouncingScrollPhysics(),
+          slivers: [
+            SliverAppBar(
+              backgroundColor: Colors.transparent,
+              expandedHeight: 100,
+              floating: true,
+              pinned: false,
+              flexibleSpace: FlexibleSpaceBar(
+                titlePadding: EdgeInsets.zero,
+                background: Padding(
+                  padding: const EdgeInsets.fromLTRB(26, 10, 26, 0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text('Recurring Payments',
+                          style: TextStyle(
+                              color: secondaryTextColor,
+                              fontSize: 14,
+                              letterSpacing: 0.5)),
+                      Text('Auto-pay Bills',
+                          style: TextStyle(
+                              fontSize: 26,
+                              fontWeight: FontWeight.w900,
+                              color: textColor,
+                              letterSpacing: -1)),
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
-          SliverPadding(
-            padding: const EdgeInsets.symmetric(horizontal: 26),
-            sliver: Consumer2<RegularPaymentProvider, CategoryProvider>(
-              builder: (context, provider, categoryProvider, child) {
-                if (provider.isLoading) {
-                  return const SliverFillRemaining(
-                      child: Center(child: CircularProgressIndicator()));
-                }
+            SliverPadding(
+              padding: const EdgeInsets.symmetric(horizontal: 26),
+              sliver: Consumer2<RegularPaymentProvider, CategoryProvider>(
+                builder: (context, provider, categoryProvider, child) {
+                  if (provider.isLoading) {
+                    return const SliverFillRemaining(
+                        child: Center(child: CircularProgressIndicator()));
+                  }
 
-                if (provider.payments.isEmpty) {
-                  return SliverFillRemaining(
-                      child: _buildEmptyState(secondaryTextColor));
-                }
+                  if (provider.payments.isEmpty) {
+                    return SliverFillRemaining(
+                        child: _buildEmptyState(secondaryTextColor));
+                  }
 
-                return SliverList(
-                  delegate: SliverChildBuilderDelegate(
-                    (context, index) {
-                      final payment = provider.payments[index];
-                      return _buildPaymentCard(payment, categoryProvider,
-                          textColor, secondaryTextColor);
-                    },
-                    childCount: provider.payments.length,
-                  ),
-                );
-              },
+                  return SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                      (context, index) {
+                        final payment = provider.payments[index];
+                        return _buildPaymentCard(payment, categoryProvider,
+                            textColor, secondaryTextColor);
+                      },
+                      childCount: provider.payments.length,
+                    ),
+                  );
+                },
+              ),
             ),
-          ),
-          const SliverToBoxAdapter(child: SizedBox(height: 140)),
-        ],
+            const SliverToBoxAdapter(child: SizedBox(height: 140)),
+          ],
+        ),
       ),
       floatingActionButton: Padding(
         padding: const EdgeInsets.only(bottom: 120),
@@ -116,11 +126,11 @@ class _RegularPaymentsScreenState extends State<RegularPaymentsScreen> {
           Container(
             padding: const EdgeInsets.all(32),
             decoration: BoxDecoration(
-              color: AppTheme.primary.withOpacity(0.05),
+              color: AppTheme.primary.withValues(alpha: 0.05),
               shape: BoxShape.circle,
             ),
             child: Icon(LucideIcons.repeat,
-                size: 64, color: AppTheme.primary.withOpacity(0.4)),
+                size: 64, color: AppTheme.primary.withValues(alpha: 0.4)),
           ),
           const SizedBox(height: 24),
           Text('No recurring bills yet',
@@ -131,7 +141,8 @@ class _RegularPaymentsScreenState extends State<RegularPaymentsScreen> {
           const SizedBox(height: 8),
           Text('Add your subscriptions to track them automatically',
               style: TextStyle(
-                  fontSize: 13, color: secondaryTextColor.withOpacity(0.7))),
+                  fontSize: 13,
+                  color: secondaryTextColor.withValues(alpha: 0.7))),
         ],
       ),
     );
@@ -166,7 +177,7 @@ class _RegularPaymentsScreenState extends State<RegularPaymentsScreen> {
                 decoration: BoxDecoration(
                   color: Color(int.parse(
                           (cat.color ?? '#79D2C1').replaceFirst('#', '0xff')))
-                      .withOpacity(0.1),
+                      .withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(18),
                 ),
                 alignment: Alignment.center,
@@ -202,7 +213,7 @@ class _RegularPaymentsScreenState extends State<RegularPaymentsScreen> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
-              color: secondaryTextColor.withOpacity(0.05),
+              color: secondaryTextColor.withValues(alpha: 0.05),
               borderRadius: BorderRadius.circular(16),
             ),
             child: Row(
@@ -293,7 +304,7 @@ class _RegularPaymentsScreenState extends State<RegularPaymentsScreen> {
                           width: 40,
                           height: 4,
                           decoration: BoxDecoration(
-                              color: Colors.grey.withOpacity(0.3),
+                              color: Colors.grey.withValues(alpha: 0.3),
                               borderRadius: BorderRadius.circular(2)))),
                   const SizedBox(height: 24),
                   Text('Setup Recurring Bill',
@@ -440,10 +451,10 @@ class _RegularPaymentsScreenState extends State<RegularPaymentsScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
         color: isDark
-            ? Colors.white.withOpacity(0.05)
-            : Colors.grey.withOpacity(0.05),
+            ? Colors.white.withValues(alpha: 0.05)
+            : Colors.grey.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.withOpacity(0.2)),
+        border: Border.all(color: Colors.grey.withValues(alpha: 0.2)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

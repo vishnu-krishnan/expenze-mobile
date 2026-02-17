@@ -71,9 +71,10 @@ class _CategoryAddScreenState extends State<CategoryAddScreen> {
                   style: TextStyle(color: AppTheme.getTextColor(context))),
               backgroundColor: Colors.transparent,
               elevation: 0,
+              centerTitle: true,
               leading: IconButton(
-                icon: Icon(LucideIcons.chevronLeft,
-                    color: AppTheme.getTextColor(context)),
+                icon: Icon(Icons.arrow_back_ios_new,
+                    size: 20, color: AppTheme.getTextColor(context)),
                 onPressed: () => Navigator.pop(context),
               ),
             ),
@@ -143,13 +144,13 @@ class _CategoryAddScreenState extends State<CategoryAddScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
               color: exists
-                  ? AppTheme.primary.withOpacity(0.05)
+                  ? AppTheme.primary.withValues(alpha: 0.05)
                   : Theme.of(context).cardTheme.color,
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
                 color: exists
-                    ? AppTheme.primary.withOpacity(0.2)
-                    : Theme.of(context).dividerColor.withOpacity(0.1),
+                    ? AppTheme.primary.withValues(alpha: 0.2)
+                    : Theme.of(context).dividerColor.withValues(alpha: 0.1),
               ),
               boxShadow: exists ? [] : AppTheme.softShadow,
             ),
@@ -317,7 +318,7 @@ class _CategoryAddScreenState extends State<CategoryAddScreen> {
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
                     color: isSelected
-                        ? AppTheme.primary.withOpacity(0.1)
+                        ? AppTheme.primary.withValues(alpha: 0.1)
                         : Theme.of(context).cardTheme.color,
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(

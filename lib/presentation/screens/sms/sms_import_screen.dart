@@ -353,7 +353,8 @@ class _SmsImportScreenState extends State<SmsImportScreen>
               color: Theme.of(context).cardTheme.color,
               borderRadius: BorderRadius.circular(28),
               boxShadow: AppTheme.softShadow,
-              border: Border.all(color: AppTheme.primary.withOpacity(0.1)),
+              border:
+                  Border.all(color: AppTheme.primary.withValues(alpha: 0.1)),
             ),
             child: Column(
               children: [

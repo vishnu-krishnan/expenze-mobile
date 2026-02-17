@@ -52,9 +52,10 @@ class _CategoryEditScreenState extends State<CategoryEditScreen> {
                   style: TextStyle(color: AppTheme.getTextColor(context))),
               backgroundColor: Colors.transparent,
               elevation: 0,
+              centerTitle: true,
               leading: IconButton(
-                icon: Icon(LucideIcons.chevronLeft,
-                    color: AppTheme.getTextColor(context)),
+                icon: Icon(Icons.arrow_back_ios_new,
+                    size: 20, color: AppTheme.getTextColor(context)),
                 onPressed: () => Navigator.pop(context),
               ),
               actions: [
@@ -243,7 +244,7 @@ class _CategoryEditScreenState extends State<CategoryEditScreen> {
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
                     color: isSelected
-                        ? AppTheme.primary.withOpacity(0.1)
+                        ? AppTheme.primary.withValues(alpha: 0.1)
                         : Theme.of(context).cardTheme.color,
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(

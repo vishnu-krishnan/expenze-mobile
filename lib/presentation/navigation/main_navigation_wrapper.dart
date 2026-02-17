@@ -64,12 +64,12 @@ class _MainNavigationWrapperState extends State<MainNavigationWrapper> {
       height: 70,
       decoration: BoxDecoration(
         color: isDark
-            ? AppTheme.bgCardDark.withOpacity(0.8)
-            : Colors.white.withOpacity(0.8),
+            ? AppTheme.bgCardDark.withValues(alpha: 0.8)
+            : Colors.white.withValues(alpha: 0.8),
         borderRadius: BorderRadius.circular(35),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(isDark ? 0.3 : 0.1),
+            color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.1),
             blurRadius: 30,
             offset: const Offset(0, 10),
           ),
@@ -116,7 +116,7 @@ class _MainNavigationWrapperState extends State<MainNavigationWrapper> {
         ),
         decoration: BoxDecoration(
           color: isSelected
-              ? AppTheme.primary.withOpacity(0.15)
+              ? AppTheme.primary.withValues(alpha: 0.15)
               : Colors.transparent,
           borderRadius: BorderRadius.circular(20),
         ),
@@ -129,7 +129,7 @@ class _MainNavigationWrapperState extends State<MainNavigationWrapper> {
                   ? AppTheme.primary
                   : (isDark
                       ? Colors.white60
-                      : AppTheme.textSecondary.withOpacity(0.5)),
+                      : AppTheme.textSecondary.withValues(alpha: 0.5)),
               size: isSelected ? 24 : 22,
             ),
             if (isSelected) ...[
