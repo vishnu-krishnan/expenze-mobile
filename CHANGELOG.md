@@ -7,6 +7,7 @@ All notable changes to this project will be documented in this file.
 - Randomized motivational quotes in the Profile Screen.
 - "Member Since" field in User Profile.
 - In-app versioning and recent changes display.
+- Automatic (System) and Manual theme mode selection.
 
 ### Changed
 - Standardized header design in Monthly Planner to match Analytics.

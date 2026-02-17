@@ -167,15 +167,19 @@ class SettingsScreen extends StatelessWidget {
                     context,
                     child: Column(
                       children: [
-                        _buildSettingsToggle(
-                          context: context,
-                          icon: themeProvider.isDarkMode
-                              ? LucideIcons.moon
-                              : LucideIcons.sun,
-                          label: 'Dark Mode',
-                          subtitle: 'Enable dark theme for the app',
-                          value: themeProvider.isDarkMode,
-                          onChanged: (val) => themeProvider.toggleTheme(),
+                        _buildSettingsItem(
+                          icon: themeProvider.themeMode == ThemeMode.system
+                              ? LucideIcons.monitor
+                              : themeProvider.themeMode == ThemeMode.dark
+                                  ? LucideIcons.moon
+                                  : LucideIcons.sun,
+                          label: 'App Theme',
+                          subtitle: themeProvider.themeMode == ThemeMode.system
+                              ? 'System Default'
+                              : themeProvider.themeMode == ThemeMode.dark
+                                  ? 'Dark'
+                                  : 'Light',
+                          onTap: () => _showThemeDialog(context, themeProvider),
                           textColor: textColor,
                           secondaryTextColor: secondaryTextColor,
                         ),
@@ -494,6 +498,55 @@ class SettingsScreen extends StatelessWidget {
         ],
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
       ),
+    );
+  }
+
+  void _showThemeDialog(BuildContext context, ThemeProvider themeProvider) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: Theme.of(context).cardColor,
+        title: const Text('Choose Theme',
+            style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: -0.5)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _buildThemeOption(context, themeProvider, ThemeMode.system,
+                'System Default', LucideIcons.monitor),
+            _buildThemeOption(context, themeProvider, ThemeMode.light,
+                'Light Mode', LucideIcons.sun),
+            _buildThemeOption(context, themeProvider, ThemeMode.dark,
+                'Dark Mode', LucideIcons.moon),
+          ],
+        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+      ),
+    );
+  }
+
+  Widget _buildThemeOption(BuildContext context, ThemeProvider themeProvider,
+      ThemeMode mode, String label, IconData icon) {
+    final isSelected = themeProvider.themeMode == mode;
+    final textColor = AppTheme.getTextColor(context);
+
+    return ListTile(
+      leading: Icon(icon,
+          color: isSelected
+              ? AppTheme.primary
+              : AppTheme.getTextColor(context, isSecondary: true)),
+      title: Text(label,
+          style: TextStyle(
+              color: textColor,
+              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal)),
+      trailing: isSelected
+          ? const Icon(LucideIcons.check, color: AppTheme.primary, size: 20)
+          : null,
+      onTap: () {
+        themeProvider.setThemeMode(mode);
+        Navigator.pop(context);
+      },
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
     );
   }
 }

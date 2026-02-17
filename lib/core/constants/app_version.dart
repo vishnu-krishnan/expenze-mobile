@@ -6,6 +6,7 @@ class AppVersion {
   static const List<String> recentChanges = [
     'Refined Profile Screen with motivational quotes',
     'Standardized UI headers across analytics screens',
+    'Integrated automatic & manual theme mode selection',
     'Optimized Monthly Planner progress bar reference',
     'Fixed layout overflow and deprecated opacity calls',
     'Integrated in-app versioning and changelog'
