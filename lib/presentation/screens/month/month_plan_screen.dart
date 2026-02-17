@@ -28,7 +28,7 @@ class _MonthPlanScreenState extends State<MonthPlanScreen> {
     final themeProvider = context.watch<ThemeProvider>();
     final textColor = AppTheme.getTextColor(context);
 
-    final isDark = themeProvider.isDarkMode;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
       backgroundColor: Colors.transparent,

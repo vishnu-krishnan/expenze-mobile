@@ -37,7 +37,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final secondaryTextColor =
         AppTheme.getTextColor(context, isSecondary: true);
 
-    final isDark = context.watch<ThemeProvider>().isDarkMode;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
       backgroundColor: Colors.transparent,

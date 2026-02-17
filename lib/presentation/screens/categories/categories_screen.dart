@@ -22,7 +22,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
     final secondaryTextColor =
         AppTheme.getTextColor(context, isSecondary: true);
 
-    final isDark = context.watch<ThemeProvider>().isDarkMode;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
       decoration: isDark

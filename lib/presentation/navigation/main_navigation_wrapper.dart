@@ -1,13 +1,13 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter/material.dart';
 import '../../core/theme/app_theme.dart';
 import '../screens/dashboard/dashboard_screen.dart';
 import '../screens/analytics/analytics_screen.dart';
 import '../screens/month/month_plan_screen.dart';
 import '../screens/settings/settings_screen.dart';
-import '../providers/theme_provider.dart';
+import '../screens/settings/settings_screen.dart';
 
 class MainNavigationWrapper extends StatefulWidget {
   final int initialIndex;
