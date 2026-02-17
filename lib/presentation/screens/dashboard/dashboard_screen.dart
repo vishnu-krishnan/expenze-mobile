@@ -405,8 +405,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
           _buildActionCard(context, LucideIcons.stickyNote, 'Notes',
               AppTheme.primary, () => Navigator.pushNamed(context, '/notes')),
           const SizedBox(width: 12),
-          _buildActionCard(context, LucideIcons.calendar, 'Planner',
-              AppTheme.primary, () => Navigator.pushNamed(context, '/month')),
+          _buildActionCard(
+              context,
+              LucideIcons.layoutGrid,
+              'Categories',
+              AppTheme.primary,
+              () => Navigator.pushNamed(context, '/categories')),
         ],
       ),
     );

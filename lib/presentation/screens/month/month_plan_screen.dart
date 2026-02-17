@@ -43,7 +43,7 @@ class _MonthPlanScreenState extends State<MonthPlanScreen> {
             SliverAppBar(
               automaticallyImplyLeading: false,
               title: Text(
-                'Spending Limit',
+                'Monthly Planner',
                 style: TextStyle(
                   color: textColor,
                   fontWeight: FontWeight.w900,
@@ -411,7 +411,7 @@ class _MonthPlanScreenState extends State<MonthPlanScreen> {
               final amount =
                   double.tryParse(controller.text) ?? expense.plannedAmount;
               provider.togglePaid(expense, amount);
-              Navigator.pop(context);
+              if (context.mounted) Navigator.pop(context);
             },
             child: const Text('Confirm'),
           ),
@@ -512,7 +512,7 @@ class _MonthPlanScreenState extends State<MonthPlanScreen> {
                     await context
                         .read<ExpenseProvider>()
                         .updateExpense(updated);
-                    if (mounted) Navigator.pop(context);
+                    if (context.mounted) Navigator.pop(context);
                   },
                   style: ElevatedButton.styleFrom(
                       shape: RoundedRectangleBorder(

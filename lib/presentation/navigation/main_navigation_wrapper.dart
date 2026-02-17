@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 import '../../core/theme/app_theme.dart';
 import '../screens/dashboard/dashboard_screen.dart';
 import '../screens/analytics/analytics_screen.dart';
-import '../screens/categories/categories_screen.dart';
+import '../screens/month/month_plan_screen.dart';
 import '../screens/settings/settings_screen.dart';
 import '../providers/theme_provider.dart';
 
@@ -26,10 +26,11 @@ class _MainNavigationWrapperState extends State<MainNavigationWrapper> {
     _selectedIndex = widget.initialIndex;
   }
 
+  // Define screens in the order of the nav bar
   final List<Widget> _screens = [
     const DashboardScreen(),
     const AnalyticsScreen(),
-    const CategoriesScreen(),
+    const MonthPlanScreen(), // Index 2 is now Planner
     const SettingsScreen(),
   ];
 
@@ -88,8 +89,8 @@ class _MainNavigationWrapperState extends State<MainNavigationWrapper> {
                 Expanded(
                     child: _buildNavItem(LucideIcons.pieChart, 'Analytics', 1)),
                 Expanded(
-                    child:
-                        _buildNavItem(LucideIcons.layoutGrid, 'Categories', 2)),
+                    child: _buildNavItem(
+                        LucideIcons.calendar, 'Planner', 2)), // Tab 2: Planner
                 Expanded(
                     child: _buildNavItem(LucideIcons.settings, 'Settings', 3)),
               ],

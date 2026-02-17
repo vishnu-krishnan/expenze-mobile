@@ -19,29 +19,21 @@ class _CategoryAddScreenState extends State<CategoryAddScreen> {
 
   final List<Map<String, dynamic>> _quickAddCategories = [
     {'name': 'Rent', 'emoji': '🏠'},
-    {'name': 'Groceries', 'emoji': '🍎'},
-    {'name': 'Dining Out', 'emoji': '🍽️'},
+    {'name': 'Groceries', 'emoji': '🛒'},
+    {'name': 'Food & Dining', 'emoji': '🍕'},
     {'name': 'Transportation', 'emoji': '🚗'},
-    {'name': 'Utilities', 'emoji': '💡'},
+    {'name': 'Bills & Utilities', 'emoji': '💡'},
     {'name': 'Healthcare', 'emoji': '🏥'},
     {'name': 'Entertainment', 'emoji': '🎬'},
     {'name': 'Shopping', 'emoji': '🛍️'},
-    {'name': 'Investments', 'emoji': '📈'},
+    {'name': 'Investment', 'emoji': '📈'},
     {'name': 'Gifts', 'emoji': '🎁'},
-    {'name': 'Subscriptions', 'emoji': '📱'},
-    {'name': 'Insurance', 'emoji': '🛡️'},
+    {'name': 'Subscriptions', 'emoji': '📺'},
     {'name': 'Education', 'emoji': '📚'},
     {'name': 'Fitness', 'emoji': '💪'},
     {'name': 'Travel', 'emoji': '✈️'},
-    {'name': 'Pet Care', 'emoji': '🐾'},
-    {'name': 'Coffee & Tea', 'emoji': '☕'},
-    {'name': 'Personal Care', 'emoji': '💅'},
-    {'name': 'Home Improvement', 'emoji': '🛠️'},
-    {'name': 'Electronics', 'emoji': '💻'},
-    {'name': 'Clothing', 'emoji': '👗'},
-    {'name': 'Charity', 'emoji': '❤️'},
-    {'name': 'Taxes', 'emoji': '💼'},
-    {'name': 'Savings', 'emoji': '💰'},
+    {'name': 'Recharge', 'emoji': '📱'},
+    {'name': 'Petrol/Fuel', 'emoji': '⛽'},
     {'name': 'Loan', 'emoji': '📜'},
     {'name': 'EMI', 'emoji': '💳'},
     {'name': 'Others', 'emoji': '📦'},
@@ -137,7 +129,7 @@ class _CategoryAddScreenState extends State<CategoryAddScreen> {
               ? null
               : () async {
                   await provider.addCategory(cat['name'], cat['emoji']);
-                  if (mounted) Navigator.pop(context);
+                  if (context.mounted) Navigator.pop(context);
                 },
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -313,7 +305,7 @@ class _CategoryAddScreenState extends State<CategoryAddScreen> {
               if (_nameController.text.isEmpty) return;
               await provider.addCategory(
                   _nameController.text, _iconController.text);
-              if (mounted) Navigator.pop(context);
+              if (context.mounted) Navigator.pop(context);
             },
             style: AppTheme.primaryButtonStyle.copyWith(
               minimumSize:

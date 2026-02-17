@@ -237,7 +237,7 @@ class _CategoryEditScreenState extends State<CategoryEditScreen> {
               if (_nameController.text.isEmpty) return;
               await provider.updateCategory(widget.category.id,
                   _nameController.text, _iconController.text);
-              if (mounted) Navigator.pop(context);
+              if (context.mounted) Navigator.pop(context);
             },
             style: AppTheme.primaryButtonStyle.copyWith(
               minimumSize:
@@ -270,7 +270,7 @@ class _CategoryEditScreenState extends State<CategoryEditScreen> {
           TextButton(
             onPressed: () async {
               await provider.deleteCategory(widget.category.id);
-              if (mounted) {
+              if (context.mounted) {
                 Navigator.pop(context);
                 Navigator.pop(context);
               }
