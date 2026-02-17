@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:intl/intl.dart';
 import 'package:expenze_mobile/presentation/providers/note_provider.dart';
-import 'package:expenze_mobile/presentation/providers/theme_provider.dart';
 import 'package:expenze_mobile/core/theme/app_theme.dart';
 import 'package:expenze_mobile/data/models/note.dart';
 
@@ -25,7 +24,6 @@ class _NotesScreenState extends State<NotesScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final themeProvider = context.watch<ThemeProvider>();
     final textColor = AppTheme.getTextColor(context);
     final secondaryTextColor =
         AppTheme.getTextColor(context, isSecondary: true);

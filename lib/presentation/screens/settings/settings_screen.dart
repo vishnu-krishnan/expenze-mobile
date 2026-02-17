@@ -441,59 +441,78 @@ class SettingsScreen extends StatelessWidget {
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: Theme.of(context).cardColor,
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text('What\'s New',
-                style: TextStyle(
-                    fontWeight: FontWeight.w900, letterSpacing: -0.5)),
-            Text('Version ${AppVersion.current}',
-                style: TextStyle(
-                    fontSize: 12,
-                    color: secondaryTextColor,
-                    fontWeight: FontWeight.normal)),
-          ],
-        ),
+        title: const Text('Release History',
+            style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: -0.5)),
         content: SizedBox(
           width: double.maxFinite,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: AppVersion.recentChanges
-                .map((change) => Padding(
-                      padding: const EdgeInsets.only(bottom: 12),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+          child: Scrollbar(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.only(right: 8),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: AppVersion.history.map((release) {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Container(
-                            margin: const EdgeInsets.only(top: 6),
-                            width: 6,
-                            height: 6,
-                            decoration: const BoxDecoration(
-                              color: AppTheme.primary,
-                              shape: BoxShape.circle,
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Text(
-                              change,
+                          Text('Version ${release.version}',
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: AppTheme.primary,
+                                  fontSize: 16)),
+                          Text(release.date,
                               style: TextStyle(
-                                fontSize: 14,
-                                color: textColor.withValues(alpha: 0.9),
-                                height: 1.3,
-                              ),
-                            ),
-                          ),
+                                  fontSize: 11, color: secondaryTextColor)),
                         ],
                       ),
-                    ))
-                .toList(),
+                      const SizedBox(height: 12),
+                      ...release.changes.map((change) => Padding(
+                            padding: const EdgeInsets.only(bottom: 8, left: 4),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Container(
+                                  margin: const EdgeInsets.only(top: 6),
+                                  width: 5,
+                                  height: 5,
+                                  decoration: BoxDecoration(
+                                    color: secondaryTextColor.withValues(
+                                        alpha: 0.5),
+                                    shape: BoxShape.circle,
+                                  ),
+                                ),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: Text(
+                                    change,
+                                    style: TextStyle(
+                                      color: textColor,
+                                      fontSize: 13,
+                                      height: 1.4,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          )),
+                      const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 16),
+                        child: Divider(height: 1),
+                      ),
+                    ],
+                  );
+                }).toList(),
+              ),
+            ),
           ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Great!'),
+            child: const Text('Close'),
           ),
         ],
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),

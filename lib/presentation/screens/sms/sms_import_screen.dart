@@ -4,7 +4,6 @@ import 'package:lucide_icons/lucide_icons.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../providers/expense_provider.dart';
 import '../../providers/category_provider.dart';
-import '../../providers/theme_provider.dart';
 import '../../../data/models/category.dart';
 import '../../../data/models/expense.dart';
 import '../../../data/services/sms_service.dart';
@@ -224,7 +223,7 @@ class _SmsImportScreenState extends State<SmsImportScreen>
           priority: item.priority,
           isPaid: true,
           paidDate: date.toIso8601String(),
-          notes: 'SMS_ID:${item.id}',
+          notes: 'SMS_ID:${item.id} | MSG:${item.raw}',
         );
         await provider.addExpense(expense);
         setState(() => _detectedExpenses[i].isSuccess = true);
@@ -249,7 +248,6 @@ class _SmsImportScreenState extends State<SmsImportScreen>
 
   @override
   Widget build(BuildContext context) {
-    final themeProvider = context.watch<ThemeProvider>();
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final textColor = AppTheme.getTextColor(context);
     final secondaryTextColor =

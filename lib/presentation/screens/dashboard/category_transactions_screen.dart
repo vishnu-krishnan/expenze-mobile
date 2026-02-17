@@ -6,7 +6,7 @@ import '../../../data/repositories/expense_repository.dart';
 import 'package:intl/intl.dart';
 
 class CategoryTransactionsScreen extends StatefulWidget {
-  final int categoryId;
+  final int? categoryId;
   final String categoryName;
   final String monthKey;
   final String? categoryIcon;

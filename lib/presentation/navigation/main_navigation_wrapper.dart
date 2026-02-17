@@ -1,12 +1,10 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
-import 'package:flutter/material.dart';
 import '../../core/theme/app_theme.dart';
 import '../screens/dashboard/dashboard_screen.dart';
 import '../screens/analytics/analytics_screen.dart';
 import '../screens/month/month_plan_screen.dart';
-import '../screens/settings/settings_screen.dart';
 import '../screens/settings/settings_screen.dart';
 
 class MainNavigationWrapper extends StatefulWidget {
@@ -26,11 +24,10 @@ class _MainNavigationWrapperState extends State<MainNavigationWrapper> {
     _selectedIndex = widget.initialIndex;
   }
 
-  // Define screens in the order of the nav bar
   final List<Widget> _screens = [
     const DashboardScreen(),
     const AnalyticsScreen(),
-    const MonthPlanScreen(), // Index 2 is now Planner
+    const MonthPlanScreen(),
     const SettingsScreen(),
   ];
 
@@ -44,7 +41,7 @@ class _MainNavigationWrapperState extends State<MainNavigationWrapper> {
           : AppTheme.backgroundDecoration,
       child: Scaffold(
         backgroundColor: Colors.transparent,
-        extendBody: true, // Crucial for floating navbar
+        extendBody: true,
         body: SafeArea(
           top: true,
           bottom: false,
@@ -88,8 +85,7 @@ class _MainNavigationWrapperState extends State<MainNavigationWrapper> {
                 Expanded(
                     child: _buildNavItem(LucideIcons.pieChart, 'Analytics', 1)),
                 Expanded(
-                    child: _buildNavItem(
-                        LucideIcons.calendar, 'Planner', 2)), // Tab 2: Planner
+                    child: _buildNavItem(LucideIcons.calendar, 'Planner', 2)),
                 Expanded(
                     child: _buildNavItem(LucideIcons.settings, 'Settings', 3)),
               ],

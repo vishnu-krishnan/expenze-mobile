@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../providers/category_provider.dart';
-import '../../providers/theme_provider.dart';
 import '../../../data/models/category.dart';
 import 'category_add_screen.dart';
 import 'category_edit_screen.dart';

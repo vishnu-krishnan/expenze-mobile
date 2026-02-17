@@ -116,7 +116,7 @@ class RecentExpensesScreen extends StatelessWidget {
             context,
             MaterialPageRoute(
               builder: (context) => CategoryTransactionsScreen(
-                categoryId: item['id'] as int,
+                categoryId: item['id'] as int?,
                 categoryName: item['category_name'] ?? 'Uncategorized',
                 monthKey: Provider.of<ExpenseProvider>(context, listen: false)
                     .currentMonthKey,

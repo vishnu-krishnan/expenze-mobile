@@ -12,20 +12,21 @@ class ExpenseRepository {
       'expenses',
       where: 'month_key = ?',
       whereArgs: [monthKey],
-      orderBy: 'created_at DESC',
+      orderBy: 'is_paid ASC, created_at DESC',
     );
 
     return List.generate(maps.length, (i) => Expense.fromMap(maps[i]));
   }
 
-  // Get expenses for a specific category and month
   Future<List<Expense>> getExpensesByCategory(
-      String monthKey, int categoryId) async {
+      String monthKey, int? categoryId) async {
     final db = await _dbHelper.database;
     final List<Map<String, dynamic>> maps = await db.query(
       'expenses',
-      where: 'month_key = ? AND category_id = ?',
-      whereArgs: [monthKey, categoryId],
+      where: categoryId == null
+          ? 'month_key = ? AND category_id IS NULL'
+          : 'month_key = ? AND category_id = ?',
+      whereArgs: categoryId == null ? [monthKey] : [monthKey, categoryId],
       orderBy: 'created_at DESC',
     );
 
@@ -99,7 +100,9 @@ class ExpenseRepository {
     final result = await db.rawQuery('''
       SELECT 
         SUM(planned_amount) as total_planned,
-        SUM(actual_amount) as total_actual,
+        SUM(CASE WHEN is_paid = 1 AND planned_amount > 0 THEN planned_amount ELSE 0 END) as confirmed_planned,
+        SUM(CASE WHEN is_paid = 0 AND planned_amount > 0 THEN planned_amount ELSE 0 END) as pending_planned,
+        SUM(CASE WHEN is_paid = 1 THEN actual_amount ELSE 0 END) as total_actual,
         SUM(CASE WHEN planned_amount = 0 AND actual_amount > 0 THEN actual_amount ELSE 0 END) as total_unplanned,
         COUNT(CASE WHEN is_paid = 0 THEN 1 END) as pending_count
       FROM expenses
@@ -110,6 +113,8 @@ class ExpenseRepository {
 
     return {
       'planned': result.first['total_planned'] ?? 0.0,
+      'confirmed_planned': result.first['confirmed_planned'] ?? 0.0,
+      'pending_planned': result.first['pending_planned'] ?? 0.0,
       'actual': result.first['total_actual'] ?? 0.0,
       'unplanned': result.first['total_unplanned'] ?? 0.0,
       'pending_count': result.first['pending_count'] ?? 0,

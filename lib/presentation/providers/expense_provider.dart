@@ -57,6 +57,10 @@ class ExpenseProvider with ChangeNotifier {
 
       final actual = (rawSummary['actual'] as num).toDouble();
       final planned = (rawSummary['planned'] as num).toDouble();
+      final confirmedPlanned =
+          (rawSummary['confirmed_planned'] as num?)?.toDouble() ?? 0.0;
+      final pendingPlanned =
+          (rawSummary['pending_planned'] as num?)?.toDouble() ?? 0.0;
       final unplanned = (rawSummary['unplanned'] as num?)?.toDouble() ?? 0.0;
 
       final limit = (rawSummary['limit'] as num).toDouble();
@@ -66,6 +70,8 @@ class ExpenseProvider with ChangeNotifier {
 
       _summary = {
         'planned': planned,
+        'confirmed_planned': confirmedPlanned,
+        'pending_planned': pendingPlanned,
         'actual': actual,
         'unplanned': unplanned,
         'limit': limit,

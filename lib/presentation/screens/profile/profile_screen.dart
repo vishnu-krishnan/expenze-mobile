@@ -4,7 +4,6 @@ import 'dart:math';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../providers/auth_provider.dart';
-import '../../providers/theme_provider.dart';
 import '../../../data/constants/app_quotes.dart';
 
 class ProfileScreen extends StatefulWidget {
