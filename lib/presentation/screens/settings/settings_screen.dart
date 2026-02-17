@@ -198,16 +198,6 @@ class SettingsScreen extends StatelessWidget {
                       ],
                     ),
                   ),
-                  const SizedBox(height: 40),
-                  Center(
-                    child: TextButton.icon(
-                      onPressed: () => _showResetPrompt(context),
-                      icon: const Icon(LucideIcons.refreshCcw,
-                          size: 16, color: Colors.redAccent),
-                      label: const Text('Reset Application',
-                          style: TextStyle(color: Colors.redAccent)),
-                    ),
-                  ),
                   const SizedBox(height: 140),
                 ],
               ),
@@ -261,31 +251,6 @@ class SettingsScreen extends StatelessWidget {
           ),
         ],
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-      ),
-    );
-  }
-
-  void _showResetPrompt(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Reset Expenze?'),
-        content: const Text(
-            'This will delete all your local data and security settings. This action is IRREVERSIBLE.'),
-        actions: [
-          TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Go Back')),
-          TextButton(
-            onPressed: () {
-              context.read<AuthProvider>().logout();
-              Navigator.pushNamedAndRemoveUntil(
-                  context, '/landing', (route) => false);
-            },
-            child: const Text('Reset Everything',
-                style: TextStyle(color: Colors.redAccent)),
-          ),
-        ],
       ),
     );
   }

@@ -91,10 +91,8 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
         title: const Text('Reset Password'),
         backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: AppTheme.textPrimary),
-          onPressed: () => Navigator.pushReplacementNamed(context, '/login'),
-        ),
+        centerTitle: false,
+        automaticallyImplyLeading: false,
       ),
       body: SafeArea(
         child: _buildForm(),

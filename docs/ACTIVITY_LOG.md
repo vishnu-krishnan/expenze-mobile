@@ -1084,3 +1084,11 @@ Impact: Improved visual consistency, eliminated layout desync, and ensured 100% 
 Rollback Strategy: Revert `MainNavigationWrapper.dart` layout changes and individual screen padding updates.
 
 Date: 2026-02-17
+[2026-02-17] [UI/UX]
+Change Type: Minor
+Decision made: Standardized global heading alignment to the left across all application screens. Refactored the "Recurring Payments" screen to remove the "Auto-pay Bills" subtitle and unified the heading to "Recurring Payments". Continued removal of explicit back buttons.
+Reason: Achieved a cleaner, more minimalist premium aesthetic; improved layout consistency and heading clarity.
+Impact: Unified visual language across Analytics, Categories, Profile, Settings, Regular Payments, Month Plan, and auxiliary screens.
+Rollback Strategy: Revert `centerTitle` to true and restore previous heading text in `RegularPaymentsScreen`.
+
+Date: 2026-02-17

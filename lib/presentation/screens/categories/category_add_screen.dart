@@ -71,12 +71,8 @@ class _CategoryAddScreenState extends State<CategoryAddScreen> {
                   style: TextStyle(color: AppTheme.getTextColor(context))),
               backgroundColor: Colors.transparent,
               elevation: 0,
-              centerTitle: true,
-              leading: IconButton(
-                icon: Icon(Icons.arrow_back_ios_new,
-                    size: 20, color: AppTheme.getTextColor(context)),
-                onPressed: () => Navigator.pop(context),
-              ),
+              centerTitle: false,
+              automaticallyImplyLeading: false,
             ),
             Expanded(
               child: Consumer<CategoryProvider>(

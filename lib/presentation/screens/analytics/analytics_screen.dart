@@ -36,16 +36,8 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
         slivers: [
           SliverAppBar(
             backgroundColor: Colors.transparent,
+            automaticallyImplyLeading: false,
             expandedHeight: 100,
-            floating: true,
-            pinned: true, // Keep back button accessible
-            leading: Navigator.canPop(context)
-                ? IconButton(
-                    icon: Icon(Icons.arrow_back_ios_new,
-                        size: 20, color: textColor),
-                    onPressed: () => Navigator.pop(context),
-                  )
-                : null,
             flexibleSpace: FlexibleSpaceBar(
               titlePadding: EdgeInsets.zero,
               background: Padding(

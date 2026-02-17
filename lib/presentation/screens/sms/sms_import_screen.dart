@@ -288,9 +288,6 @@ class _SmsImportScreenState extends State<SmsImportScreen>
                                 letterSpacing: -1)),
                       ],
                     ),
-                    IconButton(
-                        onPressed: () => Navigator.pop(context),
-                        icon: Icon(LucideIcons.x, color: secondaryTextColor))
                   ],
                 ),
               ),

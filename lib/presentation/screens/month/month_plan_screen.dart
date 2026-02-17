@@ -41,6 +41,7 @@ class _MonthPlanScreenState extends State<MonthPlanScreen> {
         child: NestedScrollView(
           headerSliverBuilder: (context, innerBoxIsScrolled) => [
             SliverAppBar(
+              automaticallyImplyLeading: false,
               title: Text(
                 'Spending Limit',
                 style: TextStyle(
@@ -52,7 +53,7 @@ class _MonthPlanScreenState extends State<MonthPlanScreen> {
               ),
               backgroundColor: Colors.transparent,
               elevation: 0,
-              centerTitle: true,
+              centerTitle: false,
               floating: true,
               pinned: true,
             ),

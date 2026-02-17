@@ -58,11 +58,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
             AppBar(
               backgroundColor: Colors.transparent,
               elevation: 0,
-              leading: IconButton(
-                icon: Icon(Icons.arrow_back_ios_new,
-                    size: 20, color: AppTheme.getTextColor(context)),
-                onPressed: () => Navigator.pop(context),
-              ),
+              automaticallyImplyLeading: false,
             ),
             Expanded(
               child: SafeArea(

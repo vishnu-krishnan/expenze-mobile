@@ -45,6 +45,7 @@ class _RegularPaymentsScreenState extends State<RegularPaymentsScreen> {
           slivers: [
             SliverAppBar(
               backgroundColor: Colors.transparent,
+              automaticallyImplyLeading: false,
               expandedHeight: 100,
               floating: true,
               pinned: false,
@@ -57,11 +58,6 @@ class _RegularPaymentsScreenState extends State<RegularPaymentsScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text('Recurring Payments',
-                          style: TextStyle(
-                              color: secondaryTextColor,
-                              fontSize: 14,
-                              letterSpacing: 0.5)),
-                      Text('Auto-pay Bills',
                           style: TextStyle(
                               fontSize: 26,
                               fontWeight: FontWeight.w900,

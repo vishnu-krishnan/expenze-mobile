@@ -57,10 +57,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       TextStyle(color: textColor, fontWeight: FontWeight.bold)),
               backgroundColor: Colors.transparent,
               elevation: 0,
-              leading: IconButton(
-                icon: Icon(LucideIcons.chevronLeft, color: textColor),
-                onPressed: () => Navigator.pop(context),
-              ),
+              centerTitle: false,
+              automaticallyImplyLeading: false,
               actions: [
                 _isEditing
                     ? IconButton(

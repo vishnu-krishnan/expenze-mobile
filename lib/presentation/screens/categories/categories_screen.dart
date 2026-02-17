@@ -28,6 +28,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
         slivers: [
           SliverAppBar(
             backgroundColor: Colors.transparent,
+            automaticallyImplyLeading: false,
             expandedHeight: 100,
             floating: true,
             pinned: false,

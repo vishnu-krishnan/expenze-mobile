@@ -41,6 +41,8 @@ class ExpenseDetailScreen extends StatelessWidget {
               title: const Text('Transaction Details'),
               backgroundColor: Colors.transparent,
               elevation: 0,
+              centerTitle: false,
+              automaticallyImplyLeading: false,
             ),
             Expanded(
               child: SingleChildScrollView(
