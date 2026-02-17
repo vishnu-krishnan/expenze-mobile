@@ -4,6 +4,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../providers/theme_provider.dart';
 import '../../providers/category_provider.dart';
+import '../../../core/constants/emoji_constants.dart';
 
 class CategoryAddScreen extends StatefulWidget {
   const CategoryAddScreen({super.key});
@@ -41,6 +42,8 @@ class _CategoryAddScreenState extends State<CategoryAddScreen> {
     {'name': 'Charity', 'emoji': '❤️'},
     {'name': 'Taxes', 'emoji': '💼'},
     {'name': 'Savings', 'emoji': '💰'},
+    {'name': 'Loan', 'emoji': '📜'},
+    {'name': 'EMI', 'emoji': '💳'},
     {'name': 'Others', 'emoji': '📦'},
   ];
 
@@ -90,7 +93,7 @@ class _CategoryAddScreenState extends State<CategoryAddScreen> {
                         _buildSectionHeader(context, 'Custom Category',
                             'Create your own identification'),
                         const SizedBox(height: 16),
-                        _buildCustomForm(provider),
+                        _buildCustomForm(provider, isDark),
                       ],
                     ),
                   );
@@ -177,7 +180,7 @@ class _CategoryAddScreenState extends State<CategoryAddScreen> {
     );
   }
 
-  Widget _buildCustomForm(CategoryProvider provider) {
+  Widget _buildCustomForm(CategoryProvider provider, bool isDark) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -202,132 +205,109 @@ class _CategoryAddScreenState extends State<CategoryAddScreen> {
                   fontSize: 13,
                   color: AppTheme.getTextColor(context))),
           const SizedBox(height: 12),
-          Wrap(
-            spacing: 10,
-            runSpacing: 10,
-            children: [
-              // Food & Dining
-              '🍎', '🍊', '🍋', '🍌', '🍉', '🍇', '🍓', '🫐', '🍈', '🍒',
-              '🍑', '🥭', '🍍', '🥥', '🥝', '🍅', '🍆', '🥑', '🥦', '🥬',
-              '🥒', '🌶️', '🫑', '🌽', '🥕', '🫒', '🧄', '🧅', '🥔', '🍠',
-              '🥐', '🥯', '🍞', '🥖', '🥨', '🧀', '🥚', '🍳', '🧈', '🥞',
-              '🧇', '🥓', '🥩', '🍗', '🍖', '🦴', '🌭', '🍔', '🍟', '🍕',
-              '🫓', '🥪', '🥙', '🧆', '🌮', '🌯', '🫔', '🥗', '🥘', '🫕',
-              '🍝', '🍜', '🍲', '🍛', '🍣', '🍱', '🥟', '🦪', '🍤', '🍙',
-              '🍚', '🍘', '🍥', '🥠', '🥮', '🍢', '🍡', '🍧', '🍨', '🍦',
-              '🥧', '🧁', '🍰', '🎂', '🍮', '🍭', '🍬', '🍫', '🍿', '🍩',
-              '🍪', '🌰', '🥜', '🫘', '🍯', '🥛', '🍼', '🫖', '☕', '🍵',
-              '🧃', '🥤', '🧋', '🍶', '🍺', '🍻', '🥂', '🍷', '🥃', '🍸',
-              '🍹', '🧉', '🍾', '🧊',
-
-              // Transportation & Travel
-              '🚗', '🚕', '🚙', '🚌', '🚎', '🏎️', '🚓', '🚑', '🚒', '🚐',
-              '🛻', '🚚', '🚛', '🚜', '🦯', '🦽', '🦼', '🛴', '🚲', '🛵',
-              '🏍️', '🛺', '🚨', '🚔', '🚍', '🚘', '🚖', '🚡', '🚠', '🚟',
-              '🚃', '🚋', '🚞', '🚝', '🚄', '🚅', '🚈', '🚂', '🚆', '🚇',
-              '🚊', '🚉', '✈️', '🛫', '🛬', '🛩️', '💺', '🚁', '🛰️', '🚀',
-              '🛸', '🚢', '⛵', '🛶', '🚤', '🛳️', '⛴️', '🛥️', '🚧', '⛽',
-
-              // Home & Living
-              '🏠', '🏡', '🏘️', '🏚️', '🏗️', '🏭', '🏢', '🏬', '🏣', '🏤',
-              '🏥', '🏦', '🏨', '🏪', '🏫', '🏩', '💒', '🏛️', '⛪', '🕌',
-              '🛕', '🕍', '⛩️', '🕋', '🪔', '🕯️', '💡', '🔦', '🏮', '🪔',
-              '🧯', '🛢️', '💸', '💵', '💴', '💶', '💷', '🪙', '💰', '💳',
-
-              // Health & Wellness
-              '💊', '💉', '🩹', '🩺', '🩻', '🩼', '🦷', '🧬', '🧪', '🧫',
-              '🧴', '🧼', '🧽', '🧹', '🧺', '🧻', '🪒', '🪥', '🪮', '🧖',
-              '💆', '💇', '🚿', '🛁', '🛀', '🧘', '💪', '🦾', '🦿', '🦵',
-              '🦶', '👂', '🦻', '👃', '🧠', '🫀', '🫁', '🦴', '👀', '👁️',
-
-              // Entertainment & Hobbies
-              '🎬', '🎭', '🎪', '🎨', '🎰', '🎲', '🎯', '🎳', '🎮', '🎰',
-              '🎸', '🎹', '🎺', '🎻', '🪕', '🥁', '🪘', '🎧', '🎤', '🎬',
-              '📷', '📸', '📹', '📼', '📺', '📻', '📡', '⏱️', '⏰', '⏲️',
-              '🕰️', '⌚', '📱', '💻', '⌨️', '🖥️', '🖨️', '🖱️', '🖲️', '🕹️',
-
-              // Shopping & Fashion
-              '🛍️', '🛒', '💄', '💍', '💎', '🔇', '🔈', '🔉', '🔊', '📢',
-              '👔', '👕', '👖', '🧣', '🧤', '🧥', '🧦', '👗', '👘', '🥻',
-              '🩱', '🩲', '🩳', '👙', '👚', '👛', '👜', '👝', '🎒', '👞',
-              '👟', '🥾', '🥿', '👠', '👡', '🩰', '👢', '👑', '👒', '🎩',
-              '🎓', '🧢', '⛑️', '🪖', '💄', '💋', '👄', '🦷', '👅', '👂',
-
-              // Finance & Business
-              '💼', '📊', '📈', '📉', '💹', '💱', '💲', '✉️', '📧', '📨',
-              '📩', '📤', '📥', '📦', '📫', '📪', '📬', '📭', '📮', '🗳️',
-              '✏️', '✒️', '🖋️', '🖊️', '🖌️', '🖍️', '📝', '💼', '📁', '📂',
-              '🗂️', '📅', '📆', '🗒️', '🗓️', '📇', '📈', '📉', '📊', '📋',
-
-              // Education & Learning
-              '📚', '📖', '📕', '📗', '📘', '📙', '📓', '📔', '📒', '📃',
-              '📜', '📄', '📰', '🗞️', '📑', '🔖', '🏷️', '💰', '🪙', '💴',
-
-              // Sports & Fitness
-              '⚽', '🏀', '🏈', '⚾', '🥎', '🎾', '🏐', '🏉', '🥏', '🎱',
-              '🪀', '🏓', '🏸', '🏒', '🏑', '🥍', '🏏', '🪃', '🥅', '⛳',
-              '🪁', '🏹', '🎣', '🤿', '🥊', '🥋', '🎽', '🛹', '🛼', '🛷',
-              '⛸️', '🥌', '🎿', '⛷️', '🏂', '🪂', '🏋️', '🤼', '🤸', '🤺',
-
-              // Nature & Animals
-              '🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼', '🐨', '🐯',
-              '🦁', '🐮', '🐷', '🐽', '🐸', '🐵', '🙈', '🙉', '🙊', '🐒',
-              '🐔', '🐧', '🐦', '🐤', '🐣', '🐥', '🦆', '🦅', '🦉', '🦇',
-              '🐺', '🐗', '🐴', '🦄', '🐝', '🪱', '🐛', '🦋', '🐌', '🐞',
-              '🐜', '🪰', '🪲', '🪳', '🦟', '🦗', '🕷️', '🕸️', '🦂', '🐢',
-              '🐍', '🦎', '🦖', '🦕', '🐙', '🦑', '🦐', '🦞', '🦀', '🐡',
-              '🐠', '🐟', '🐬', '🐳', '🐋', '🦈', '🐊', '🐅', '🐆', '🦓',
-              '🦍', '🦧', '🦣', '🐘', '🦛', '🦏', '🐪', '🐫', '🦒', '🦘',
-              '🦬', '🐃', '🐂', '🐄', '🐎', '🐖', '🐏', '🐑', '🦙', '🐐',
-              '🦌', '🐕', '🐩', '🦮', '🐕‍🦺', '🐈', '🐈‍⬛', '🪶', '🐓', '🦃',
-              '🦤', '🦚', '🦜', '🦢', '🦩', '🕊️', '🐇', '🦝', '🦨', '🦡',
-              '🦫', '🦦', '🦥', '🐁', '🐀', '🐿️', '🦔', '🐾', '🐉', '🐲',
-
-              // Objects & Tools
-              '🔧', '🔨', '⚒️', '🛠️', '⛏️', '🪓', '🪚', '🔩', '⚙️', '🪤',
-              '🧰', '🧲', '🪜', '⚗️', '🧪', '🧫', '🧬', '🔬', '🔭', '📡',
-              '💉', '🩸', '💊', '🩹', '🩺', '🪑', '🚪', '🪟', '🪞', '🛏️',
-              '🛋️', '🪑', '🚽', '🪠', '🚿', '🛁', '🪤', '🪒', '🧴', '🧷',
-              '🧹', '🧺', '🧻', '🪣', '🧼', '🪥', '🧽', '🧯', '🛒', '🚬',
-
-              // Symbols & Misc
-              '❤️', '🧡', '💛', '💚', '💙', '💜', '🖤', '🤍', '🤎', '💔',
-              '❣️', '💕', '💞', '💓', '💗', '💖', '💘', '💝', '💟', '☮️',
-              '✝️', '☪️', '🕉️', '☸️', '✡️', '🔯', '🕎', '☯️', '☦️', '🛐',
-              '⛎', '♈', '♉', '♊', '♋', '♌', '♍', '♎', '♏', '♐',
-              '♑', '♒', '♓', '🆔', '⚛️', '🉑', '☢️', '☣️', '📴', '📳',
-              '🈶', '🈚', '🈸', '🈺', '🈷️', '✴️', '🆚', '💮', '🉐', '㊙️',
-              '㊗️', '🈴', '🈵', '🈹', '🈲', '🅰️', '🅱️', '🆎', '🆑', '🅾️',
-              '🆘', '❌', '⭕', '🛑', '⛔', '📛', '🚫', '💯', '💢', '♨️',
-              '🚷', '🚯', '🚳', '🚱', '🔞', '📵', '🚭', '❗', '❕', '❓',
-              '❔', '‼️', '⁉️', '🔅', '🔆', '〽️', '⚠️', '🚸', '🔱', '⚜️',
-              '🔰', '♻️', '✅', '🈯', '💹', '❇️', '✳️', '❎', '🌐', '💠',
-              '🎁', '🎀', '🎗️', '🎟️', '🎫', '🎖️', '🏆', '🏅', '🥇', '🥈',
-              '🥉', '⚽', '⚾', '🥎', '🏀', '🏐', '🏈', '🏉', '🎾', '🥏',
-            ].map((emoji) {
-              final isSelected = _iconController.text == emoji;
-              return GestureDetector(
-                onTap: () => setState(() => _iconController.text = emoji),
-                child: Container(
-                  width: 44,
-                  height: 44,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: isSelected
-                        ? AppTheme.primary.withValues(alpha: 0.1)
-                        : Theme.of(context).cardTheme.color,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: isSelected ? AppTheme.primary : Colors.transparent,
-                      width: 2,
+          DefaultTabController(
+            length: EmojiConstants.categorizedEmojis.length,
+            child: Container(
+              decoration: BoxDecoration(
+                color: isDark ? AppTheme.bgSecondaryDark : AppTheme.bgSecondary,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                    color: (isDark ? AppTheme.borderDark : AppTheme.border)
+                        .withValues(alpha: 0.5)),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    height: 44,
+                    decoration: BoxDecoration(
+                      border: Border(
+                          bottom: BorderSide(
+                              color: (isDark
+                                      ? AppTheme.borderDark
+                                      : AppTheme.border)
+                                  .withValues(alpha: 0.2))),
+                    ),
+                    child: TabBar(
+                      isScrollable: true,
+                      dividerColor: Colors.transparent,
+                      indicatorColor: AppTheme.primary,
+                      indicatorWeight: 3,
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      tabAlignment: TabAlignment.start,
+                      tabs: EmojiConstants.categorizedEmojis.keys.map((cat) {
+                        return Tab(
+                          icon: Icon(
+                            EmojiConstants.categoryIcons[cat] ??
+                                LucideIcons.helpCircle,
+                            size: 18,
+                          ),
+                        );
+                      }).toList(),
                     ),
                   ),
-                  child: Text(emoji, style: const TextStyle(fontSize: 20)),
-                ),
-              );
-            }).toList(),
+                  SizedBox(
+                    height: 200,
+                    child: TabBarView(
+                      children:
+                          EmojiConstants.categorizedEmojis.values.map((emojis) {
+                        return GridView.builder(
+                          padding: const EdgeInsets.all(12),
+                          physics: const BouncingScrollPhysics(),
+                          gridDelegate:
+                              const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 6,
+                            mainAxisSpacing: 8,
+                            crossAxisSpacing: 8,
+                          ),
+                          itemCount: emojis.length,
+                          itemBuilder: (context, index) {
+                            final emoji = emojis[index];
+                            final isSelected = _iconController.text == emoji;
+                            return GestureDetector(
+                              onTap: () =>
+                                  setState(() => _iconController.text = emoji),
+                              child: AnimatedContainer(
+                                duration: const Duration(milliseconds: 200),
+                                alignment: Alignment.center,
+                                decoration: BoxDecoration(
+                                  color: isSelected
+                                      ? AppTheme.primary.withValues(alpha: 0.1)
+                                      : (isDark
+                                          ? AppTheme.bgPrimaryDark
+                                          : Colors.white),
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                    color: isSelected
+                                        ? AppTheme.primary
+                                        : Colors.transparent,
+                                    width: 2,
+                                  ),
+                                  boxShadow: isSelected
+                                      ? []
+                                      : [
+                                          BoxShadow(
+                                            color: Colors.black
+                                                .withValues(alpha: 0.03),
+                                            blurRadius: 4,
+                                            offset: const Offset(0, 2),
+                                          )
+                                        ],
+                                ),
+                                child: Text(emoji,
+                                    style: const TextStyle(fontSize: 22)),
+                              ),
+                            );
+                          },
+                        );
+                      }).toList(),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
-          const SizedBox(height: 32),
+          const SizedBox(height: 24),
           ElevatedButton(
             onPressed: () async {
               if (_nameController.text.isEmpty) return;
@@ -341,8 +321,10 @@ class _CategoryAddScreenState extends State<CategoryAddScreen> {
               shape: WidgetStateProperty.all(
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
               ),
+              backgroundColor: WidgetStateProperty.all(AppTheme.primary),
             ),
-            child: const Text('Add Category'),
+            child: const Text('Add Category',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
           ),
         ],
       ),
