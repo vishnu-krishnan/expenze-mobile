@@ -192,6 +192,7 @@ class AuthProvider with ChangeNotifier {
     String? fullName,
     String? username,
     String? phone,
+    String? email,
     double? defaultBudget,
   }) async {
     if (_user?['id'] == null) return;
@@ -201,6 +202,7 @@ class AuthProvider with ChangeNotifier {
         if (fullName != null) 'full_name': fullName,
         if (username != null) 'username': username,
         if (phone != null) 'phone': phone,
+        if (email != null) 'email': email,
         if (defaultBudget != null) 'default_budget': defaultBudget,
       });
 

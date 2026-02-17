@@ -5,6 +5,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../providers/theme_provider.dart';
 import '../../providers/expense_provider.dart';
 import '../../providers/auth_provider.dart';
+import '../../../core/constants/app_version.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -191,9 +192,12 @@ class SettingsScreen extends StatelessWidget {
                         _buildSettingsItem(
                           icon: LucideIcons.info,
                           label: 'Version',
-                          subtitle: '1.2.0 (Local-First Build)',
+                          subtitle:
+                              '${AppVersion.current} (${AppVersion.releaseName})',
                           textColor: textColor,
                           secondaryTextColor: secondaryTextColor,
+                          onTap: () => _showChangelogDialog(
+                              context, textColor, secondaryTextColor),
                         ),
                       ],
                     ),
@@ -423,6 +427,72 @@ class SettingsScreen extends StatelessWidget {
           ),
         ],
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      ),
+    );
+  }
+
+  void _showChangelogDialog(
+      BuildContext context, Color textColor, Color secondaryTextColor) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: Theme.of(context).cardColor,
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('What\'s New',
+                style: TextStyle(
+                    fontWeight: FontWeight.w900, letterSpacing: -0.5)),
+            Text('Version ${AppVersion.current}',
+                style: TextStyle(
+                    fontSize: 12,
+                    color: secondaryTextColor,
+                    fontWeight: FontWeight.normal)),
+          ],
+        ),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: AppVersion.recentChanges
+                .map((change) => Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            margin: const EdgeInsets.only(top: 6),
+                            width: 6,
+                            height: 6,
+                            decoration: const BoxDecoration(
+                              color: AppTheme.primary,
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              change,
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: textColor.withValues(alpha: 0.9),
+                                height: 1.3,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ))
+                .toList(),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Great!'),
+          ),
+        ],
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
       ),
     );
   }

@@ -38,36 +38,51 @@ class _MonthPlanScreenState extends State<MonthPlanScreen> {
         decoration: isDark
             ? AppTheme.darkBackgroundDecoration
             : AppTheme.backgroundDecoration,
-        child: NestedScrollView(
-          headerSliverBuilder: (context, innerBoxIsScrolled) => [
-            SliverAppBar(
-              automaticallyImplyLeading: false,
-              title: Text(
-                'Monthly Planner',
-                style: TextStyle(
-                  color: textColor,
-                  fontWeight: FontWeight.w900,
-                  fontSize: 26,
-                  letterSpacing: -1,
+        child: Consumer2<ExpenseProvider, CategoryProvider>(
+          builder: (context, expenseProvider, categoryProvider, child) {
+            return CustomScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              slivers: [
+                SliverAppBar(
+                  automaticallyImplyLeading: false,
+                  backgroundColor: Colors.transparent,
+                  expandedHeight: 100,
+                  floating: true,
+                  pinned: false,
+                  flexibleSpace: FlexibleSpaceBar(
+                    titlePadding: EdgeInsets.zero,
+                    background: Padding(
+                      padding: const EdgeInsets.fromLTRB(26, 10, 26, 0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text('Financial Overview',
+                              style: TextStyle(
+                                  color: themeProvider.isDarkMode
+                                      ? AppTheme.getTextColor(context,
+                                          isSecondary: true)
+                                      : AppTheme.getTextColor(context,
+                                          isSecondary: true),
+                                  fontSize: 13,
+                                  letterSpacing: 0.5)),
+                          Text('Monthly Planner',
+                              style: TextStyle(
+                                  fontSize: 26,
+                                  fontWeight: FontWeight.w900,
+                                  color: textColor,
+                                  letterSpacing: -1)),
+                        ],
+                      ),
+                    ),
+                  ),
                 ),
-              ),
-              backgroundColor: Colors.transparent,
-              elevation: 0,
-              centerTitle: false,
-              floating: true,
-              pinned: true,
-            ),
-          ],
-          body: Consumer2<ExpenseProvider, CategoryProvider>(
-            builder: (context, expenseProvider, categoryProvider, child) {
-              if (expenseProvider.isLoading &&
-                  expenseProvider.expenses.isEmpty) {
-                return const Center(child: CircularProgressIndicator());
-              }
-
-              return CustomScrollView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                slivers: [
+                if (expenseProvider.isLoading &&
+                    expenseProvider.expenses.isEmpty)
+                  const SliverFillRemaining(
+                    child: Center(child: CircularProgressIndicator()),
+                  )
+                else ...[
                   // 1. Month Navigation
                   SliverToBoxAdapter(
                     child:
@@ -85,7 +100,7 @@ class _MonthPlanScreenState extends State<MonthPlanScreen> {
                       child: Padding(
                         padding: const EdgeInsets.fromLTRB(24, 24, 24, 12),
                         child: Text(
-                          'Planned Expenses',
+                          'Transaction List',
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
@@ -116,9 +131,9 @@ class _MonthPlanScreenState extends State<MonthPlanScreen> {
                     ),
                   const SliverToBoxAdapter(child: SizedBox(height: 100)),
                 ],
-              );
-            },
-          ),
+              ],
+            );
+          },
         ),
       ),
     );
@@ -166,11 +181,10 @@ class _MonthPlanScreenState extends State<MonthPlanScreen> {
   Widget _buildPremiumSummary(ExpenseProvider provider) {
     final summary = provider.summary;
     final planned = (summary['planned'] ?? 0.0).toDouble();
-    final actual = (summary['actual'] ?? 0.0).toDouble();
-    // Use planned amount as target for this screen (ignoring global limit)
+    final unplanned = (summary['unplanned'] ?? 0.0).toDouble();
+
+    // Use the sum of itemized planned amounts as the baseline reference for white
     final target = planned;
-    final remaining = target - actual;
-    // limit is available in summary but we ignore it here as requested
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
@@ -193,53 +207,74 @@ class _MonthPlanScreenState extends State<MonthPlanScreen> {
       child: Column(
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text('Available Balance',
-                      style: TextStyle(color: Colors.white70, fontSize: 13)),
-                  Text(
-                    '₹${remaining.toInt()}',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 32,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-          const SizedBox(height: 24),
-          Row(
             children: [
               _buildSummaryItem('Planned', '₹${target.toInt()}'),
               Container(width: 1, height: 30, color: Colors.white24),
-              _buildSummaryItem('Spent', '₹${actual.toInt()}'),
-              Container(width: 1, height: 30, color: Colors.white24),
-              _buildSummaryItem('Progress',
-                  '${target > 0 ? (actual / target * 100).toInt() : 0}%'),
+              _buildSummaryItem('Unplanned', '₹${unplanned.toInt()}'),
             ],
           ),
           const SizedBox(height: 24),
-          // Progress Bar
-          ClipRRect(
-            borderRadius: BorderRadius.circular(10),
-            child: LinearProgressIndicator(
-              value: (actual / (target > 0 ? target : 1)).clamp(0.0, 1.0),
-              backgroundColor: Colors.white.withValues(alpha: 0.2),
-              valueColor: AlwaysStoppedAnimation<Color>(
-                (actual / (target > 0 ? target : 1)) > 1.0
-                    ? const Color(0xFFFF5252) // Red
-                    : (actual / (target > 0 ? target : 1)) > 0.75
-                        ? const Color(0xFFFFAB40) // Orange
-                        : Colors.white,
+          // Multi-colored Progress Bar
+          Builder(builder: (context) {
+            // Reference logic: Total Plan vs Unplanned Expenses
+            final total = target + unplanned;
+            final base = total > 0 ? total : 1.0;
+
+            final pctPlanned = (target / base * 100).toInt();
+            final pctUnplanned = (unplanned / base * 100).toInt();
+
+            return Container(
+              height: 12,
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.2),
+                borderRadius: BorderRadius.circular(6),
               ),
-              minHeight: 8,
-            ),
-          ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(6),
+                child: Row(
+                  children: [
+                    if (pctPlanned > 0)
+                      Flexible(
+                        flex: pctPlanned,
+                        child: Container(color: Colors.white),
+                      ),
+                    if (pctUnplanned > 0)
+                      Flexible(
+                        flex: pctUnplanned,
+                        child: Container(color: const Color(0xFFFFAB40)),
+                      ),
+                  ],
+                ),
+              ),
+            );
+          }),
+          const SizedBox(height: 8),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(children: [
+                Container(
+                    width: 8,
+                    height: 8,
+                    decoration: const BoxDecoration(
+                        color: Colors.white, shape: BoxShape.circle)),
+                const SizedBox(width: 4),
+                const Text('Planned',
+                    style: TextStyle(color: Colors.white70, fontSize: 10)),
+              ]),
+              Row(children: [
+                Container(
+                    width: 8,
+                    height: 8,
+                    decoration: const BoxDecoration(
+                        color: Color(0xFFFFAB40), shape: BoxShape.circle)),
+                const SizedBox(width: 4),
+                const Text('Unplanned',
+                    style: TextStyle(color: Colors.white70, fontSize: 10)),
+              ]),
+            ],
+          )
         ],
       ),
     );
@@ -292,82 +327,266 @@ class _MonthPlanScreenState extends State<MonthPlanScreen> {
         AppTheme.getTextColor(context, isSecondary: true);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: isDark ? AppTheme.bgCardDark : Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: AppTheme.softShadow,
-      ),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: (expense.isPaid ? AppTheme.success : AppTheme.primary)
-                      .withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(16),
+    // Get category
+    final categoryProvider = context.read<CategoryProvider>();
+    final category = categoryProvider.categories.firstWhere(
+      (c) => c.id == expense.categoryId,
+      orElse: () => categoryProvider.categories.first,
+    );
+
+    // Format Date
+    String dateStr = '';
+    if (expense.createdAt != null) {
+      final date = DateTime.parse(expense.createdAt!).toLocal();
+      dateStr = DateFormat('MMM d, h:mm a').format(date);
+    }
+
+    return GestureDetector(
+      onTap: () => _showExpenseDetails(context, expense, category),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: isDark ? AppTheme.bgCardDark : Colors.white,
+          borderRadius: BorderRadius.circular(24),
+          boxShadow: AppTheme.softShadow,
+        ),
+        child: Column(
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color:
+                        (expense.isPaid ? AppTheme.success : AppTheme.primary)
+                            .withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Text(
+                    category.icon ?? '📁',
+                    style: const TextStyle(fontSize: 20),
+                  ),
                 ),
-                child: Icon(
-                  expense.isPaid
-                      ? LucideIcons.checkCheck
-                      : LucideIcons.shoppingBag,
-                  size: 20,
-                  color: expense.isPaid ? AppTheme.success : AppTheme.primary,
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(expense.name,
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                              color: textColor)),
+                      if (dateStr.isNotEmpty)
+                        Text(dateStr,
+                            style: TextStyle(
+                                color: secondaryTextColor, fontSize: 12)),
+                    ],
+                  ),
                 ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(expense.name,
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                            color: textColor)),
-                    Text('Target: ₹${expense.plannedAmount.toInt()}',
-                        style:
-                            TextStyle(color: secondaryTextColor, fontSize: 12)),
-                  ],
+                IconButton(
+                  icon: Icon(LucideIcons.edit3,
+                      size: 18, color: secondaryTextColor),
+                  onPressed: () => _showEditExpenseDialog(context, expense),
                 ),
-              ),
-              IconButton(
-                icon: Icon(LucideIcons.edit3,
-                    size: 18, color: secondaryTextColor),
-                onPressed: () => _showEditExpenseDialog(context, expense),
-              ),
-              Checkbox(
-                value: expense.isPaid,
-                onChanged: (val) => _showPaidDialog(expense, provider),
-                activeColor: AppTheme.success,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(6)),
-              ),
-            ],
-          ),
-          if (expense.isPaid) ...[
+                Checkbox(
+                  value: expense.isPaid,
+                  onChanged: (val) => _showPaidDialog(expense, provider),
+                  activeColor: AppTheme.success,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(6)),
+                ),
+              ],
+            ),
             const Divider(height: 24),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('Actual Spent:',
-                    style: TextStyle(color: secondaryTextColor, fontSize: 13)),
-                Text(
-                  '₹${expense.actualAmount.toInt()}',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: isOver ? AppTheme.danger : textColor,
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Planned',
+                        style:
+                            TextStyle(color: secondaryTextColor, fontSize: 12)),
+                    Text('₹${expense.plannedAmount.toInt()}',
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, color: textColor)),
+                  ],
+                ),
+                if (expense.isPaid)
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text('Actual',
+                          style: TextStyle(
+                              color: secondaryTextColor, fontSize: 12)),
+                      Text('₹${expense.actualAmount.toInt()}',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: isOver ? AppTheme.danger : textColor,
+                          )),
+                    ],
+                  )
+                else
+                  Text('Pending',
+                      style: TextStyle(
+                          color: AppTheme.warning,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12)),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showExpenseDetails(
+      BuildContext context, Expense expense, dynamic category) {
+    final textColor = AppTheme.getTextColor(context);
+    final secondaryTextColor =
+        AppTheme.getTextColor(context, isSecondary: true);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (context) => Container(
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          color: isDark ? AppTheme.bgCardDark : Colors.white,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey.withValues(alpha: 0.3),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: AppTheme.primary.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    category.icon ?? '📝',
+                    style: const TextStyle(fontSize: 32),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        expense.name,
+                        style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: textColor),
+                      ),
+                      Text(
+                        category.name,
+                        style:
+                            TextStyle(color: secondaryTextColor, fontSize: 14),
+                      ),
+                    ],
                   ),
                 ),
               ],
             ),
+            const SizedBox(height: 32),
+            _buildDetailRow('Status', expense.isPaid ? 'Paid' : 'Pending',
+                valueColor:
+                    expense.isPaid ? AppTheme.success : AppTheme.warning),
+            const SizedBox(height: 16),
+            _buildDetailRow(
+                'Planned Amount', '₹${expense.plannedAmount.toInt()}'),
+            if (expense.isPaid) ...[
+              const SizedBox(height: 16),
+              _buildDetailRow(
+                  'Actual Spent', '₹${expense.actualAmount.toInt()}'),
+            ],
+            const SizedBox(height: 16),
+            if (expense.createdAt != null)
+              _buildDetailRow(
+                  'Date',
+                  DateFormat('MMM d, yyyy h:mm a')
+                      .format(DateTime.parse(expense.createdAt!).toLocal())),
+            if (expense.notes != null && expense.notes!.isNotEmpty) ...[
+              const SizedBox(height: 24),
+              Text(
+                'Inbox Message',
+                style: TextStyle(
+                  color: secondaryTextColor,
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 1,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: isDark ? Colors.black12 : Colors.grey.shade50,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: Colors.grey.withValues(alpha: 0.1)),
+                ),
+                child: Text(
+                  expense.notes!,
+                  style: TextStyle(
+                    color: textColor,
+                    height: 1.5,
+                  ),
+                ),
+              ),
+            ],
+            const SizedBox(height: 32),
           ],
-        ],
+        ),
       ),
+    );
+  }
+
+  Widget _buildDetailRow(String label, String value, {Color? valueColor}) {
+    final textColor = AppTheme.getTextColor(context);
+    final secondaryTextColor =
+        AppTheme.getTextColor(context, isSecondary: true);
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            color: secondaryTextColor,
+            fontSize: 14,
+          ),
+        ),
+        Text(
+          value,
+          style: TextStyle(
+            color: valueColor ?? textColor,
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ],
     );
   }
 
@@ -423,8 +642,9 @@ class _MonthPlanScreenState extends State<MonthPlanScreen> {
   void _showEditExpenseDialog(BuildContext context, Expense expense) {
     // Logic similar to add expense but with pre-filled data
     final nameController = TextEditingController(text: expense.name);
-    final amountController =
-        TextEditingController(text: expense.plannedAmount.toStringAsFixed(0));
+    final amountController = TextEditingController(
+        text: (expense.isPaid ? expense.actualAmount : expense.plannedAmount)
+            .toStringAsFixed(0));
     int? selectedCategoryId = expense.categoryId;
 
     showModalBottomSheet(
@@ -502,11 +722,13 @@ class _MonthPlanScreenState extends State<MonthPlanScreen> {
                       return;
                     }
 
+                    final amount = double.tryParse(amountController.text) ?? 0;
+
                     final updated = expense.copyWith(
                       categoryId: selectedCategoryId,
                       name: nameController.text,
-                      plannedAmount:
-                          double.tryParse(amountController.text) ?? 0,
+                      plannedAmount: expense.isPaid ? 0 : amount,
+                      actualAmount: expense.isPaid ? amount : 0,
                     );
 
                     await context
@@ -517,7 +739,7 @@ class _MonthPlanScreenState extends State<MonthPlanScreen> {
                   style: ElevatedButton.styleFrom(
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(18))),
-                  child: const Text('Update Plan',
+                  child: const Text('Update',
                       style:
                           TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                 ),

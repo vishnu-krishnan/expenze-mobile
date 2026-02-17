@@ -219,7 +219,7 @@ class _SmsImportScreenState extends State<SmsImportScreen>
           monthKey: monthKey,
           categoryId: item.categoryId,
           name: item.name,
-          plannedAmount: item.amount,
+          plannedAmount: 0, // Set to 0 so it counts as Unplanned
           actualAmount: item.amount,
           priority: item.priority,
           isPaid: true,
@@ -327,13 +327,12 @@ class _SmsImportScreenState extends State<SmsImportScreen>
       floatingActionButton: _detectedExpenses.isNotEmpty
           ? FloatingActionButton.extended(
               onPressed: _importAll,
-              backgroundColor: AppTheme.primary,
-              icon: const Icon(LucideIcons.checkSquare,
-                  color: AppTheme.primaryDark),
+              backgroundColor: Colors.white,
+              icon:
+                  const Icon(LucideIcons.checkSquare, color: AppTheme.primary),
               label: const Text('Import All',
                   style: TextStyle(
-                      color: AppTheme.primaryDark,
-                      fontWeight: FontWeight.bold)),
+                      color: AppTheme.primary, fontWeight: FontWeight.bold)),
             )
           : null,
     );
@@ -393,6 +392,14 @@ class _SmsImportScreenState extends State<SmsImportScreen>
                         : const Icon(LucideIcons.zap, size: 18),
                     label: Text(_isLoading ? 'Scanning...' : 'Start Auto Scan'),
                   ),
+                ),
+                const SizedBox(height: 16),
+                TextButton.icon(
+                  onPressed: () => _showClearSmsDialog(context),
+                  icon: const Icon(LucideIcons.trash2,
+                      size: 16, color: AppTheme.danger),
+                  label: const Text('Clear Previously Imported Data',
+                      style: TextStyle(color: AppTheme.danger)),
                 ),
               ],
             ),
@@ -619,6 +626,80 @@ class _SmsImportScreenState extends State<SmsImportScreen>
                   ),
                 ),
             ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showClearSmsDialog(BuildContext context) {
+    if (!mounted) return;
+
+    final provider = context.read<ExpenseProvider>();
+    final confirmController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Clear imported SMS?'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+                'This will delete all expenses imported from SMS for this month. You will need to re-scan to get them back.'),
+            const SizedBox(height: 16),
+            const Text('Type "CONFIRM" to proceed:',
+                style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 8),
+            TextField(
+              controller: confirmController,
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                hintText: 'CONFIRM',
+                hintStyle: TextStyle(fontSize: 12),
+                contentPadding:
+                    EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              ),
+              style: const TextStyle(fontSize: 13),
+              onChanged: (value) {
+                // Force rebuild to update button state
+                (context as Element).markNeedsBuild();
+              },
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          ValueListenableBuilder<TextEditingValue>(
+            valueListenable: confirmController,
+            builder: (context, value, child) {
+              return TextButton(
+                onPressed: value.text == 'CONFIRM'
+                    ? () async {
+                        Navigator.pop(context);
+                        await provider
+                            .clearImportedExpenses(provider.currentMonthKey);
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                                content: Text('Imported SMS expenses cleared')),
+                          );
+                          // Trigger rescan automatically
+                          _syncFromInbox();
+                        }
+                      }
+                    : null,
+                child: Text('Delete',
+                    style: TextStyle(
+                        color: value.text == 'CONFIRM'
+                            ? AppTheme.danger
+                            : Colors.grey)),
+              );
+            },
           ),
         ],
       ),

@@ -100,43 +100,75 @@ class SmsService {
 
     // Merchant Extraction Patterns - Enhanced
     final merchantPatterns = [
-      // To [Merchant]
+      // UPI P2M / P2P
+      RegExp(r'(?:to|at)\s+([a-zA-Z0-9.\-_]{3,25}@[a-zA-Z0-9.\-_]{3,25})',
+          caseSensitive: false), // VPA in text
+      RegExp(r'(?:vf|vm|vz|bz|ax|ic|hs|py)-([a-zA-Z0-9]{3,10})',
+          caseSensitive: false), // Header based (simplistic)
+      // "Spent Rs X at [Merchant]"
       RegExp(
-          r'(?:to|paid to|spent on|at|info:|at:)\s+([A-Za-z0-9\s&*_\-.]{3,40}?)(?:\s+on|\s+ref|\s+from|\s+dated|\s+at|\s+using|\.|\d)',
+          r'(?:at|to|on)\s+([A-Za-z0-9\s&*_\-.]{3,40}?)(?:\s+on\s+card|\s+on\s+account|\s+ending|\s+via|\s+date|\s+ref|\s+txn|\.|\d)',
           caseSensitive: false),
-      // Merchant: [Name]
-      RegExp(r'(?:merchant:?|vpa:?)\s*([A-Za-z0-9\s&*_\-.]{3,40})',
-          caseSensitive: false),
-      // Text between debited to and [date/ref]
+      // "Debited ... for [Merchant]"
       RegExp(
-          r'debited\s+to\s+([A-Za-z0-9\s&*]{3,40})(?:\s+on|\s+ref|\s+dated|\s+at)',
+          r'(?:for|info:)\s+([A-Za-z0-9\s&*_\-.]{3,40}?)(?:\s+on|\s+ref|\s+txn|\.|\d)',
           caseSensitive: false),
-      // Start of message mentions
-      RegExp(r'([A-Za-z0-9\s&*]{3,25})\s+(?:ref|txn|id)', caseSensitive: false),
+      // Card usage: "Purchase of Rs X at [Merchant]"
+      RegExp(
+          r'purchase\s+of\s+.*?\s+at\s+([A-Za-z0-9\s&*_\-.]{3,40}?)(?:\s+on|\.|\d)',
+          caseSensitive: false),
+      // Generic "at"
+      RegExp(r'\s+at\s+([A-Za-z0-9\s&*_\-.]{3,40}?)(?:\s+on|\.|\d)',
+          caseSensitive: false),
     ];
 
     String merchant = '';
-    for (var pattern in merchantPatterns) {
-      final match = pattern.firstMatch(body);
-      if (match != null) {
-        String val = match.group(1)!.trim();
 
-        // Remove trailing prepositions/filler words
-        val = val
-            .replaceAll(
-                RegExp(r'\s+(on|at|for|ref|from|to)$', caseSensitive: false),
-                '')
-            .trim();
+    // 1. Look for VPA first (High confidence)
+    final vpaMatch =
+        RegExp(r'([a-zA-Z0-9.\-_]+@[a-zA-Z0-9.\-_]+)').firstMatch(body);
+    if (vpaMatch != null) {
+      merchant = vpaMatch.group(1)!;
+    }
 
-        if (val.isNotEmpty &&
-            val.length > 2 &&
-            !val.toLowerCase().contains('account') &&
-            !val.toLowerCase().contains('bank') &&
-            !val.toLowerCase().contains('debit') &&
-            !val.toLowerCase().contains('credit') &&
-            !val.toLowerCase().contains('balance')) {
-          merchant = val;
-          break;
+    if (merchant.isEmpty) {
+      for (var pattern in merchantPatterns) {
+        final match = pattern.firstMatch(body);
+        if (match != null) {
+          String val = match.group(1)!.trim();
+
+          // Cleanup values
+          val = val
+              .replaceAll(
+                  RegExp(r'\s+(on|at|for|ref|from|to|with|by)$',
+                      caseSensitive: false),
+                  '')
+              .trim();
+
+          // Filter out bad extractions
+          if (val.isNotEmpty &&
+              val.length > 2 &&
+              !val.toLowerCase().contains('account') &&
+              !val.toLowerCase().contains('bank') &&
+              !val.toLowerCase().contains(' xxxx') &&
+              !val.toLowerCase().contains('ending') &&
+              !val.toLowerCase().contains('balance') &&
+              !val.toLowerCase().contains('limit') &&
+              !val.toLowerCase().contains('wallet') &&
+              !val.toLowerCase().contains('card')) {
+            // If looks like a VPA, keep it
+            if (val.contains('@')) {
+              merchant = val;
+              break;
+            }
+
+            // If just text, verify it's not generic 'transaction'
+            if (!val.toLowerCase().contains('transaction') &&
+                !val.toLowerCase().contains('transfer')) {
+              merchant = val;
+              break;
+            }
+          }
         }
       }
     }

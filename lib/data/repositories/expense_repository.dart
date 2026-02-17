@@ -100,6 +100,7 @@ class ExpenseRepository {
       SELECT 
         SUM(planned_amount) as total_planned,
         SUM(actual_amount) as total_actual,
+        SUM(CASE WHEN planned_amount = 0 AND actual_amount > 0 THEN actual_amount ELSE 0 END) as total_unplanned,
         COUNT(CASE WHEN is_paid = 0 THEN 1 END) as pending_count
       FROM expenses
       WHERE month_key = ?
@@ -110,6 +111,7 @@ class ExpenseRepository {
     return {
       'planned': result.first['total_planned'] ?? 0.0,
       'actual': result.first['total_actual'] ?? 0.0,
+      'unplanned': result.first['total_unplanned'] ?? 0.0,
       'pending_count': result.first['pending_count'] ?? 0,
       'limit': limit,
     };
@@ -351,6 +353,17 @@ class ExpenseRepository {
       where: 'id = ?',
       whereArgs: [syncQueueId],
     );
+  }
+
+  // Delete imported expenses for a specific month
+  Future<int> deleteImportedExpenses(String monthKey) async {
+    final db = await _dbHelper.database;
+    final result = await db.delete(
+      'expenses',
+      where: "month_key = ? AND notes LIKE 'SMS_ID:%'",
+      whereArgs: [monthKey],
+    );
+    return result;
   }
 
   // Get list of imported SMS IDs

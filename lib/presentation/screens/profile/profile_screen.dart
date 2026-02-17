@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'dart:math';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/theme_provider.dart';
+import '../../../data/constants/app_quotes.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -14,21 +16,17 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   final _nameController = TextEditingController();
-  final _usernameController = TextEditingController();
-  final _phoneController = TextEditingController();
-  final _budgetController = TextEditingController();
   final _emailController = TextEditingController();
   bool _isEditing = false;
+  int _quoteIndex = 0;
 
   @override
   void initState() {
     super.initState();
+    _quoteIndex = Random().nextInt(AppQuotes.motivational.length);
     final user = context.read<AuthProvider>().user;
     if (user != null) {
       _nameController.text = user['fullName'] ?? '';
-      _usernameController.text = user['username'] ?? '';
-      _phoneController.text = user['phone'] ?? '';
-      _budgetController.text = (user['defaultBudget'] ?? 0).toString();
       _emailController.text = user['email'] ?? '';
     }
   }
@@ -97,13 +95,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 fontSize: 20,
                                 fontWeight: FontWeight.bold,
                                 color: textColor)),
-                        Text('@${user['username'] ?? ''}',
-                            style: TextStyle(
-                                color: secondaryTextColor, fontSize: 13)),
                         const SizedBox(height: 32),
                         _buildSettingsCard(user, textColor, secondaryTextColor),
-                        const SizedBox(height: 24),
-                        _buildLogoutButton(auth),
+                        if (!_isEditing) ...[
+                          const SizedBox(height: 24),
+                          _buildMotivationalCard(),
+                          const SizedBox(height: 24),
+                          _buildLogoutButton(auth),
+                        ],
                       ],
                     ),
                   );
@@ -117,21 +116,49 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _buildModernAvatar(String name) {
-    return Container(
-      padding: const EdgeInsets.all(4),
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        border: Border.all(color: AppTheme.primary, width: 2),
-      ),
-      child: CircleAvatar(
-        radius: 50,
-        backgroundColor: AppTheme.primary,
-        child: Text(
-          name.isNotEmpty ? name[0].toUpperCase() : 'U',
-          style: const TextStyle(
-              fontSize: 40, fontWeight: FontWeight.bold, color: Colors.white),
+    return Stack(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(4),
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: Border.all(color: AppTheme.primary, width: 2),
+          ),
+          child: CircleAvatar(
+            radius: 50,
+            backgroundColor: AppTheme.primary,
+            child: Text(
+              name.isNotEmpty ? name[0].toUpperCase() : 'U',
+              style: const TextStyle(
+                  fontSize: 40,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white),
+            ),
+          ),
         ),
-      ),
+        if (_isEditing)
+          Positioned(
+            bottom: 0,
+            right: 0,
+            child: GestureDetector(
+              onTap: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                      content: Text('Profile picture upload coming soon!')),
+                );
+              },
+              child: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: const BoxDecoration(
+                  color: AppTheme.primary,
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(LucideIcons.camera,
+                    color: Colors.white, size: 16),
+              ),
+            ),
+          ),
+      ],
     );
   }
 
@@ -152,22 +179,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
               controller: _nameController),
           Divider(height: 32, color: secondaryTextColor.withValues(alpha: 0.1)),
           _buildInfoRow(
-              LucideIcons.atSign, 'Username', _usernameController.text,
-              textColor: textColor,
-              secondaryTextColor: secondaryTextColor,
-              controller: _usernameController),
-          Divider(height: 32, color: secondaryTextColor.withValues(alpha: 0.1)),
-          _buildInfoRow(
-              LucideIcons.mail, 'Communication', _emailController.text,
+              LucideIcons.mail, 'Email Address', _emailController.text,
               textColor: textColor,
               secondaryTextColor: secondaryTextColor,
               controller: _emailController),
           Divider(height: 32, color: secondaryTextColor.withValues(alpha: 0.1)),
-          _buildInfoRow(
-              LucideIcons.phone, 'Contact number', _phoneController.text,
-              textColor: textColor,
-              secondaryTextColor: secondaryTextColor,
-              controller: _phoneController),
+          _buildInfoRow(LucideIcons.calendar, 'Member Since',
+              _formatDate(user['created_at']),
+              textColor: textColor, secondaryTextColor: secondaryTextColor),
         ],
       ),
     );
@@ -279,9 +298,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final auth = context.read<AuthProvider>();
     await auth.updateProfile(
       fullName: _nameController.text,
-      username: _usernameController.text,
-      phone: _phoneController.text,
-      defaultBudget: double.tryParse(_budgetController.text) ?? 0,
+      email: _emailController.text,
     );
 
     if (mounted) {
@@ -290,6 +307,55 @@ class _ProfileScreenState extends State<ProfileScreen> {
         backgroundColor: AppTheme.success,
         behavior: SnackBarBehavior.floating,
       ));
+    }
+  }
+
+  Widget _buildMotivationalCard() {
+    final quote = AppQuotes.motivational[_quoteIndex];
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [AppTheme.primary, AppTheme.primaryDark],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: AppTheme.softShadow,
+      ),
+      child: Column(
+        children: [
+          const Icon(LucideIcons.quote, color: Colors.white, size: 32),
+          const SizedBox(height: 16),
+          Text(
+            '"${quote['text']}"',
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                fontStyle: FontStyle.italic),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            '- ${quote['author']}',
+            style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.8),
+                fontSize: 12,
+                fontWeight: FontWeight.w500),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _formatDate(String? isoString) {
+    if (isoString == null) return 'Unknown';
+    try {
+      final date = DateTime.parse(isoString);
+      return '${date.day}/${date.month}/${date.year}';
+    } catch (_) {
+      return 'Unknown';
     }
   }
 }

@@ -57,6 +57,7 @@ class ExpenseProvider with ChangeNotifier {
 
       final actual = (rawSummary['actual'] as num).toDouble();
       final planned = (rawSummary['planned'] as num).toDouble();
+      final unplanned = (rawSummary['unplanned'] as num?)?.toDouble() ?? 0.0;
 
       final limit = (rawSummary['limit'] as num).toDouble();
 
@@ -66,6 +67,7 @@ class ExpenseProvider with ChangeNotifier {
       _summary = {
         'planned': planned,
         'actual': actual,
+        'unplanned': unplanned,
         'limit': limit,
         'remaining': (targetAmount - actual).toDouble(),
       };
@@ -216,5 +218,10 @@ class ExpenseProvider with ChangeNotifier {
     });
 
     _categoryBreakdown = sortedList;
+  }
+
+  Future<void> clearImportedExpenses(String monthKey) async {
+    await _repository.deleteImportedExpenses(monthKey);
+    await loadMonthData(monthKey);
   }
 }
