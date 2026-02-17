@@ -42,7 +42,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final isDark = context.watch<ThemeProvider>().isDarkMode;
 
     return Scaffold(
-      backgroundColor: isDark ? AppTheme.bgPrimaryDark : AppTheme.bgPrimary,
+      backgroundColor: Colors.transparent,
       body: Container(
         width: double.infinity,
         height: double.infinity,

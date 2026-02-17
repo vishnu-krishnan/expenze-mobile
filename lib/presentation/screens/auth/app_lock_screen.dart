@@ -81,143 +81,149 @@ class _AppLockScreenState extends State<AppLockScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      body: Stack(
-        children: [
-          // Theme-aligned Background Gradient (Matching Landing Page)
-          Container(
-            width: double.infinity,
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  Color(0xFF2D8272), // primaryDark
-                  Color(0xFF79D2C1), // primary
-                  Color(0xFF9CDDD1), // secondary
-                  Colors.white,
-                ],
-                stops: [0.0, 0.4, 0.7, 1.0],
+      backgroundColor: Colors.transparent,
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: isDark
+            ? AppTheme.darkBackgroundDecoration
+            : AppTheme.backgroundDecoration,
+        child: Stack(
+          children: [
+            // Subtle background glow
+            Positioned(
+              top: -100,
+              left: -100,
+              child: Container(
+                width: 300,
+                height: 300,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.white.withOpacity(0.05),
+                ),
               ),
             ),
-          ),
 
-          SafeArea(
-            child: Column(
-              children: [
-                const Spacer(flex: 2),
+            SafeArea(
+              child: Column(
+                children: [
+                  const Spacer(flex: 2),
 
-                // Security Icon with Glow
-                Container(
-                  padding: const EdgeInsets.all(24),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.05),
-                    shape: BoxShape.circle,
-                    border: Border.all(color: Colors.white.withOpacity(0.1)),
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppTheme.primary.withOpacity(0.1),
-                        blurRadius: 40,
-                        spreadRadius: 5,
-                      )
-                    ],
+                  // Security Icon with Glow
+                  Container(
+                    padding: const EdgeInsets.all(24),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.05),
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.white.withOpacity(0.1)),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppTheme.primary.withOpacity(0.1),
+                          blurRadius: 40,
+                          spreadRadius: 5,
+                        )
+                      ],
+                    ),
+                    child: Image.asset(
+                      'assets/images/expenze_logo.png',
+                      width: 56,
+                      height: 56,
+                    ),
                   ),
-                  child: Image.asset(
-                    'assets/images/expenze_logo.png',
-                    width: 56,
-                    height: 56,
+
+                  const SizedBox(height: 32),
+
+                  Text(
+                    'EXPENZE',
+                    style: GoogleFonts.outfit(
+                      fontSize: 24,
+                      fontWeight: FontWeight.w900,
+                      color: AppTheme.getTextColor(context),
+                      letterSpacing: 2,
+                    ),
                   ),
-                ),
 
-                const SizedBox(height: 32),
+                  const SizedBox(height: 8),
 
-                Text(
-                  'EXPENDZE SECURE',
-                  style: GoogleFonts.outfit(
-                    fontSize: 24,
-                    fontWeight: FontWeight.w900,
-                    color: Colors.white,
-                    letterSpacing: 2,
+                  Text(
+                    'Enter 4-digit PIN to unlock',
+                    style: GoogleFonts.inter(
+                      fontSize: 16,
+                      color: AppTheme.getTextColor(context, isSecondary: true),
+                    ),
                   ),
-                ),
 
-                const SizedBox(height: 8),
+                  const SizedBox(height: 48),
 
-                Text(
-                  'Enter 4-digit PIN to unlock',
-                  style: GoogleFonts.inter(
-                    fontSize: 16,
-                    color: Colors.white.withOpacity(0.6),
-                  ),
-                ),
-
-                const SizedBox(height: 48),
-
-                // Modern PIN Indicators
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: List.generate(4, (index) {
-                    final isActive = index < _pin.length;
-                    return AnimatedContainer(
-                      duration: const Duration(milliseconds: 200),
-                      margin: const EdgeInsets.symmetric(horizontal: 14),
-                      width: 18,
-                      height: 18,
-                      decoration: BoxDecoration(
-                        color: _isError
-                            ? Colors.redAccent.withOpacity(0.4)
-                            : isActive
-                                ? AppTheme.primary
-                                : Colors.white.withOpacity(0.1),
-                        shape: BoxShape.circle,
-                        border: Border.all(
+                  // Modern PIN Indicators
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: List.generate(4, (index) {
+                      final isActive = index < _pin.length;
+                      return AnimatedContainer(
+                        duration: const Duration(milliseconds: 200),
+                        margin: const EdgeInsets.symmetric(horizontal: 14),
+                        width: 18,
+                        height: 18,
+                        decoration: BoxDecoration(
                           color: _isError
-                              ? Colors.redAccent
+                              ? Colors.redAccent.withOpacity(0.4)
                               : isActive
                                   ? AppTheme.primary
-                                  : Colors.white.withOpacity(0.3),
-                          width: 2,
-                        ),
-                        boxShadow: isActive && !_isError
-                            ? [
-                                BoxShadow(
-                                  color: AppTheme.primary.withOpacity(0.4),
-                                  blurRadius: 10,
-                                )
-                              ]
-                            : [],
-                      ),
-                    );
-                  }),
-                ),
-
-                const SizedBox(height: 24),
-
-                // Error Text
-                SizedBox(
-                  height: 20,
-                  child: _isError
-                      ? Text(
-                          'Incorrect PIN. Please try again.',
-                          style: GoogleFonts.inter(
-                            color: Colors.redAccent,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
+                                  : Colors.white.withOpacity(0.1),
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: _isError
+                                ? Colors.redAccent
+                                : isActive
+                                    ? AppTheme.primary
+                                    : Colors.white.withOpacity(0.3),
+                            width: 2,
                           ),
-                        )
-                      : null,
-                ),
+                          boxShadow: isActive && !_isError
+                              ? [
+                                  BoxShadow(
+                                    color: AppTheme.primary.withOpacity(0.4),
+                                    blurRadius: 10,
+                                  )
+                                ]
+                              : [],
+                        ),
+                      );
+                    }),
+                  ),
 
-                const Spacer(flex: 3),
+                  const SizedBox(height: 24),
 
-                // Keypad
-                _buildKeypad(),
+                  // Error Text
+                  SizedBox(
+                    height: 20,
+                    child: _isError
+                        ? Text(
+                            'Incorrect PIN. Please try again.',
+                            style: GoogleFonts.inter(
+                              color: Colors.redAccent,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          )
+                        : null,
+                  ),
 
-                const SizedBox(height: 48),
-              ],
+                  const Spacer(flex: 3),
+
+                  // Keypad
+                  _buildKeypad(),
+
+                  const SizedBox(height: 48),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -262,7 +268,7 @@ class _AppLockScreenState extends State<AppLockScreen> {
         height: 74,
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.05),
+          color: AppTheme.getTextColor(context).withOpacity(0.05),
           shape: BoxShape.circle,
         ),
         child: Text(
@@ -270,7 +276,7 @@ class _AppLockScreenState extends State<AppLockScreen> {
           style: GoogleFonts.outfit(
             fontSize: 28,
             fontWeight: FontWeight.w600,
-            color: Colors.white,
+            color: AppTheme.getTextColor(context),
           ),
         ),
       ),
@@ -293,7 +299,8 @@ class _AppLockScreenState extends State<AppLockScreen> {
           LucideIcons.fingerprint,
           color: auth.useBiometrics
               ? AppTheme.primary
-              : Colors.white.withOpacity(0.2),
+              : AppTheme.getTextColor(context, isSecondary: true)
+                  .withOpacity(0.3),
           size: 32,
         ),
       ),
@@ -308,9 +315,9 @@ class _AppLockScreenState extends State<AppLockScreen> {
         width: 74,
         height: 74,
         alignment: Alignment.center,
-        child: const Icon(
+        child: Icon(
           LucideIcons.delete,
-          color: Colors.white70,
+          color: AppTheme.getTextColor(context, isSecondary: true),
           size: 28,
         ),
       ),

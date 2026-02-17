@@ -5,7 +5,6 @@ import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../providers/regular_payment_provider.dart';
 import '../../providers/category_provider.dart';
-import '../../providers/theme_provider.dart';
 import '../../../data/models/category.dart' as model;
 
 class RegularPaymentsScreen extends StatefulWidget {
@@ -26,37 +25,34 @@ class _RegularPaymentsScreenState extends State<RegularPaymentsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final themeProvider = context.watch<ThemeProvider>();
     final textColor = AppTheme.getTextColor(context);
     final secondaryTextColor =
         AppTheme.getTextColor(context, isSecondary: true);
 
-    final isDark = themeProvider.isDarkMode;
-
     return Scaffold(
-      backgroundColor: isDark ? AppTheme.bgPrimaryDark : AppTheme.bgPrimary,
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        decoration: isDark
-            ? AppTheme.darkBackgroundDecoration
-            : AppTheme.backgroundDecoration,
-        child: SafeArea(
-          bottom: false,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(26, 20, 26, 24),
+      backgroundColor: Colors.transparent,
+      body: CustomScrollView(
+        physics: const BouncingScrollPhysics(),
+        slivers: [
+          SliverAppBar(
+            backgroundColor: Colors.transparent,
+            expandedHeight: 100,
+            floating: true,
+            pinned: false,
+            flexibleSpace: FlexibleSpaceBar(
+              titlePadding: EdgeInsets.zero,
+              background: Padding(
+                padding: const EdgeInsets.fromLTRB(26, 10, 26, 0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text('Auto-pay Bills',
+                    Text('Recurring Payments',
                         style: TextStyle(
                             color: secondaryTextColor,
                             fontSize: 14,
                             letterSpacing: 0.5)),
-                    Text('Recurring Payments',
+                    Text('Auto-pay Bills',
                         style: TextStyle(
                             fontSize: 26,
                             fontWeight: FontWeight.w900,
@@ -65,32 +61,37 @@ class _RegularPaymentsScreenState extends State<RegularPaymentsScreen> {
                   ],
                 ),
               ),
-              Expanded(
-                child: Consumer2<RegularPaymentProvider, CategoryProvider>(
-                  builder: (context, provider, categoryProvider, child) {
-                    if (provider.isLoading) {
-                      return const Center(child: CircularProgressIndicator());
-                    }
-
-                    if (provider.payments.isEmpty) {
-                      return _buildEmptyState(secondaryTextColor);
-                    }
-
-                    return ListView.builder(
-                      padding: const EdgeInsets.fromLTRB(26, 0, 26, 120),
-                      itemCount: provider.payments.length,
-                      itemBuilder: (context, index) {
-                        final payment = provider.payments[index];
-                        return _buildPaymentCard(payment, categoryProvider,
-                            textColor, secondaryTextColor);
-                      },
-                    );
-                  },
-                ),
-              ),
-            ],
+            ),
           ),
-        ),
+          SliverPadding(
+            padding: const EdgeInsets.symmetric(horizontal: 26),
+            sliver: Consumer2<RegularPaymentProvider, CategoryProvider>(
+              builder: (context, provider, categoryProvider, child) {
+                if (provider.isLoading) {
+                  return const SliverFillRemaining(
+                      child: Center(child: CircularProgressIndicator()));
+                }
+
+                if (provider.payments.isEmpty) {
+                  return SliverFillRemaining(
+                      child: _buildEmptyState(secondaryTextColor));
+                }
+
+                return SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) {
+                      final payment = provider.payments[index];
+                      return _buildPaymentCard(payment, categoryProvider,
+                          textColor, secondaryTextColor);
+                    },
+                    childCount: provider.payments.length,
+                  ),
+                );
+              },
+            ),
+          ),
+          const SliverToBoxAdapter(child: SizedBox(height: 140)),
+        ],
       ),
       floatingActionButton: Padding(
         padding: const EdgeInsets.only(bottom: 120),
@@ -101,8 +102,7 @@ class _RegularPaymentsScreenState extends State<RegularPaymentsScreen> {
           elevation: 8,
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-          child: const Icon(LucideIcons.plus,
-              color: AppTheme.primaryDark, size: 30),
+          child: const Icon(LucideIcons.plus, color: Colors.white, size: 30),
         ),
       ),
     );
@@ -417,6 +417,8 @@ class _RegularPaymentsScreenState extends State<RegularPaymentsScreen> {
                         if (mounted) Navigator.pop(context);
                       },
                       style: ElevatedButton.styleFrom(
+                          backgroundColor: AppTheme.primary,
+                          foregroundColor: Colors.white,
                           shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(18))),
                       child: const Text('Save',

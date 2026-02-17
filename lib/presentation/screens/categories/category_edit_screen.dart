@@ -38,7 +38,7 @@ class _CategoryEditScreenState extends State<CategoryEditScreen> {
     final isDark = themeProvider.isDarkMode;
 
     return Scaffold(
-      backgroundColor: isDark ? AppTheme.bgPrimaryDark : AppTheme.bgPrimary,
+      backgroundColor: Colors.transparent,
       body: Container(
         width: double.infinity,
         height: double.infinity,
@@ -48,9 +48,15 @@ class _CategoryEditScreenState extends State<CategoryEditScreen> {
         child: Column(
           children: [
             AppBar(
-              title: const Text('Edit Category'),
+              title: Text('Edit Category',
+                  style: TextStyle(color: AppTheme.getTextColor(context))),
               backgroundColor: Colors.transparent,
               elevation: 0,
+              leading: IconButton(
+                icon: Icon(LucideIcons.chevronLeft,
+                    color: AppTheme.getTextColor(context)),
+                onPressed: () => Navigator.pop(context),
+              ),
               actions: [
                 IconButton(
                   icon: const Icon(LucideIcons.trash2, color: AppTheme.danger),
@@ -66,7 +72,7 @@ class _CategoryEditScreenState extends State<CategoryEditScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _buildSectionHeader('Modify Identity',
+                        _buildSectionHeader(context, 'Modify Identity',
                             'Update how this category appears'),
                         const SizedBox(height: 24),
                         _buildEditForm(provider),
@@ -82,14 +88,20 @@ class _CategoryEditScreenState extends State<CategoryEditScreen> {
     );
   }
 
-  Widget _buildSectionHeader(String title, String subtitle) {
+  Widget _buildSectionHeader(
+      BuildContext context, String title, String subtitle) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(title,
-            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+            style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: AppTheme.getTextColor(context))),
         Text(subtitle,
-            style: TextStyle(color: AppTheme.textLight, fontSize: 13)),
+            style: TextStyle(
+                color: AppTheme.getTextColor(context, isSecondary: true),
+                fontSize: 13)),
       ],
     );
   }
@@ -98,7 +110,7 @@ class _CategoryEditScreenState extends State<CategoryEditScreen> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardTheme.color,
         borderRadius: BorderRadius.circular(20),
         boxShadow: AppTheme.softShadow,
       ),
@@ -107,12 +119,17 @@ class _CategoryEditScreenState extends State<CategoryEditScreen> {
         children: [
           TextField(
             controller: _nameController,
-            decoration:
-                AppTheme.inputDecoration('Category Name', LucideIcons.tag),
+            decoration: AppTheme.inputDecoration(
+                'Category Name', LucideIcons.tag,
+                context: context),
+            style: TextStyle(color: AppTheme.getTextColor(context)),
           ),
           const SizedBox(height: 20),
-          const Text('Category Icon',
-              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
+          Text('Select an Icon',
+              style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 13,
+                  color: AppTheme.getTextColor(context))),
           const SizedBox(height: 12),
           Wrap(
             spacing: 10,
@@ -227,7 +244,7 @@ class _CategoryEditScreenState extends State<CategoryEditScreen> {
                   decoration: BoxDecoration(
                     color: isSelected
                         ? AppTheme.primary.withOpacity(0.1)
-                        : AppTheme.bgSecondary,
+                        : Theme.of(context).cardTheme.color,
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
                       color: isSelected ? AppTheme.primary : Colors.transparent,

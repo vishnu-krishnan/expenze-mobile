@@ -4,7 +4,6 @@ import 'package:lucide_icons/lucide_icons.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../providers/expense_provider.dart';
-import '../../providers/theme_provider.dart';
 
 class AnalyticsScreen extends StatefulWidget {
   const AnalyticsScreen({super.key});
@@ -26,32 +25,30 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final themeProvider = context.watch<ThemeProvider>();
     final textColor = AppTheme.getTextColor(context);
     final secondaryTextColor =
         AppTheme.getTextColor(context, isSecondary: true);
 
-    final isDark = themeProvider.isDarkMode;
-
     return Scaffold(
-      backgroundColor: isDark ? AppTheme.bgPrimaryDark : AppTheme.bgPrimary,
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        decoration: isDark
-            ? AppTheme.darkBackgroundDecoration
-            : AppTheme.backgroundDecoration,
-        child: SafeArea(
-          bottom: false,
-          child: Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(26, 20, 26, 20),
+      backgroundColor: Colors.transparent,
+      body: CustomScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        slivers: [
+          SliverAppBar(
+            backgroundColor: Colors.transparent,
+            expandedHeight: 100,
+            floating: true,
+            pinned: false,
+            flexibleSpace: FlexibleSpaceBar(
+              titlePadding: EdgeInsets.zero,
+              background: Padding(
+                padding: const EdgeInsets.fromLTRB(26, 10, 26, 0),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text('Insights & Trends',
                             style: TextStyle(
@@ -70,44 +67,42 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                   ],
                 ),
               ),
-              Expanded(
-                child: Consumer<ExpenseProvider>(
-                  builder: (context, provider, child) {
-                    if (provider.isLoading) {
-                      return const Center(child: CircularProgressIndicator());
-                    }
-
-                    return SingleChildScrollView(
-                      padding: const EdgeInsets.symmetric(horizontal: 26),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildPremiumChartCard(provider.trends, textColor),
-                          const SizedBox(height: 24),
-                          _buildSpendingSummary(
-                              provider, textColor, secondaryTextColor),
-                          const SizedBox(height: 32),
-                          Text('Monthly Performance',
-                              style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                  color: textColor,
-                                  letterSpacing: -0.5)),
-                          const SizedBox(height: 16),
-                          _buildPerformanceGrid(
-                              provider.trends, textColor, secondaryTextColor),
-                          const SizedBox(height: 32),
-                          const SizedBox(height: 120),
-                          const SizedBox(height: 120),
-                        ],
-                      ),
-                    );
-                  },
-                ),
-              ),
-            ],
+            ),
           ),
-        ),
+          SliverPadding(
+            padding: const EdgeInsets.symmetric(horizontal: 26),
+            sliver: Consumer<ExpenseProvider>(
+              builder: (context, provider, child) {
+                if (provider.isLoading) {
+                  return const SliverFillRemaining(
+                      child: Center(child: CircularProgressIndicator()));
+                }
+
+                return SliverList(
+                  delegate: SliverChildListDelegate(
+                    [
+                      _buildPremiumChartCard(provider.trends, textColor),
+                      const SizedBox(height: 24),
+                      _buildSpendingSummary(
+                          provider, textColor, secondaryTextColor),
+                      const SizedBox(height: 32),
+                      Text('Monthly Performance',
+                          style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: textColor,
+                              letterSpacing: -0.5)),
+                      const SizedBox(height: 16),
+                      _buildPerformanceGrid(
+                          provider.trends, textColor, secondaryTextColor),
+                      const SizedBox(height: 140),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -116,7 +111,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
     return Container(
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
-        color: AppTheme.primary.withOpacity(0.08),
+        color: AppTheme.primary.withOpacity(0.12),
         borderRadius: BorderRadius.circular(14),
       ),
       child: Row(
@@ -148,8 +143,9 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
           label,
           style: TextStyle(
             color: isSelected
-                ? AppTheme.primaryDark
-                : AppTheme.primaryDark.withOpacity(0.5),
+                ? Colors.white
+                : AppTheme.getTextColor(context, isSecondary: true)
+                    .withOpacity(0.8),
             fontSize: 11,
             fontWeight: FontWeight.bold,
           ),
@@ -205,8 +201,10 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                   return Padding(
                     padding: const EdgeInsets.only(top: 8),
                     child: Text(key.split('-')[1],
-                        style: const TextStyle(
-                            fontSize: 10, color: AppTheme.textSecondary)),
+                        style: TextStyle(
+                            fontSize: 10,
+                            color: AppTheme.getTextColor(context,
+                                isSecondary: true))),
                   );
                 }
                 return const SizedBox();

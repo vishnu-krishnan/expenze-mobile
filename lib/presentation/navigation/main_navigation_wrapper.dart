@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 import '../../core/theme/app_theme.dart';
 import '../screens/dashboard/dashboard_screen.dart';
 import '../screens/analytics/analytics_screen.dart';
-import '../screens/regular/regular_payments_screen.dart';
+import '../screens/categories/categories_screen.dart';
 import '../screens/settings/settings_screen.dart';
 import '../providers/theme_provider.dart';
 
@@ -29,7 +29,7 @@ class _MainNavigationWrapperState extends State<MainNavigationWrapper> {
   final List<Widget> _screens = [
     const DashboardScreen(),
     const AnalyticsScreen(),
-    const RegularPaymentsScreen(),
+    const CategoriesScreen(),
     const SettingsScreen(),
   ];
 
@@ -38,13 +38,23 @@ class _MainNavigationWrapperState extends State<MainNavigationWrapper> {
     final themeProvider = context.watch<ThemeProvider>();
     final isDark = themeProvider.isDarkMode;
 
-    return Scaffold(
-      extendBody: true, // Crucial for floating navbar
-      body: IndexedStack(
-        index: _selectedIndex,
-        children: _screens,
+    return Container(
+      decoration: isDark
+          ? AppTheme.darkBackgroundDecoration
+          : AppTheme.backgroundDecoration,
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        extendBody: true, // Crucial for floating navbar
+        body: SafeArea(
+          top: true,
+          bottom: false,
+          child: IndexedStack(
+            index: _selectedIndex,
+            children: _screens,
+          ),
+        ),
+        bottomNavigationBar: _buildModernNavBar(isDark),
       ),
-      bottomNavigationBar: _buildModernNavBar(isDark),
     );
   }
 
@@ -92,8 +102,7 @@ class _MainNavigationWrapperState extends State<MainNavigationWrapper> {
 
   Widget _buildNavItem(IconData icon, String label, int index) {
     final isSelected = _selectedIndex == index;
-    final themeProvider = context.watch<ThemeProvider>();
-    final isDark = themeProvider.isDarkMode;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return GestureDetector(
       onTap: () => setState(() => _selectedIndex = index),
@@ -118,7 +127,9 @@ class _MainNavigationWrapperState extends State<MainNavigationWrapper> {
               icon,
               color: isSelected
                   ? AppTheme.primary
-                  : (isDark ? Colors.white60 : Colors.black45),
+                  : (isDark
+                      ? Colors.white60
+                      : AppTheme.textSecondary.withOpacity(0.5)),
               size: isSelected ? 24 : 22,
             ),
             if (isSelected) ...[

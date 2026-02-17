@@ -31,7 +31,7 @@ class _MonthPlanScreenState extends State<MonthPlanScreen> {
     final isDark = themeProvider.isDarkMode;
 
     return Scaffold(
-      backgroundColor: isDark ? AppTheme.bgPrimaryDark : AppTheme.bgPrimary,
+      backgroundColor: Colors.transparent,
       body: Container(
         width: double.infinity,
         height: double.infinity,

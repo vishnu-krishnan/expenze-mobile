@@ -2,41 +2,42 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class AppTheme {
-  // User Preferred Palette
-  static const Color primary = Color(0xFF79D2C1);
-  static const Color primaryDark = Color(0xFF2D8272); // Dark Teal for headings
-  static const Color secondary = Color(0xFF9CDDD1);
-  static const Color accent = Color(0xFF2D8272);
-  static const Color info = Color(0xFFC7ECE6);
+  // User Preferred Palette - cleaner, more vibrant
+  static const Color primary = Color(0xFF0D9488); // Teal 600
+  static const Color primaryDark = Color(0xFF0F766E); // Teal 700
+  static const Color primaryLight = Color(0xFFCCFBF1); // Teal 100
+  static const Color secondary = Color(0xFF0EA5E9); // Sky 500
+  static const Color accent = Color(0xFF0D9488);
+  static const Color info = Color(0xFFE0F2F1);
 
   static const Color success = Color(0xFF10B981);
   static const Color warning = Color(0xFFF59E0B);
   static const Color danger = Color(0xFFEF4444);
 
-  // Background colors
-  static const Color bgPrimary = Colors.white;
-  static const Color bgSecondary = Color(0xFFC7ECE6);
+  // Background colors - cleaner neutrals
+  static const Color bgPrimary = Color(0xFFF8FAFC); // Slate 50
+  static const Color bgSecondary = Color(0xFFF1F5F9); // Slate 100
   static const Color bgCard = Colors.white;
 
-  // Static constants for reference but should use BuildContext extension for dynamic themes
-  static const Color textPrimary = Color(0xFF2D8272);
-  static const Color textSecondary = Color(0xFF475569);
-  static const Color textLight = Color(0xFF94A3B8);
+  // Text Colors - High contrast
+  static const Color textPrimary = Color(0xFF0F172A); // Slate 900
+  static const Color textSecondary = Color(0xFF475569); // Slate 600
+  static const Color textLight = Color(0xFF94A3B8); // Slate 400
 
   // Dark Theme constants
-  static const Color bgPrimaryDark = Color(0xFF0F172A);
-  static const Color bgSecondaryDark = Color(0xFF1E293B);
-  static const Color bgCardDark = Color(0xFF1E293B);
-  static const Color border = Color(0xFFC7ECE6);
-  static const Color borderDark = Color(0xFF334155);
-  static const Color textPrimaryDark = Color(0xFFF8FAFC);
-  static const Color textSecondaryDark = Color(0xFF94A3B8);
+  static const Color bgPrimaryDark = Color(0xFF020617); // Slate 950
+  static const Color bgSecondaryDark = Color(0xFF0F172A); // Slate 900
+  static const Color bgCardDark = Color(0xFF1E293B); // Slate 800
+  static const Color border = Color(0xFFE2E8F0); // Slate 200
+  static const Color borderDark = Color(0xFF334155); // Slate 700
+  static const Color textPrimaryDark = Color(0xFFF8FAFC); // Slate 50
+  static const Color textSecondaryDark = Color(0xFF94A3B8); // Slate 400
 
   static List<BoxShadow> softShadow = [
     BoxShadow(
-      color: primary.withOpacity(0.1),
-      blurRadius: 12,
-      offset: const Offset(0, 4),
+      color: Colors.black.withOpacity(0.05),
+      blurRadius: 20,
+      offset: const Offset(0, 10),
     ),
   ];
 
@@ -44,39 +45,37 @@ class AppTheme {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return BoxDecoration(
       color: isDark
-          ? Colors.white.withOpacity(0.05)
-          : Colors.white.withOpacity(0.7),
+          ? Colors.white.withOpacity(0.03)
+          : Colors.white.withOpacity(0.8),
       borderRadius: BorderRadius.circular(24),
       border:
-          Border.all(color: (isDark ? borderDark : border).withOpacity(0.4)),
+          Border.all(color: (isDark ? borderDark : border).withOpacity(0.3)),
     );
   }
 
-  // Background patterns
-  static BoxDecoration get backgroundDecoration => BoxDecoration(
+  // Background patterns - softer gradients
+  static BoxDecoration get backgroundDecoration => const BoxDecoration(
         color: bgPrimary,
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            primary.withOpacity(0.1),
-            bgPrimary,
-            bgPrimary,
-            info.withOpacity(0.2),
+            Color(0xFFF1F5F9), // Slate 100
+            Color(0xFFF8FAFC), // Slate 50
+            Colors.white,
           ],
         ),
       );
 
-  static BoxDecoration get darkBackgroundDecoration => BoxDecoration(
+  static BoxDecoration get darkBackgroundDecoration => const BoxDecoration(
         color: bgPrimaryDark,
         gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
           colors: [
-            primaryDark.withOpacity(0.15),
-            bgPrimaryDark,
-            bgPrimaryDark,
-            primary.withOpacity(0.05),
+            Color(0xFF020617), // Slate 950
+            Color(0xFF0F172A), // Slate 900
+            Color(0xFF020617), // Slate 950
           ],
         ),
       );
@@ -155,7 +154,7 @@ class AppTheme {
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
         backgroundColor: primary,
-        foregroundColor: primaryDark,
+        foregroundColor: Colors.white,
         elevation: 0,
         padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 18),
         textStyle: GoogleFonts.outfit(fontWeight: FontWeight.w600, fontSize: 16)
@@ -233,6 +232,7 @@ class AppTheme {
       style: ElevatedButton.styleFrom(
         backgroundColor: primary,
         foregroundColor: Colors.white,
+        elevation: 0,
         padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 18),
         textStyle: GoogleFonts.outfit(fontWeight: FontWeight.w600, fontSize: 16)
             .copyWith(inherit: true),

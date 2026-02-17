@@ -910,3 +910,62 @@ Integrated the custom high-resolution branding assets provided for Expenze, repl
 - **Production Readiness**: Meeting platform standards for high-resolution app icons across Android and iOS.
 
 Date: 2026-02-17
+
+## [2026-02-17] UI Refinement: Unified Background & Enhanced Branding
+
+**Change Type:** Minor | Patch
+
+**Decision Made:**
+Unified the application's background scheme across all onboarding and security screens to eliminate visual "bleed" and improve content visibility. Updated app icons based on refined assets.
+
+**Implementation:**
+1. **Branding Refresh**:
+    - Regenerated Android and iOS launcher icons using the new "zoomed-in" logo for better visibility on high-density displays.
+2. **Unified Background Architecture**:
+    - Updated `AppTheme` with a premium teal gradient that replaces the previous white-fade bottom.
+    - Synced `LandingPage`, `ProfileSetupPage`, and `AppLockScreen` to use this shared decoration.
+    - Set `Scaffold` backgrounds to transparency to resolve white-bar issues during scroll bouncing.
+3. **UX & Layout Fixes**:
+    - Wrapped onboarding screens in `SingleChildScrollView` with bouncing physics to handle smaller screen sizes and resolve "top/bottom" gaps.
+    - Optimized spacing to ensure core CTA buttons and feature cards remain accessible regardless of device aspect ratio.
+
+**Impact:**
+- **Consistency**: A single, premium visual identity from the lock screen to the setup flow.
+- **Accessibility**: Improved visibility for text and icons previously washed out by white backgrounds.
+- **Reliability**: Resolved layout overflows on smaller devices.
+
+Date: 2026-02-17
+
+[2026-02-17] [UI/UX Alignment]
+Change Type: Minor
+Implemented app-wide background theme alignment. All major and auxiliary screens (Dashboard, Analytics, Regular Payments, Settings, Month Plan, Categories, SMS Import, Profile, Notes) now use the unified premium teal background decoration via a shared provider/container architecture. Set Scaffolds to transparent and enabled premium bouncing scroll physics throughout.
+Reason: Ensure total visual cohesion and eliminate background jumping during navigation.
+Impact: Seamless transition between all app modules with a premium, focused aesthetic.
+Rollback Strategy: Revert Scaffolds to solid colors and remove decoration containers.
+
+Date: 2026-02-17
+
+[2026-02-17] [Theme & Color Refinement]
+Change Type: Minor
+Refined the global color palette in `AppTheme.dart` to a modern, high-contrast scheme using Slate and Teal shades. Updated all user-facing screens to eliminate hardcoded colors and ensure full adherence to the dynamic theme. Improved contrast for primary buttons, unselected navigation icons, and chart elements.
+Reason: User feedback regarding suboptimal color choices; necessity for better readability in both Light and Dark modes.
+Impact: Enhanced visual premium feel, significantly improved text legibility, and consistent cross-screen aesthetic.
+Rollback Strategy: Revert `AppTheme.dart` color constants and theme-aware styling calls.
+
+Date: 2026-02-17
+
+[2026-02-17] [Core Logic & UI Cleanup]
+Change Type: Minor
+Implemented "Smart Spending Limit Carry-over" logic. Spending limits set in previous months now automatically persist to future months until changed. Also performed critical UI cleanup: corrected "EXPENZE" spelling on App Lock screen, removed "SECURE" branding from lock screen, and fixed color/contrast issues for Period selectors, Switch toggles, and AI Analysis/Auto Scan buttons.
+Reason: User request for better budget persistence and brand consistency/legibility.
+Impact: Significant improvement in budget tracking reliability and brand professionalization.
+Rollback Strategy: Revert `expense_repository.dart` query changes and UI string updates.
+
+[2026-02-17] [Navigation & UI]
+Change Type: Patch
+Decision made: Standardized global layout by wrapping `IndexedStack` in `SafeArea` (top) within `MainNavigationWrapper`. Consolidated background decorations to the root navigator and increased bottom padding to `140px` across all primary screens.
+Reason: Address "window-fit" issues where content was being obscured by the status bar or floating navigation bar.
+Impact: Improved visual consistency, eliminated layout desync, and ensured 100% interactive clearance for the navigation UI.
+Rollback Strategy: Revert `MainNavigationWrapper.dart` layout changes and individual screen padding updates.
+
+Date: 2026-02-17

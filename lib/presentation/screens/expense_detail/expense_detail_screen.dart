@@ -261,6 +261,7 @@ class ExpenseDetailScreen extends StatelessWidget {
             label: const Text('Edit Transaction'),
             style: ElevatedButton.styleFrom(
               backgroundColor: AppTheme.primary,
+              foregroundColor: Colors.white,
               padding: const EdgeInsets.symmetric(vertical: 16),
             ),
           ),

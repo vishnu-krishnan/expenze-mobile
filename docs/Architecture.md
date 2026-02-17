@@ -36,4 +36,11 @@
 - Managed session persistence with automatic token refreshing.
 - Runtime permission management.
 
-Date: 2026-02-16
+## Design Architecture
+### Unified Background System
+- **Single Source of Truth**: Background decorations are defined globally in `AppTheme`.
+- **Inherited Decoration**: `MainNavigationWrapper` provides the primary background container for the persistent shell.
+- **Transparent Scaffolds**: Individual screens within the shell use `Colors.transparent` to ensure seamless visual integration.
+- **Standalone Resilience**: Screens outside the shell (Auth, Onboarding) implement their own `Container` using the same `AppTheme` definitions.
+
+Date: 2026-02-17

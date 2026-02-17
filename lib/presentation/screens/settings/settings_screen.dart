@@ -20,198 +20,200 @@ class SettingsScreen extends StatelessWidget {
     final summary = expenseProvider.summary;
     final limit = summary['limit'] ?? 0.0;
 
-    final isDark = themeProvider.isDarkMode;
-
     return Scaffold(
-      backgroundColor: isDark ? AppTheme.bgPrimaryDark : AppTheme.bgPrimary,
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        decoration: isDark
-            ? AppTheme.darkBackgroundDecoration
-            : AppTheme.backgroundDecoration,
-        child: CustomScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          slivers: [
-            SliverAppBar(
-              title: Text(
-                'App Settings',
-                style: TextStyle(
-                  color: textColor,
-                  fontWeight: FontWeight.w900,
-                  fontSize: 26,
-                  letterSpacing: -1,
-                ),
-              ),
-              backgroundColor: Colors.transparent,
-              elevation: 0,
-              centerTitle: true,
-              floating: true,
-              pinned: true,
-            ),
-            SliverToBoxAdapter(
-              child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+      backgroundColor: Colors.transparent,
+      body: CustomScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        slivers: [
+          SliverAppBar(
+            backgroundColor: Colors.transparent,
+            expandedHeight: 100,
+            floating: true,
+            pinned: false,
+            flexibleSpace: FlexibleSpaceBar(
+              titlePadding: EdgeInsets.zero,
+              background: Padding(
+                padding: const EdgeInsets.fromLTRB(26, 10, 26, 0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    _buildSectionTitle('Account Profile', textColor),
-                    const SizedBox(height: 12),
-                    _buildSettingsCard(
-                      context,
-                      child: Column(
-                        children: [
-                          _buildSettingsItem(
-                            icon: LucideIcons.user,
-                            label: 'User Profile',
-                            subtitle: authProvider.user?['fullName'] ??
-                                'Set up your profile',
-                            onTap: () =>
-                                Navigator.pushNamed(context, '/profile'),
-                            textColor: textColor,
-                            secondaryTextColor: secondaryTextColor,
-                          ),
-                          Divider(
-                              height: 32,
-                              color: secondaryTextColor.withOpacity(0.1)),
-                          _buildSettingsItem(
-                            icon: LucideIcons.target,
-                            label: 'Spending Limit',
-                            subtitle: limit > 0
-                                ? 'Target: ₹${limit.toStringAsFixed(0)}'
-                                : 'No limit set',
-                            onTap: () => _showLimitDialog(context, limit),
-                            textColor: textColor,
-                            secondaryTextColor: secondaryTextColor,
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 32),
-                    _buildSectionTitle('Security & Privacy', textColor),
-                    const SizedBox(height: 12),
-                    _buildSettingsCard(
-                      context,
-                      child: Column(
-                        children: [
-                          _buildSettingsToggle(
-                            context: context,
-                            icon: LucideIcons.lock,
-                            label: 'App Lock',
-                            subtitle: 'Require PIN to open app',
-                            value: authProvider.isLockEnabled,
-                            onChanged: (val) {
-                              if (val) {
-                                _showPinSetupDialog(context);
-                              } else {
-                                authProvider.disableAppLock();
-                              }
-                            },
-                            textColor: textColor,
-                            secondaryTextColor: secondaryTextColor,
-                          ),
-                          if (authProvider.isLockEnabled) ...[
-                            Divider(
-                                height: 32,
-                                color: secondaryTextColor.withOpacity(0.1)),
-                            _buildSettingsToggle(
-                              context: context,
-                              icon: LucideIcons.fingerprint,
-                              label: 'Biometric Lock',
-                              subtitle: 'Unlock using Fingerprint',
-                              value: authProvider.useBiometrics,
-                              onChanged: (val) {
-                                authProvider.updateBiometrics(val);
-                              },
-                              textColor: textColor,
-                              secondaryTextColor: secondaryTextColor,
-                            ),
-                          ],
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 32),
-                    _buildSectionTitle('Cloud & Backup', textColor),
-                    const SizedBox(height: 12),
-                    _buildSettingsCard(
-                      context,
-                      child: Column(
-                        children: [
-                          _buildSettingsItem(
-                            icon: LucideIcons.cloud,
-                            label: 'Google Drive Sync',
-                            subtitle: 'Coming Soon',
-                            onTap: () {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                    content: Text(
-                                        'Google Drive sync will be available in the next update!')),
-                              );
-                            },
-                            textColor: textColor.withOpacity(0.5),
-                            secondaryTextColor:
-                                secondaryTextColor.withOpacity(0.5),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 32),
-                    _buildSectionTitle('Appearance', textColor),
-                    const SizedBox(height: 12),
-                    _buildSettingsCard(
-                      context,
-                      child: Column(
-                        children: [
-                          _buildSettingsToggle(
-                            context: context,
-                            icon: themeProvider.isDarkMode
-                                ? LucideIcons.moon
-                                : LucideIcons.sun,
-                            label: 'Dark Mode',
-                            subtitle: 'Enable dark theme for the app',
-                            value: themeProvider.isDarkMode,
-                            onChanged: (val) => themeProvider.toggleTheme(),
-                            textColor: textColor,
-                            secondaryTextColor: secondaryTextColor,
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 32),
-                    _buildSectionTitle('App Info', textColor),
-                    const SizedBox(height: 12),
-                    _buildSettingsCard(
-                      context,
-                      child: Column(
-                        children: [
-                          _buildSettingsItem(
-                            icon: LucideIcons.info,
-                            label: 'Version',
-                            subtitle: '1.2.0 (Local-First Build)',
-                            textColor: textColor,
-                            secondaryTextColor: secondaryTextColor,
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 40),
-                    Center(
-                      child: TextButton.icon(
-                        onPressed: () => _showResetPrompt(context),
-                        icon: const Icon(LucideIcons.refreshCcw,
-                            size: 16, color: Colors.redAccent),
-                        label: const Text('Reset Application',
-                            style: TextStyle(color: Colors.redAccent)),
-                      ),
-                    ),
-                    const SizedBox(height: 40),
+                    Text('Configuration',
+                        style: TextStyle(
+                            color: secondaryTextColor,
+                            fontSize: 13,
+                            letterSpacing: 0.5)),
+                    Text('Settings',
+                        style: TextStyle(
+                            fontSize: 26,
+                            fontWeight: FontWeight.w900,
+                            color: textColor,
+                            letterSpacing: -1)),
                   ],
                 ),
               ),
             ),
-          ],
-        ),
+          ),
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 26, vertical: 20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildSectionTitle('Account Profile', textColor),
+                  const SizedBox(height: 12),
+                  _buildSettingsCard(
+                    context,
+                    child: Column(
+                      children: [
+                        _buildSettingsItem(
+                          icon: LucideIcons.user,
+                          label: 'User Profile',
+                          subtitle: authProvider.user?['fullName'] ??
+                              'Set up your profile',
+                          onTap: () => Navigator.pushNamed(context, '/profile'),
+                          textColor: textColor,
+                          secondaryTextColor: secondaryTextColor,
+                        ),
+                        Divider(
+                            height: 32,
+                            color: secondaryTextColor.withOpacity(0.1)),
+                        _buildSettingsItem(
+                          icon: LucideIcons.target,
+                          label: 'Spending Limit',
+                          subtitle: limit > 0
+                              ? 'Target: ₹${limit.toStringAsFixed(0)}'
+                              : 'No limit set',
+                          onTap: () => _showLimitDialog(context, limit),
+                          textColor: textColor,
+                          secondaryTextColor: secondaryTextColor,
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 32),
+                  _buildSectionTitle('Security & Privacy', textColor),
+                  const SizedBox(height: 12),
+                  _buildSettingsCard(
+                    context,
+                    child: Column(
+                      children: [
+                        _buildSettingsToggle(
+                          context: context,
+                          icon: LucideIcons.lock,
+                          label: 'App Lock',
+                          subtitle: 'Require PIN to open app',
+                          value: authProvider.isLockEnabled,
+                          onChanged: (val) {
+                            if (val) {
+                              _showPinSetupDialog(context);
+                            } else {
+                              authProvider.disableAppLock();
+                            }
+                          },
+                          textColor: textColor,
+                          secondaryTextColor: secondaryTextColor,
+                        ),
+                        if (authProvider.isLockEnabled) ...[
+                          Divider(
+                              height: 32,
+                              color: secondaryTextColor.withOpacity(0.1)),
+                          _buildSettingsToggle(
+                            context: context,
+                            icon: LucideIcons.fingerprint,
+                            label: 'Biometric Lock',
+                            subtitle: 'Unlock using Fingerprint',
+                            value: authProvider.useBiometrics,
+                            onChanged: (val) {
+                              authProvider.updateBiometrics(val);
+                            },
+                            textColor: textColor,
+                            secondaryTextColor: secondaryTextColor,
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 32),
+                  _buildSectionTitle('Cloud & Backup', textColor),
+                  const SizedBox(height: 12),
+                  _buildSettingsCard(
+                    context,
+                    child: Column(
+                      children: [
+                        _buildSettingsItem(
+                          icon: LucideIcons.cloud,
+                          label: 'Google Drive Sync',
+                          subtitle: 'Coming Soon',
+                          onTap: () {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                  content: Text(
+                                      'Google Drive sync will be available in the next update!')),
+                            );
+                          },
+                          textColor: textColor.withOpacity(0.5),
+                          secondaryTextColor:
+                              secondaryTextColor.withOpacity(0.5),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 32),
+                  _buildSectionTitle('Appearance', textColor),
+                  const SizedBox(height: 12),
+                  _buildSettingsCard(
+                    context,
+                    child: Column(
+                      children: [
+                        _buildSettingsToggle(
+                          context: context,
+                          icon: themeProvider.isDarkMode
+                              ? LucideIcons.moon
+                              : LucideIcons.sun,
+                          label: 'Dark Mode',
+                          subtitle: 'Enable dark theme for the app',
+                          value: themeProvider.isDarkMode,
+                          onChanged: (val) => themeProvider.toggleTheme(),
+                          textColor: textColor,
+                          secondaryTextColor: secondaryTextColor,
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 32),
+                  _buildSectionTitle('App Info', textColor),
+                  const SizedBox(height: 12),
+                  _buildSettingsCard(
+                    context,
+                    child: Column(
+                      children: [
+                        _buildSettingsItem(
+                          icon: LucideIcons.info,
+                          label: 'Version',
+                          subtitle: '1.2.0 (Local-First Build)',
+                          textColor: textColor,
+                          secondaryTextColor: secondaryTextColor,
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 40),
+                  Center(
+                    child: TextButton.icon(
+                      onPressed: () => _showResetPrompt(context),
+                      icon: const Icon(LucideIcons.refreshCcw,
+                          size: 16, color: Colors.redAccent),
+                      label: const Text('Reset Application',
+                          style: TextStyle(color: Colors.redAccent)),
+                    ),
+                  ),
+                  const SizedBox(height: 140),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -363,7 +365,8 @@ class SettingsScreen extends StatelessWidget {
           Switch.adaptive(
             value: value,
             onChanged: onChanged,
-            activeColor: AppTheme.primary,
+            activeColor: Colors.white,
+            activeTrackColor: AppTheme.primary,
           ),
         ],
       ),

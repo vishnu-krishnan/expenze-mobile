@@ -4,7 +4,6 @@ import 'package:lucide_icons/lucide_icons.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/expense_provider.dart';
 import '../../providers/category_provider.dart';
-import '../../providers/theme_provider.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../data/models/expense.dart';
 
@@ -65,127 +64,114 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget build(BuildContext context) {
     final auth = Provider.of<AuthProvider>(context);
     final user = auth.user;
-    final themeProvider = context.watch<ThemeProvider>();
     final textColor = AppTheme.getTextColor(context);
     final secondaryTextColor =
         AppTheme.getTextColor(context, isSecondary: true);
 
-    final isDark = themeProvider.isDarkMode;
-
     return Scaffold(
-      backgroundColor: isDark ? AppTheme.bgPrimaryDark : AppTheme.bgPrimary,
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        decoration: isDark
-            ? AppTheme.darkBackgroundDecoration
-            : AppTheme.backgroundDecoration,
-        child: SafeArea(
-          bottom: false,
-          child: Consumer<ExpenseProvider>(
-            builder: (context, provider, child) {
-              if (provider.isLoading) {
-                return const Center(child: CircularProgressIndicator());
-              }
+      backgroundColor: Colors.transparent,
+      body: Consumer<ExpenseProvider>(
+        builder: (context, provider, child) {
+          if (provider.isLoading) {
+            return const Center(child: CircularProgressIndicator());
+          }
 
-              final summary = provider.summary;
-              final actual = summary['actual'] ?? 0.0;
-              final planned = summary['planned'] ?? 0.0;
-              final remaining = summary['remaining'] ?? 0.0;
-              final limit = summary['limit'] ?? 0.0;
-              final target = limit > 0 ? limit : planned;
-              final pctUsed = target > 0 ? (actual / target) : 0.0;
+          final summary = provider.summary;
+          final actual = summary['actual'] ?? 0.0;
+          final planned = summary['planned'] ?? 0.0;
+          final remaining = summary['remaining'] ?? 0.0;
+          final limit = summary['limit'] ?? 0.0;
+          final target = limit > 0 ? limit : planned;
+          final pctUsed = target > 0 ? (actual / target) : 0.0;
 
-              return RefreshIndicator(
-                onRefresh: () =>
-                    provider.loadMonthData(provider.currentMonthKey),
-                child: CustomScrollView(
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  slivers: [
-                    SliverToBoxAdapter(
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(26, 20, 26, 8),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  _getTimeBasedGreeting(),
-                                  style: TextStyle(
-                                    color: secondaryTextColor,
-                                    fontSize: 14,
-                                    letterSpacing: 0.5,
-                                  ),
-                                ),
-                                Text(
-                                  user?['fullName'] ??
-                                      user?['username'] ??
-                                      'User',
-                                  style: TextStyle(
-                                    fontSize: 26,
-                                    fontWeight: FontWeight.w900,
-                                    color: textColor,
-                                    letterSpacing: -0.8,
-                                  ),
-                                ),
-                              ],
+          return RefreshIndicator(
+            onRefresh: () => provider.loadMonthData(provider.currentMonthKey),
+            child: CustomScrollView(
+              physics: const BouncingScrollPhysics(),
+              slivers: [
+                SliverAppBar(
+                  backgroundColor: Colors.transparent,
+                  expandedHeight: 100,
+                  floating: true,
+                  pinned: false,
+                  flexibleSpace: FlexibleSpaceBar(
+                    titlePadding: EdgeInsets.zero,
+                    background: Padding(
+                      padding: const EdgeInsets.fromLTRB(26, 10, 26, 0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            _getTimeBasedGreeting(),
+                            style: TextStyle(
+                              color: secondaryTextColor,
+                              fontSize: 14,
+                              letterSpacing: 0.5,
                             ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    SliverToBoxAdapter(
-                      child: Padding(
-                        padding: const EdgeInsets.only(bottom: 20),
-                        child: _buildWalletCard(actual, remaining, pctUsed,
-                            provider, summary, planned),
-                      ),
-                    ),
-                    SliverToBoxAdapter(
-                      child: _buildQuickActions(context),
-                    ),
-                    SliverToBoxAdapter(
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(26, 32, 26, 16),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              'Category Breakdown',
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                color: textColor,
-                                letterSpacing: -0.5,
-                              ),
+                          ),
+                          Text(
+                            user?['fullName'] ?? user?['username'] ?? 'User',
+                            style: TextStyle(
+                              fontSize: 26,
+                              fontWeight: FontWeight.w900,
+                              color: textColor,
+                              letterSpacing: -0.8,
                             ),
-                            Icon(LucideIcons.arrowRight,
-                                size: 18, color: secondaryTextColor),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
                     ),
-                    SliverPadding(
-                      padding: const EdgeInsets.symmetric(horizontal: 26),
-                      sliver: SliverList(
-                        delegate: SliverChildBuilderDelegate(
-                          (context, index) {
-                            final item = provider.categoryBreakdown[index];
-                            return _buildCategoryItem(context, item);
-                          },
-                          childCount: provider.categoryBreakdown.length,
-                        ),
-                      ),
-                    ),
-                    const SliverToBoxAdapter(child: SizedBox(height: 120)),
-                  ],
+                  ),
                 ),
-              );
-            },
-          ),
-        ),
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.only(bottom: 20),
+                    child: _buildWalletCard(
+                        actual, remaining, pctUsed, provider, summary, planned),
+                  ),
+                ),
+                SliverToBoxAdapter(
+                  child: _buildQuickActions(context),
+                ),
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(26, 32, 26, 16),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Category Breakdown',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: textColor,
+                            letterSpacing: -0.5,
+                          ),
+                        ),
+                        Icon(LucideIcons.arrowRight,
+                            size: 18, color: secondaryTextColor),
+                      ],
+                    ),
+                  ),
+                ),
+                SliverPadding(
+                  padding: const EdgeInsets.symmetric(horizontal: 26),
+                  sliver: SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                      (context, index) {
+                        final item = provider.categoryBreakdown[index];
+                        return _buildCategoryItem(context, item);
+                      },
+                      childCount: provider.categoryBreakdown.length,
+                    ),
+                  ),
+                ),
+                const SliverToBoxAdapter(child: SizedBox(height: 140)),
+              ],
+            ),
+          );
+        },
       ),
       floatingActionButton: Padding(
         padding: const EdgeInsets.only(bottom: 120),
@@ -196,8 +182,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           elevation: 10,
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-          child: const Icon(LucideIcons.plus,
-              color: AppTheme.primaryDark, size: 30),
+          child: const Icon(LucideIcons.plus, color: Colors.white, size: 30),
         ),
       ),
     );

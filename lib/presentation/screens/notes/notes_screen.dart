@@ -33,7 +33,7 @@ class _NotesScreenState extends State<NotesScreen> {
     final isDark = themeProvider.isDarkMode;
 
     return Scaffold(
-      backgroundColor: isDark ? AppTheme.bgPrimaryDark : AppTheme.bgPrimary,
+      backgroundColor: Colors.transparent,
       body: Container(
         width: double.infinity,
         height: double.infinity,
@@ -83,8 +83,7 @@ class _NotesScreenState extends State<NotesScreen> {
         onPressed: () => _showNoteDialog(context),
         backgroundColor: AppTheme.primary,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-        child:
-            const Icon(LucideIcons.plus, color: AppTheme.primaryDark, size: 30),
+        child: const Icon(LucideIcons.plus, color: Colors.white, size: 30),
       ),
     );
   }

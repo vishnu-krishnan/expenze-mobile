@@ -101,19 +101,20 @@ class ExpenseRepository {
     };
   }
 
-  // Get monthly limit from month_plans or users table
+  // Get monthly limit from month_plans or users table with carry-over logic
   Future<double> getMonthlyLimit(String monthKey) async {
     final db = await _dbHelper.database;
 
-    // 1. Try month_plans first
+    // 1. Try to find the most recent limit at or before this month
     final List<Map<String, dynamic>> plans = await db.query(
       'month_plans',
-      where: 'month_key = ?',
+      where: 'month_key <= ? AND total_planned > 0',
       whereArgs: [monthKey],
+      orderBy: 'month_key DESC',
       limit: 1,
     );
 
-    if (plans.isNotEmpty && (plans.first['total_planned'] as num) > 0) {
+    if (plans.isNotEmpty) {
       return (plans.first['total_planned'] as num).toDouble();
     }
 

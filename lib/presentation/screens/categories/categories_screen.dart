@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../providers/category_provider.dart';
-import '../../providers/theme_provider.dart';
 import '../../../data/models/category.dart';
 import 'category_add_screen.dart';
 import 'category_edit_screen.dart';
@@ -18,30 +17,27 @@ class CategoriesScreen extends StatefulWidget {
 class _CategoriesScreenState extends State<CategoriesScreen> {
   @override
   Widget build(BuildContext context) {
-    final themeProvider = context.watch<ThemeProvider>();
     final textColor = AppTheme.getTextColor(context);
     final secondaryTextColor =
         AppTheme.getTextColor(context, isSecondary: true);
 
-    final isDark = themeProvider.isDarkMode;
-
     return Scaffold(
-      backgroundColor: isDark ? AppTheme.bgPrimaryDark : AppTheme.bgPrimary,
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        decoration: isDark
-            ? AppTheme.darkBackgroundDecoration
-            : AppTheme.backgroundDecoration,
-        child: SafeArea(
-          bottom: false,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(26, 20, 26, 24),
+      backgroundColor: Colors.transparent,
+      body: CustomScrollView(
+        physics: const BouncingScrollPhysics(),
+        slivers: [
+          SliverAppBar(
+            backgroundColor: Colors.transparent,
+            expandedHeight: 100,
+            floating: true,
+            pinned: false,
+            flexibleSpace: FlexibleSpaceBar(
+              titlePadding: EdgeInsets.zero,
+              background: Padding(
+                padding: const EdgeInsets.fromLTRB(26, 10, 26, 0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text('Organization',
                         style: TextStyle(
@@ -57,32 +53,37 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                   ],
                 ),
               ),
-              Expanded(
-                child: Consumer<CategoryProvider>(
-                  builder: (context, provider, child) {
-                    if (provider.isLoading) {
-                      return const Center(child: CircularProgressIndicator());
-                    }
-
-                    if (provider.categories.isEmpty) {
-                      return _buildEmptyState(secondaryTextColor);
-                    }
-
-                    return ListView.builder(
-                      padding: const EdgeInsets.fromLTRB(26, 0, 26, 120),
-                      itemCount: provider.categories.length,
-                      itemBuilder: (context, index) {
-                        final cat = provider.categories[index];
-                        return _buildCategoryCard(
-                            context, cat, textColor, secondaryTextColor);
-                      },
-                    );
-                  },
-                ),
-              ),
-            ],
+            ),
           ),
-        ),
+          SliverPadding(
+            padding: const EdgeInsets.symmetric(horizontal: 26),
+            sliver: Consumer<CategoryProvider>(
+              builder: (context, provider, child) {
+                if (provider.isLoading) {
+                  return const SliverFillRemaining(
+                      child: Center(child: CircularProgressIndicator()));
+                }
+
+                if (provider.categories.isEmpty) {
+                  return SliverFillRemaining(
+                      child: _buildEmptyState(secondaryTextColor));
+                }
+
+                return SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) {
+                      final cat = provider.categories[index];
+                      return _buildCategoryCard(
+                          context, cat, textColor, secondaryTextColor);
+                    },
+                    childCount: provider.categories.length,
+                  ),
+                );
+              },
+            ),
+          ),
+          const SliverToBoxAdapter(child: SizedBox(height: 140)),
+        ],
       ),
       floatingActionButton: FloatingActionButton(
         heroTag: 'categories_fab',
@@ -91,8 +92,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
         backgroundColor: AppTheme.primary,
         elevation: 8,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-        child:
-            const Icon(LucideIcons.plus, color: AppTheme.primaryDark, size: 28),
+        child: const Icon(LucideIcons.plus, color: Colors.white, size: 28),
       ),
     );
   }
@@ -143,6 +143,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
           decoration: BoxDecoration(
             color: color.withOpacity(0.1),
             borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: color.withOpacity(0.2)),
           ),
           alignment: Alignment.center,
           child: Text(cat.icon ?? '📁', style: const TextStyle(fontSize: 24)),
@@ -189,7 +190,9 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
               context.read<CategoryProvider>().deleteCategory(cat.id);
               Navigator.pop(context);
             },
-            style: ElevatedButton.styleFrom(backgroundColor: AppTheme.danger),
+            style: ElevatedButton.styleFrom(
+                backgroundColor: AppTheme.danger,
+                foregroundColor: Colors.white),
             child: const Text('Delete'),
           ),
         ],

@@ -57,7 +57,7 @@ class _CategoryAddScreenState extends State<CategoryAddScreen> {
     final isDark = themeProvider.isDarkMode;
 
     return Scaffold(
-      backgroundColor: isDark ? AppTheme.bgPrimaryDark : AppTheme.bgPrimary,
+      backgroundColor: Colors.transparent,
       body: Container(
         width: double.infinity,
         height: double.infinity,
@@ -67,9 +67,15 @@ class _CategoryAddScreenState extends State<CategoryAddScreen> {
         child: Column(
           children: [
             AppBar(
-              title: const Text('Add Category'),
+              title: Text('Add Category',
+                  style: TextStyle(color: AppTheme.getTextColor(context))),
               backgroundColor: Colors.transparent,
               elevation: 0,
+              leading: IconButton(
+                icon: Icon(LucideIcons.chevronLeft,
+                    color: AppTheme.getTextColor(context)),
+                onPressed: () => Navigator.pop(context),
+              ),
             ),
             Expanded(
               child: Consumer<CategoryProvider>(
@@ -79,12 +85,12 @@ class _CategoryAddScreenState extends State<CategoryAddScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _buildSectionHeader(
-                            'Quick Suggestions', 'Pick from common categories'),
+                        _buildSectionHeader(context, 'Quick Suggestions',
+                            'Pick from common categories'),
                         const SizedBox(height: 16),
                         _buildQuickAddGrid(provider),
                         const SizedBox(height: 40),
-                        _buildSectionHeader('Custom Category',
+                        _buildSectionHeader(context, 'Custom Category',
                             'Create your own identification'),
                         const SizedBox(height: 16),
                         _buildCustomForm(provider),
@@ -100,14 +106,20 @@ class _CategoryAddScreenState extends State<CategoryAddScreen> {
     );
   }
 
-  Widget _buildSectionHeader(String title, String subtitle) {
+  Widget _buildSectionHeader(
+      BuildContext context, String title, String subtitle) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(title,
-            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+            style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: AppTheme.getTextColor(context))),
         Text(subtitle,
-            style: TextStyle(color: AppTheme.textLight, fontSize: 13)),
+            style: TextStyle(
+                color: AppTheme.getTextColor(context, isSecondary: true),
+                fontSize: 13)),
       ],
     );
   }
@@ -130,10 +142,14 @@ class _CategoryAddScreenState extends State<CategoryAddScreen> {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
-              color: exists ? AppTheme.bgSecondary : Colors.white,
+              color: exists
+                  ? AppTheme.primary.withOpacity(0.05)
+                  : Theme.of(context).cardTheme.color,
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: exists ? Colors.transparent : AppTheme.border,
+                color: exists
+                    ? AppTheme.primary.withOpacity(0.2)
+                    : Theme.of(context).dividerColor.withOpacity(0.1),
               ),
               boxShadow: exists ? [] : AppTheme.softShadow,
             ),
@@ -146,7 +162,9 @@ class _CategoryAddScreenState extends State<CategoryAddScreen> {
                   cat['name'],
                   style: TextStyle(
                     fontWeight: FontWeight.w600,
-                    color: exists ? AppTheme.textLight : AppTheme.textPrimary,
+                    color: exists
+                        ? AppTheme.getTextColor(context, isSecondary: true)
+                        : AppTheme.getTextColor(context),
                   ),
                 ),
                 if (exists) ...[
@@ -166,7 +184,7 @@ class _CategoryAddScreenState extends State<CategoryAddScreen> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardTheme.color,
         borderRadius: BorderRadius.circular(20),
         boxShadow: AppTheme.softShadow,
       ),
@@ -175,12 +193,17 @@ class _CategoryAddScreenState extends State<CategoryAddScreen> {
         children: [
           TextField(
             controller: _nameController,
-            decoration:
-                AppTheme.inputDecoration('Category Name', LucideIcons.tag),
+            decoration: AppTheme.inputDecoration(
+                'Category Name', LucideIcons.tag,
+                context: context),
+            style: TextStyle(color: AppTheme.getTextColor(context)),
           ),
           const SizedBox(height: 20),
-          const Text('Select an Icon',
-              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
+          Text('Select an Icon',
+              style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 13,
+                  color: AppTheme.getTextColor(context))),
           const SizedBox(height: 12),
           Wrap(
             spacing: 10,
@@ -295,7 +318,7 @@ class _CategoryAddScreenState extends State<CategoryAddScreen> {
                   decoration: BoxDecoration(
                     color: isSelected
                         ? AppTheme.primary.withOpacity(0.1)
-                        : AppTheme.bgSecondary,
+                        : Theme.of(context).cardTheme.color,
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
                       color: isSelected ? AppTheme.primary : Colors.transparent,

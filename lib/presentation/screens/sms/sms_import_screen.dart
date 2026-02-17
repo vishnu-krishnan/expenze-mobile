@@ -256,7 +256,7 @@ class _SmsImportScreenState extends State<SmsImportScreen>
         AppTheme.getTextColor(context, isSecondary: true);
 
     return Scaffold(
-      backgroundColor: isDark ? AppTheme.bgPrimaryDark : AppTheme.bgPrimary,
+      backgroundColor: Colors.transparent,
       body: Container(
         width: double.infinity,
         height: double.infinity,
@@ -380,7 +380,7 @@ class _SmsImportScreenState extends State<SmsImportScreen>
                     onPressed: _isLoading ? null : _syncFromInbox,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppTheme.primary,
-                      foregroundColor: AppTheme.primaryDark,
+                      foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16),
@@ -391,7 +391,7 @@ class _SmsImportScreenState extends State<SmsImportScreen>
                             width: 18,
                             height: 18,
                             child: CircularProgressIndicator(
-                                strokeWidth: 2, color: AppTheme.primaryDark))
+                                strokeWidth: 2, color: Colors.white))
                         : const Icon(LucideIcons.zap, size: 18),
                     label: Text(_isLoading ? 'Scanning...' : 'Start Auto Scan'),
                   ),
@@ -458,7 +458,7 @@ class _SmsImportScreenState extends State<SmsImportScreen>
                         label: const Text('AI Analysis'),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppTheme.primary,
-                          foregroundColor: AppTheme.primaryDark,
+                          foregroundColor: Colors.white,
                           padding: const EdgeInsets.symmetric(vertical: 14),
                         ),
                       ),

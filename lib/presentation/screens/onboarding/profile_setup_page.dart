@@ -46,72 +46,88 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: isDark ? AppTheme.bgPrimaryDark : AppTheme.bgPrimary,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(LucideIcons.chevronLeft,
-              color: isDark ? Colors.white : AppTheme.primaryDark),
-          onPressed: () => Navigator.pop(context),
-        ),
-      ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 32.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 20),
-              Text(
-                'Create Your Profile',
-                style: GoogleFonts.outfit(
-                  fontSize: 34,
-                  fontWeight: FontWeight.bold,
-                  color: isDark ? Colors.white : AppTheme.primaryDark,
-                  letterSpacing: -1,
+      backgroundColor: Colors.transparent,
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: isDark
+            ? AppTheme.darkBackgroundDecoration
+            : AppTheme.backgroundDecoration,
+        child: Column(
+          children: [
+            AppBar(
+              backgroundColor: Colors.transparent,
+              elevation: 0,
+              leading: IconButton(
+                icon: Icon(LucideIcons.chevronLeft,
+                    color: AppTheme.getTextColor(context)),
+                onPressed: () => Navigator.pop(context),
+              ),
+            ),
+            Expanded(
+              child: SafeArea(
+                top: false,
+                child: SingleChildScrollView(
+                  physics: const BouncingScrollPhysics(),
+                  padding: const EdgeInsets.symmetric(horizontal: 32.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const SizedBox(height: 20),
+                      Text(
+                        'Create Your Profile',
+                        style: GoogleFonts.outfit(
+                          fontSize: 34,
+                          fontWeight: FontWeight.bold,
+                          color: AppTheme.getTextColor(context),
+                          letterSpacing: -1,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        'Help us personalize your experience. This data stays on your device.',
+                        style: GoogleFonts.inter(
+                          fontSize: 16,
+                          color:
+                              AppTheme.getTextColor(context, isSecondary: true),
+                          height: 1.5,
+                        ),
+                      ),
+                      const SizedBox(height: 48),
+                      _buildInputField(
+                        label: 'YOUR NAME',
+                        hint: 'How should we call you?',
+                        controller: _nameController,
+                        icon: LucideIcons.user,
+                        isDark: isDark,
+                      ),
+                      const SizedBox(height: 28),
+                      _buildInputField(
+                        label: 'EMAIL (OPTIONAL)',
+                        hint: 'For identification only',
+                        controller: _emailController,
+                        icon: LucideIcons.mail,
+                        keyboardType: TextInputType.emailAddress,
+                        isDark: isDark,
+                      ),
+                      const SizedBox(height: 28),
+                      _buildInputField(
+                        label: 'MONTHLY BUDGET (OPTIONAL)',
+                        hint: '0.00',
+                        controller: _budgetController,
+                        icon: LucideIcons.indianRupee,
+                        keyboardType: TextInputType.number,
+                        isDark: isDark,
+                      ),
+                      const SizedBox(height: 64),
+                      _buildSubmitButton(context),
+                      const SizedBox(height: 40),
+                    ],
+                  ),
                 ),
               ),
-              const SizedBox(height: 12),
-              Text(
-                'Help us personalize your experience. This data stays on your device.',
-                style: GoogleFonts.inter(
-                  fontSize: 16,
-                  color: isDark ? Colors.white70 : AppTheme.textSecondary,
-                  height: 1.5,
-                ),
-              ),
-              const SizedBox(height: 48),
-              _buildInputField(
-                label: 'YOUR NAME',
-                hint: 'How should we call you?',
-                controller: _nameController,
-                icon: LucideIcons.user,
-                isDark: isDark,
-              ),
-              const SizedBox(height: 28),
-              _buildInputField(
-                label: 'EMAIL (OPTIONAL)',
-                hint: 'For identification only',
-                controller: _emailController,
-                icon: LucideIcons.mail,
-                keyboardType: TextInputType.emailAddress,
-                isDark: isDark,
-              ),
-              const SizedBox(height: 28),
-              _buildInputField(
-                label: 'MONTHLY BUDGET (OPTIONAL)',
-                hint: '0.00',
-                controller: _budgetController,
-                icon: LucideIcons.indianRupee,
-                keyboardType: TextInputType.number,
-                isDark: isDark,
-              ),
-              const SizedBox(height: 64),
-              _buildSubmitButton(context),
-              const SizedBox(height: 40),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -192,7 +208,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
         onPressed: _handleSubmit,
         style: ElevatedButton.styleFrom(
           backgroundColor: AppTheme.primary,
-          foregroundColor: AppTheme.primaryDark,
+          foregroundColor: Colors.white,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
           ),
