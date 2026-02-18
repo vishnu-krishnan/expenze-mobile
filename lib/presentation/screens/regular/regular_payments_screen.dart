@@ -57,7 +57,7 @@ class _RegularPaymentsScreenState extends State<RegularPaymentsScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text('Recurring Payments',
+                      Text('Regular Expenses',
                           style: TextStyle(
                               fontSize: 26,
                               fontWeight: FontWeight.w900,
@@ -129,7 +129,7 @@ class _RegularPaymentsScreenState extends State<RegularPaymentsScreen> {
                 size: 64, color: AppTheme.primary.withValues(alpha: 0.4)),
           ),
           const SizedBox(height: 24),
-          Text('No recurring bills yet',
+          Text('No regular expenses yet',
               style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -303,7 +303,7 @@ class _RegularPaymentsScreenState extends State<RegularPaymentsScreen> {
                               color: Colors.grey.withValues(alpha: 0.3),
                               borderRadius: BorderRadius.circular(2)))),
                   const SizedBox(height: 24),
-                  Text('Setup Recurring Bill',
+                  Text('Setup Regular Expense',
                       style: TextStyle(
                           fontSize: 22,
                           fontWeight: FontWeight.w900,
@@ -329,7 +329,7 @@ class _RegularPaymentsScreenState extends State<RegularPaymentsScreen> {
                   TextField(
                     controller: nameController,
                     decoration: AppTheme.inputDecoration(
-                        'Bill Name', LucideIcons.tag,
+                        'Expense Name', LucideIcons.tag,
                         context: context),
                     style: TextStyle(color: textColor),
                   ),

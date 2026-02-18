@@ -1092,3 +1092,12 @@ Impact: Unified visual language across Analytics, Categories, Profile, Settings,
 Rollback Strategy: Revert `centerTitle` to true and restore previous heading text in `RegularPaymentsScreen`.
 
 Date: 2026-02-17
+
+[2026-02-18] [Naming & Branding Refinement]
+Change Type: Minor
+Decision made: Rebranded the "Bills" feature to **"Regular Expenses"** across the application to better represent steady costs like EMIs, Rent, and Utilities. Updated the Dashboard quick action label to **"Regular"** and the screen heading to **"Regular Expenses"**. Maintained the existing 4-tab navigation structure as per user preference.
+Reason: Fulfill user request for a descriptive and accurate term for consistent monthly outgoings.
+Impact: Improved nomenclature clarity and professionalism across the core UI.
+Rollback Strategy: Restore "Bills" or "Recurring" labels across the UI and Dashboard.
+
+Date: 2026-02-18

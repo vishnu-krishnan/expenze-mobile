@@ -20,6 +20,8 @@ class AppVersion {
       version: '1.0.2',
       date: '2026-02-18',
       changes: [
+        'Rebranded "Bills" to "Regular Expenses" for better clarity (EMI, Rent, etc.)',
+        'Updated Dashboard quick actions with "Regular" shortcut',
         'Enhanced Monthly Planner with prioritized unconfirmed expenses',
         'Refined Planned vs Unplanned logic for better clarity',
         'Fixed issue where editing unplanned expenses converted them to planned',

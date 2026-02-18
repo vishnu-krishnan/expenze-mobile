@@ -30,7 +30,7 @@
 - [x] **System-wide Dark Mode**
 - [x] **Utilities Section (Notes & Reminders)**
 - [x] **Visual Polish & Dashboard Refinement**
-- [x] **Bill Status & Quick Expense Tracking**
+- [x] **Regular Expense Status & Quick Expense Tracking**
 - [ ] Play Store Optimization
 - [ ] Vulnerability Scanning
 - [ ] Final Documentation Suite
@@ -40,4 +40,4 @@
 - Status: Core Features Complete.
 - Next: Final Polish & Vulnerability Scanning.
 
-Date: 2026-02-16
+Date: 2026-02-18

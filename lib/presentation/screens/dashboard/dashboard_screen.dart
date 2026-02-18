@@ -408,7 +408,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           _buildActionCard(context, LucideIcons.mail, 'Import',
               AppTheme.primary, () => Navigator.pushNamed(context, '/import')),
           const SizedBox(width: 12),
-          _buildActionCard(context, LucideIcons.creditCard, 'Bills',
+          _buildActionCard(context, LucideIcons.repeat, 'Regular',
               AppTheme.primary, () => Navigator.pushNamed(context, '/regular')),
           const SizedBox(width: 12),
           _buildActionCard(context, LucideIcons.stickyNote, 'Notes',

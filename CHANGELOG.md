@@ -7,6 +7,10 @@ All notable changes to this project will be documented in this file.
 - Prioritized unconfirmed expenses at the top of Monthly Planner.
 - Standardized "Unplanned" vs "Planned" status labels.
 
+### Changed
+- Rebranded "Bills" feature to **"Regular Expenses"** to better accommodate steady costs like EMIs, Rent, Loans, and Utilities.
+- Updated Dashboard quick action label to "Regular" and restored "Planner" to the bottom navigation bar.
+
 ### Fixed
 - Null safety crash when viewing Uncategorized transactions.
 - Improper planned amount baseline in Monthly Summary.
