@@ -87,11 +87,20 @@ class ExpenseProvider with ChangeNotifier {
     }
   }
 
+  List<Map<String, dynamic>> _periodCategoryBreakdown = [];
+  List<Map<String, dynamic>> get periodCategoryBreakdown =>
+      _periodCategoryBreakdown;
+
   Future<void> loadTrends(int months) async {
     _isLoading = true;
     notifyListeners();
     try {
       final rawTrends = await _repository.getTrends(months);
+
+      // Load category breakdown for the period
+      final rawBreakdown =
+          await _repository.getCategoryBreakdownForPeriod(months);
+      _periodCategoryBreakdown = List<Map<String, dynamic>>.from(rawBreakdown);
 
       // Fill missing months to ensure the chart shows the full selected period
       final List<Map<String, dynamic>> filledTrends = [];
@@ -183,9 +192,10 @@ class ExpenseProvider with ChangeNotifier {
 
   double get totalPlanned =>
       _expenses.fold(0, (sum, e) => sum + e.plannedAmount);
-  Future<List<String>> getImportedSmsIds() => _repository.getImportedSmsIds();
 
   double get totalActual => _expenses.fold(0, (sum, e) => sum + e.actualAmount);
+
+  Future<List<String>> getImportedSmsIds() => _repository.getImportedSmsIds();
 
   void setSortOption(SortOption option) {
     if (_currentSortOption == option) return;

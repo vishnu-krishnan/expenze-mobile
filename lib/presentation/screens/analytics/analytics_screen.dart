@@ -14,6 +14,7 @@ class AnalyticsScreen extends StatefulWidget {
 
 class _AnalyticsScreenState extends State<AnalyticsScreen> {
   int _selectedPeriod = 6; // Default: 6 months
+  int _touchedIndex = -1;
 
   @override
   void initState() {
@@ -32,6 +33,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: CustomScrollView(
+        key: UniqueKey(),
         physics: const AlwaysScrollableScrollPhysics(),
         slivers: [
           SliverAppBar(
@@ -84,7 +86,12 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                       const SizedBox(height: 24),
                       _buildSpendingSummary(
                           provider, textColor, secondaryTextColor),
-                      const SizedBox(height: 32),
+                      const SizedBox(height: 24),
+                      if (provider.periodCategoryBreakdown.isNotEmpty) ...[
+                        _buildPieChartCard(
+                            provider.periodCategoryBreakdown, textColor),
+                        const SizedBox(height: 32),
+                      ],
                       Text(
                           _selectedPeriod >= 60
                               ? 'Yearly Total Expenses'
@@ -487,6 +494,154 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                   color: textColor, fontSize: 20, fontWeight: FontWeight.w900)),
         ],
       ),
+    );
+  }
+
+  Widget _buildPieChartCard(
+      List<Map<String, dynamic>> breakdown, Color textColor) {
+    final secondaryTextColor =
+        AppTheme.getTextColor(context, isSecondary: true);
+    final total = breakdown.fold(
+        0.0, (sum, item) => sum + (item['total_actual'] as num).toDouble());
+
+    // Filter out categories with minimal spending (< 1%) unless it's the only one
+    final validItems = breakdown
+        .where((e) => (e['total_actual'] as num).toDouble() > 0)
+        .toList();
+
+    if (validItems.isEmpty) return const SizedBox();
+
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardTheme.color,
+        borderRadius: BorderRadius.circular(32),
+        boxShadow: AppTheme.softShadow,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Spending by Category',
+              style: TextStyle(
+                  fontWeight: FontWeight.w800, fontSize: 15, color: textColor)),
+          const SizedBox(height: 30),
+          Row(
+            children: [
+              Expanded(
+                flex: 3,
+                child: AspectRatio(
+                  aspectRatio: 1.3,
+                  child: PieChart(
+                    PieChartData(
+                      pieTouchData: PieTouchData(
+                        touchCallback: (FlTouchEvent event, pieTouchResponse) {
+                          if (!mounted) return;
+                          setState(() {
+                            if (!event.isInterestedForInteractions ||
+                                pieTouchResponse == null ||
+                                pieTouchResponse.touchedSection == null) {
+                              _touchedIndex = -1;
+                              return;
+                            }
+                            _touchedIndex = pieTouchResponse
+                                .touchedSection!.touchedSectionIndex;
+                          });
+                        },
+                      ),
+                      borderData: FlBorderData(show: false),
+                      sectionsSpace: 0, // Space between sections
+                      centerSpaceRadius: 40, // Donut chart style
+                      sections: List.generate(validItems.length, (i) {
+                        final item = validItems[i];
+                        final isTouched = i == _touchedIndex;
+                        final fontSize = isTouched ? 16.0 : 12.0;
+                        final radius = isTouched ? 60.0 : 50.0;
+                        final value = (item['total_actual'] as num).toDouble();
+                        final percentage = (value / total) * 100;
+                        final colorHex = item['color'] as String? ?? '#79D2C1';
+                        final color = Color(
+                            int.parse(colorHex.replaceFirst('#', '0xff')));
+
+                        return PieChartSectionData(
+                          color: color,
+                          value: value,
+                          title: isTouched
+                              ? '${percentage.toStringAsFixed(2)}%'
+                              : '',
+                          radius: radius,
+                          titleStyle: TextStyle(
+                            fontSize: fontSize,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                            shadows: [
+                              Shadow(color: Colors.black26, blurRadius: 2)
+                            ],
+                          ),
+                        );
+                      }),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 24),
+              Expanded(
+                flex: 2,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: List.generate(
+                      validItems.length > 5 ? 5 : validItems.length, (i) {
+                    final item = validItems[i];
+                    final colorHex = item['color'] as String? ?? '#79D2C1';
+                    final color =
+                        Color(int.parse(colorHex.replaceFirst('#', '0xff')));
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: _buildIndicator(
+                        color: color,
+                        text: (item['category_name'] as String?) ??
+                            'Uncategorized',
+                        textColor: secondaryTextColor,
+                      ),
+                    );
+                  }),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildIndicator({
+    required Color color,
+    required String text,
+    required Color textColor,
+  }) {
+    return Row(
+      children: [
+        Container(
+          width: 12,
+          height: 12,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: color,
+          ),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            text,
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.bold,
+              color: textColor,
+            ),
+            overflow: TextOverflow.ellipsis,
+          ),
+        )
+      ],
     );
   }
 }

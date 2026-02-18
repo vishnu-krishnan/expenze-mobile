@@ -187,6 +187,35 @@ class ExpenseRepository {
     return result;
   }
 
+  // Get category breakdown for a specific period (last N months)
+  Future<List<Map<String, dynamic>>> getCategoryBreakdownForPeriod(
+      int months) async {
+    final db = await _dbHelper.database;
+    final now = DateTime.now();
+    final startDate = DateTime(now.year, now.month - months + 1, 1);
+    final startMonthKey =
+        "${startDate.year}-${startDate.month.toString().padLeft(2, '0')}";
+
+    final result = await db.rawQuery('''
+      SELECT 
+        COALESCE(c.id, -1) as id,
+        COALESCE(c.name, 'Uncategorized') as category_name,
+        COALESCE(c.icon, '❓') as icon,
+        COALESCE(c.color, '#808080') as color,
+        SUM(COALESCE(e.planned_amount, 0)) as total_planned,
+        SUM(COALESCE(e.actual_amount, 0)) as total_actual,
+        MAX(e.created_at) as last_activity
+      FROM expenses e
+      LEFT JOIN categories c ON CAST(e.category_id AS INTEGER) = CAST(c.id AS INTEGER)
+      WHERE e.month_key >= ?
+      GROUP BY c.id, c.name, c.color, c.icon
+      HAVING total_planned > 0 OR total_actual > 0
+      ORDER BY total_actual DESC
+    ''', [startMonthKey]);
+
+    return result;
+  }
+
   // Get spending trends for specified months (calendar-aligned)
   Future<List<Map<String, dynamic>>> getTrends(int months) async {
     final db = await _dbHelper.database;
