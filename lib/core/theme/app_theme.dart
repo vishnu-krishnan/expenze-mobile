@@ -127,7 +127,7 @@ class AppTheme {
         letterSpacing: -0.5,
       ).copyWith(inherit: true),
     ),
-    cardTheme: CardTheme(
+    cardTheme: CardThemeData(
       color: bgCard,
       elevation: 0,
       shape: RoundedRectangleBorder(
@@ -204,7 +204,7 @@ class AppTheme {
         letterSpacing: -0.5,
       ).copyWith(inherit: true),
     ),
-    cardTheme: CardTheme(
+    cardTheme: CardThemeData(
       color: bgCardDark,
       elevation: 0,
       shape: RoundedRectangleBorder(

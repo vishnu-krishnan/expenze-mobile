@@ -23,13 +23,52 @@ import 'data/services/notification_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
   try {
-    await dotenv.load(fileName: ".env");
-  } catch (_) {
-    // If .env is missing or not bundled, continue without crashing.
+    try {
+      await dotenv.load(fileName: ".env");
+    } catch (_) {
+      // If .env is missing or not bundled, continue without crashing.
+    }
+
+    await NotificationService().init();
+    runApp(const MyApp());
+  } catch (e, stack) {
+    debugPrint("FATAL ERROR DURING APP STARTUP: $e");
+    debugPrint(stack.toString());
+
+    // Fallback UI to prevent black screen
+    runApp(MaterialApp(
+      home: Scaffold(
+        backgroundColor: const Color(0xFF020617), // Dark slate
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.error_outline, color: Colors.red, size: 64),
+                const SizedBox(height: 16),
+                const Text(
+                  'Failed to start Expenze',
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  e.toString(),
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(color: Colors.white70),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    ));
   }
-  await NotificationService().init();
-  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {

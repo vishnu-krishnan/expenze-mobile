@@ -5,7 +5,6 @@ import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../data/models/expense.dart';
-import '../../providers/expense_provider.dart';
 import '../../providers/category_provider.dart';
 import '../../providers/theme_provider.dart';
 
@@ -106,7 +105,7 @@ Notes: ${expense.notes ?? 'N/A'}
 
 Shared via Expenze App
 ''';
-                Share.share(text);
+                SharePlus.instance.share(ShareParams(text: text));
               },
               icon: Icon(LucideIcons.share2, color: textColor, size: 20),
             ),
@@ -385,6 +384,15 @@ Shared via Expenze App
                       fontSize: 15,
                       fontWeight: FontWeight.w900,
                       color: textColor)),
+              const Spacer(),
+              IconButton(
+                onPressed: () {
+                  final text =
+                      '${expense.name} - ₹${expense.actualAmount.toLocaleString()} on ${DateFormat('dd MMM yyyy').format(DateTime.parse(expense.paidDate!))} via ${expense.paymentMode}. Notes: ${expense.notes}';
+                  SharePlus.instance.share(ShareParams(text: text));
+                },
+                icon: Icon(LucideIcons.share2, color: textColor, size: 20),
+              ),
             ],
           ),
           const SizedBox(height: 16),
@@ -415,51 +423,6 @@ Shared via Expenze App
           ],
         ],
       ),
-    );
-  }
-
-  Widget _buildActionPanel(BuildContext context) {
-    return Column(
-      children: [
-        SizedBox(
-          width: double.infinity,
-          height: 60,
-          child: ElevatedButton.icon(
-            onPressed: () => Navigator.pop(context),
-            icon: const Icon(LucideIcons.edit3, size: 20),
-            label: const Text('EDIT TRANSACTION',
-                style:
-                    TextStyle(fontWeight: FontWeight.w900, letterSpacing: 1)),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppTheme.primary,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20)),
-              elevation: 0,
-            ),
-          ),
-        ),
-        const SizedBox(height: 16),
-        TextButton.icon(
-          onPressed: () {
-            context.read<ExpenseProvider>().deleteExpense(expense.id!);
-            Navigator.pop(context);
-          },
-          icon:
-              const Icon(LucideIcons.trash2, size: 18, color: AppTheme.danger),
-          label: const Text('DELETE PERMANENTLY',
-              style: TextStyle(
-                  color: AppTheme.danger,
-                  fontWeight: FontWeight.w900,
-                  fontSize: 13,
-                  letterSpacing: 0.5)),
-          style: TextButton.styleFrom(
-            padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          ),
-        ),
-      ],
     );
   }
 

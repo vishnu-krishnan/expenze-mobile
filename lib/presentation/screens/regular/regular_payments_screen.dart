@@ -443,7 +443,7 @@ class _RegularPaymentsScreenState extends State<RegularPaymentsScreen> {
                           letterSpacing: -0.5)),
                   const SizedBox(height: 32),
                   DropdownButtonFormField<int>(
-                    value: selectedCategoryId,
+                    initialValue: selectedCategoryId,
                     dropdownColor: modalBgColor,
                     items: categories
                         .map((c) => DropdownMenuItem(
@@ -484,7 +484,7 @@ class _RegularPaymentsScreenState extends State<RegularPaymentsScreen> {
                   ),
                   const SizedBox(height: 20),
                   DropdownButtonFormField<String>(
-                    value: priority,
+                    initialValue: priority,
                     dropdownColor: modalBgColor,
                     items: ['LOW', 'MEDIUM', 'HIGH']
                         .map((p) => DropdownMenuItem(

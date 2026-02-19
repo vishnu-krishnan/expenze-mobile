@@ -631,7 +631,7 @@ class _SmsImportScreenState extends State<SmsImportScreen>
             children: [
               Expanded(
                 child: DropdownButtonFormField<int>(
-                  value: expense.categoryId,
+                  initialValue: expense.categoryId,
                   dropdownColor: Theme.of(context).cardTheme.color,
                   items: categories
                       .map((c) => DropdownMenuItem(

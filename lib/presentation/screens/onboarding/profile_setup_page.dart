@@ -29,10 +29,21 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
       return;
     }
 
+    if (_emailController.text.isEmpty || !_emailController.text.contains('@')) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please enter a valid email address'),
+          backgroundColor: AppTheme.danger,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
     final auth = Provider.of<AuthProvider>(context, listen: false);
     final success = await auth.setOnboardingComplete(
       name: _nameController.text,
-      email: _emailController.text.isNotEmpty ? _emailController.text : null,
+      email: _emailController.text,
       budget: double.tryParse(_budgetController.text),
     );
 

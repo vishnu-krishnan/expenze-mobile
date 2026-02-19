@@ -269,10 +269,13 @@ class _CategoryEditScreenState extends State<CategoryEditScreen> {
               child: const Text('CANCEL')),
           TextButton(
             onPressed: () async {
+              final nav = Navigator.of(context);
               await provider.deleteCategory(widget.category.id);
               if (mounted) {
-                Navigator.pop(context);
-                Navigator.pop(context);
+                nav.pop(); // Pop dialog
+              }
+              if (context.mounted) {
+                Navigator.pop(context); // Pop screen
               }
             },
             child:

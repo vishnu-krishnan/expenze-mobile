@@ -781,7 +781,7 @@ class _MonthPlanScreenState extends State<MonthPlanScreen> {
                       color: textColor)),
               const SizedBox(height: 32),
               DropdownButtonFormField<int>(
-                value: selectedCategoryId,
+                initialValue: selectedCategoryId,
                 dropdownColor: modalBgColor,
                 items: categories
                     .map((c) => DropdownMenuItem(
@@ -797,7 +797,7 @@ class _MonthPlanScreenState extends State<MonthPlanScreen> {
               ),
               const SizedBox(height: 20),
               DropdownButtonFormField<String>(
-                value: selectedPaymentMode,
+                initialValue: selectedPaymentMode,
                 dropdownColor: modalBgColor,
                 items: ['Other', 'Cash', 'Card', 'UPI', 'Net Banking', 'Wallet']
                     .map((mode) => DropdownMenuItem(

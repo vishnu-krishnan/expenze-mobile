@@ -40,7 +40,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
     try {
       final auth = context.read<AuthProvider>();
       final success = await auth.register(
-        username: _fullNameController.text.trim(),
         password: _passwordController.text,
         fullName: _fullNameController.text.trim(),
         email: _emailController.text.trim(),

@@ -19,7 +19,7 @@ class DatabaseHelper {
 
     return await openDatabase(
       path,
-      version: 14,
+      version: 15,
       onCreate: _createDB,
       onUpgrade: _onUpgrade,
     );
@@ -80,13 +80,7 @@ class DatabaseHelper {
             'ALTER TABLE regular_payments ADD COLUMN status_description TEXT');
       } catch (_) {}
     }
-    if (oldVersion < 9) {
-      try {
-        await db.execute(
-            'ALTER TABLE regular_payments ADD COLUMN duration_months INTEGER');
-      } catch (_) {}
-    }
-    if (oldVersion < 10) {
+    if (oldVersion < 9 || oldVersion < 10) {
       try {
         await db.execute(
             'ALTER TABLE regular_payments ADD COLUMN duration_months INTEGER');
@@ -95,24 +89,28 @@ class DatabaseHelper {
     if (oldVersion < 11) {
       await _insertDefaultCategories(db);
     }
-    if (oldVersion < 12) {
+    if (oldVersion < 12 || oldVersion < 13) {
       try {
         await db.execute(
             "ALTER TABLE expenses ADD COLUMN payment_mode TEXT DEFAULT 'Other'");
       } catch (_) {}
     }
-    if (oldVersion < 13) {
+    if (oldVersion < 15) {
       try {
-        // Double check fix for version 12 failure
-        await db.execute(
-            "ALTER TABLE expenses ADD COLUMN payment_mode TEXT DEFAULT 'Other'");
-      } catch (_) {}
-    }
-    if (oldVersion < 14) {
-      try {
-        await db.execute(
-            "ALTER TABLE regular_payments ADD COLUMN priority TEXT DEFAULT 'MEDIUM'");
-      } catch (_) {}
+        final tableInfo = await db.rawQuery('PRAGMA table_info(users)');
+        final hasEmail = tableInfo.any((col) => col['name'] == 'email');
+        if (!hasEmail) {
+          await db.execute('ALTER TABLE users ADD COLUMN email TEXT');
+        }
+
+        final hasUsername = tableInfo.any((col) => col['name'] == 'username');
+        if (hasUsername) {
+          await db.execute(
+              "UPDATE users SET email = username WHERE (email IS NULL OR email = '') AND username IS NOT NULL");
+        }
+      } catch (e) {
+        print("Database migration error (v15): $e");
+      }
     }
   }
 
@@ -121,9 +119,8 @@ class DatabaseHelper {
     await db.execute('''
       CREATE TABLE users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        username TEXT NOT NULL UNIQUE,
+        email TEXT NOT NULL UNIQUE,
         full_name TEXT,
-        email TEXT,
         phone TEXT,
         password TEXT,
         default_budget REAL DEFAULT 0,
@@ -313,52 +310,45 @@ class DatabaseHelper {
   }
 
   // Auth related
-  Future<Map<String, dynamic>?> getUser(String username) async {
+  Future<Map<String, dynamic>?> getUser(String email) async {
     final db = await instance.database;
     final res = await db.query('users',
-        where: 'username = ?', whereArgs: [username], limit: 1);
+        where: 'email = ?', whereArgs: [email], limit: 1);
     return res.isNotEmpty ? res.first : null;
   }
 
   Future<int> registerUser({
-    required String username,
+    required String email,
     required String password,
     String? fullName,
-    String? email,
   }) async {
     final db = await instance.database;
     return await db.insert('users', {
-      'username': username,
+      'email': email,
       'password': password,
       'full_name': fullName,
-      'email': email,
       'created_at': DateTime.now().toIso8601String(),
     });
   }
 
   Future<int> upsertUser({
-    required String username,
+    required String email,
     String? fullName,
-    String? email,
     double? defaultBudget,
   }) async {
     final db = await instance.database;
     final now = DateTime.now().toIso8601String();
 
     Map<String, dynamic>? existing;
-    if (email != null && email.isNotEmpty) {
+    if (email.isNotEmpty) {
       final res = await db.query('users',
           where: 'email = ?', whereArgs: [email], limit: 1);
       if (res.isNotEmpty) existing = res.first;
     }
-    existing ??= (await db.query('users',
-            where: 'username = ?', whereArgs: [username], limit: 1))
-        .firstOrNull;
 
     final data = <String, dynamic>{
-      'username': username,
-      'full_name': fullName ?? existing?['full_name'],
       'email': email,
+      'full_name': fullName ?? existing?['full_name'],
       'default_budget': defaultBudget ?? (existing?['default_budget'] ?? 0.0),
       'updated_at': now,
       'synced': 0,
@@ -386,13 +376,13 @@ class DatabaseHelper {
         whereArgs: [id]);
   }
 
-  Future<void> updatePassword(String username, String newPassword) async {
+  Future<void> updatePassword(String email, String newPassword) async {
     final db = await instance.database;
     await db.update(
       'users',
       {'password': newPassword, 'updated_at': DateTime.now().toIso8601String()},
-      where: 'username = ?',
-      whereArgs: [username],
+      where: 'email = ?',
+      whereArgs: [email],
     );
   }
 }

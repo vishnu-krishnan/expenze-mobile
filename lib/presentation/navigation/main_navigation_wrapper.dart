@@ -37,7 +37,7 @@ class _MainNavigationWrapperState extends State<MainNavigationWrapper> {
 
     return PopScope(
       canPop: _selectedIndex == 0,
-      onPopInvoked: (didPop) {
+      onPopInvokedWithResult: (didPop, result) {
         if (didPop) return;
         setState(() => _selectedIndex = 0);
       },

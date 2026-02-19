@@ -43,9 +43,9 @@ class AuthProvider with ChangeNotifier {
       }
 
       // Load local user profile if exists
-      final username = prefs.getString('user_name');
-      if (username != null) {
-        _user = await _dbHelper.getUser(username);
+      final email = prefs.getString('user_email');
+      if (email != null) {
+        _user = await _dbHelper.getUser(email);
       }
     } catch (e) {
       logger.e('Auth initialization failed', error: e);
@@ -57,7 +57,7 @@ class AuthProvider with ChangeNotifier {
 
   Future<bool> setOnboardingComplete({
     required String name,
-    String? email,
+    required String email,
     double? budget,
   }) async {
     _isLoading = true;
@@ -67,25 +67,22 @@ class AuthProvider with ChangeNotifier {
       // 1. Save to Local DB
       final now = DateTime.now().toIso8601String();
       final userId = await _dbHelper.upsertUser(
-        username: name.toLowerCase().replaceAll(' ', '_'),
-        fullName: name,
         email: email,
+        fullName: name,
         defaultBudget: budget,
       );
 
       // 2. Update Preferences
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool('is_onboarded', true);
-      await prefs.setString(
-          'user_name', name.toLowerCase().replaceAll(' ', '_'));
+      await prefs.setString('user_email', email);
 
       _isOnboarded = true;
       _isAuthenticated = true; // First time entry doesn't require lock
       _user = {
         'id': userId,
-        'username': name.toLowerCase().replaceAll(' ', '_'),
-        'full_name': name,
         'email': email,
+        'full_name': name,
         'defaultBudget': budget,
         'created_at': now,
       };
@@ -193,9 +190,8 @@ class AuthProvider with ChangeNotifier {
 
   Future<void> updateProfile({
     String? fullName,
-    String? username,
-    String? phone,
     String? email,
+    String? phone,
     double? defaultBudget,
   }) async {
     if (_user?['id'] == null) return;
@@ -203,13 +199,12 @@ class AuthProvider with ChangeNotifier {
     try {
       await _dbHelper.updateUserProfile(_user!['id'], {
         if (fullName != null) 'full_name': fullName,
-        if (username != null) 'username': username,
         if (phone != null) 'phone': phone,
         if (email != null) 'email': email,
         if (defaultBudget != null) 'default_budget': defaultBudget,
       });
 
-      final updatedUser = await _dbHelper.getUser(_user!['username']);
+      final updatedUser = await _dbHelper.getUser(_user!['email']);
       if (updatedUser != null) {
         _user = updatedUser;
         notifyListeners();
@@ -220,20 +215,19 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
-  Future<bool> login(String username, String password) async {
+  Future<bool> login(String email, String password) async {
     _isLoading = true;
     notifyListeners();
 
     try {
-      // Local check: Verify if user exists and passcode matches or if it's the onboarded user
       final prefs = await SharedPreferences.getInstance();
-      final savedUser = prefs.getString('user_name');
+      final savedEmail = prefs.getString('user_email');
       final savedPin = prefs.getString('app_pin');
 
-      if (username.toLowerCase().replaceAll(' ', '_') == savedUser &&
+      if (email.toLowerCase().trim() == savedEmail &&
           (savedPin == null || savedPin == password)) {
         _isAuthenticated = true;
-        _user = await _dbHelper.getUser(username);
+        _user = await _dbHelper.getUser(email);
         _isLoading = false;
         notifyListeners();
         return true;
@@ -252,25 +246,22 @@ class AuthProvider with ChangeNotifier {
   }
 
   Future<bool> register({
-    required String username,
+    required String email,
     required String password,
     String? fullName,
-    String? email,
   }) async {
     return await setOnboardingComplete(
-      name: fullName ?? username,
+      name: fullName ?? email.split('@')[0],
       email: email,
       budget: 0,
     );
   }
 
-  Future<bool> resetPassword(String username, String password) async {
-    // Stub for Local-first architecture: In a real app lock scenario,
-    // this would update the local PIN.
+  Future<bool> resetPassword(String email, String password) async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final savedUser = prefs.getString('user_name');
-      if (username.toLowerCase().replaceAll(' ', '_') == savedUser) {
+      final savedEmail = prefs.getString('user_email');
+      if (email.toLowerCase().trim() == savedEmail) {
         await prefs.setString('app_pin', password);
         return true;
       }

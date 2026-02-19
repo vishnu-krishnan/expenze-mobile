@@ -114,7 +114,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             ),
                           ),
                           Text(
-                            user?['fullName'] ?? 'User',
+                            user?['full_name'] ?? 'User',
                             style: TextStyle(
                               fontSize: 26,
                               fontWeight: FontWeight.w900,
@@ -609,7 +609,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           letterSpacing: -0.5)),
                   const SizedBox(height: 32),
                   DropdownButtonFormField<int>(
-                    value: selectedCategoryId,
+                    initialValue: selectedCategoryId,
                     dropdownColor: modalBgColor,
                     items: categories
                         .map((c) => DropdownMenuItem(
@@ -625,7 +625,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   ),
                   const SizedBox(height: 20),
                   DropdownButtonFormField<String>(
-                    value: selectedPaymentMode,
+                    initialValue: selectedPaymentMode,
                     dropdownColor: modalBgColor,
                     items: [
                       'Other',

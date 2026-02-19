@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'dart:math';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../providers/auth_provider.dart';
-import '../../../data/constants/app_quotes.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -14,29 +12,90 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
+  final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
+  final _phoneController = TextEditingController();
+  final _budgetController = TextEditingController();
+
   bool _isEditing = false;
-  int _quoteIndex = 0;
+  bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
-    _quoteIndex = Random().nextInt(AppQuotes.motivational.length);
     final user = context.read<AuthProvider>().user;
     if (user != null) {
-      _nameController.text = user['fullName'] ?? '';
+      _nameController.text = user['full_name'] ?? '';
       _emailController.text = user['email'] ?? '';
+      _phoneController.text = user['phone'] ?? '';
+      _budgetController.text = user['default_budget']?.toString() ?? '0';
+    }
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _emailController.dispose();
+    _phoneController.dispose();
+    _budgetController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _saveProfile() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() => _isLoading = true);
+    final auth = context.read<AuthProvider>();
+
+    try {
+      await auth.updateProfile(
+        fullName: _nameController.text.trim(),
+        email: _emailController.text.trim(),
+        phone: _phoneController.text.trim(),
+        defaultBudget: double.tryParse(_budgetController.text),
+      );
+
+      if (!mounted) return;
+
+      setState(() {
+        _isLoading = false;
+        _isEditing = false;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Profile updated successfully'),
+          backgroundColor: AppTheme.success,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isLoading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Failed to update profile'),
+            backgroundColor: AppTheme.danger,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final authProvider = context.watch<AuthProvider>();
+    final user = authProvider.user;
     final textColor = AppTheme.getTextColor(context);
     final secondaryTextColor =
         AppTheme.getTextColor(context, isSecondary: true);
-
     final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    if (user == null) {
+      return const Scaffold(body: Center(child: Text('Not logged in')));
+    }
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -46,200 +105,238 @@ class _ProfileScreenState extends State<ProfileScreen> {
         decoration: isDark
             ? AppTheme.darkBackgroundDecoration
             : AppTheme.backgroundDecoration,
-        child: Column(
-          children: [
-            AppBar(
-              title: Text('User Profile',
-                  style:
-                      TextStyle(color: textColor, fontWeight: FontWeight.bold)),
-              backgroundColor: Colors.transparent,
-              elevation: 0,
-              centerTitle: false,
-              automaticallyImplyLeading: false,
-              actions: [
-                _isEditing
-                    ? IconButton(
-                        onPressed: () async {
-                          await _saveProfile();
-                          if (mounted) setState(() => _isEditing = false);
-                        },
-                        icon: const Icon(LucideIcons.check,
-                            color: AppTheme.success, size: 28),
-                      )
-                    : IconButton(
-                        onPressed: () => setState(() => _isEditing = true),
-                        icon: Icon(LucideIcons.edit3, color: AppTheme.primary),
-                      ),
-                const SizedBox(width: 8),
-              ],
-            ),
-            Expanded(
-              child: Consumer<AuthProvider>(
-                builder: (context, auth, child) {
-                  final user = auth.user;
-                  if (user == null) {
-                    return const Center(child: Text('Not logged in'));
-                  }
-
-                  // Sync controllers with user data when not editing
-                  if (!_isEditing) {
-                    _nameController.text = user['full_name'] ?? '';
-                    _emailController.text = user['email'] ?? '';
-                  }
-
-                  return SingleChildScrollView(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 24, vertical: 20),
+        child: SafeArea(
+          child: Column(
+            children: [
+              _buildHeader(context, user, textColor),
+              Expanded(
+                child: SingleChildScrollView(
+                  physics: const BouncingScrollPhysics(),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+                  child: Form(
+                    key: _formKey,
                     child: Column(
                       children: [
-                        _buildModernAvatar(user['full_name'] ?? 'U'),
-                        const SizedBox(height: 12),
-                        Text(user['full_name'] ?? 'Member',
-                            style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                                color: textColor)),
+                        _buildUserAvatar(user, textColor),
+                        const SizedBox(height: 16),
+                        Text(
+                          user['full_name'] ?? 'Guest User',
+                          style: TextStyle(
+                            fontSize: 28,
+                            fontWeight: FontWeight.w900,
+                            color: textColor,
+                            letterSpacing: -1,
+                          ),
+                        ),
+                        Text(
+                          user['email'] ?? 'No email set',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: secondaryTextColor,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
                         const SizedBox(height: 32),
-                        _buildSettingsCard(user, textColor, secondaryTextColor),
-                        if (!_isEditing) ...[
-                          const SizedBox(height: 24),
-                          _buildMotivationalCard(),
-                          const SizedBox(height: 24),
-                          _buildLogoutButton(auth),
-                        ],
+                        _buildAccountSummary(
+                            context, textColor, secondaryTextColor),
+                        const SizedBox(height: 32),
+                        _buildProfileDetails(
+                            context, textColor, secondaryTextColor),
+                        const SizedBox(height: 32),
+                        _buildSecurityQuickLinks(
+                            context, textColor, secondaryTextColor),
+                        const SizedBox(height: 40),
+                        _buildLogoutButton(context),
+                        const SizedBox(height: 100),
                       ],
                     ),
-                  );
-                },
+                  ),
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildModernAvatar(String name) {
+  Widget _buildHeader(BuildContext context, dynamic user, Color textColor) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          IconButton(
+            onPressed: () => Navigator.pop(context),
+            icon: Icon(LucideIcons.arrowLeft, color: textColor),
+          ),
+          Text(
+            'User Profile',
+            style: TextStyle(
+              color: textColor,
+              fontSize: 18,
+              fontWeight: FontWeight.w900,
+              letterSpacing: -0.5,
+            ),
+          ),
+          _isLoading
+              ? const SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: CircularProgressIndicator(strokeWidth: 2))
+              : IconButton(
+                  onPressed: () {
+                    if (_isEditing) {
+                      _saveProfile();
+                    } else {
+                      setState(() => _isEditing = true);
+                    }
+                  },
+                  icon: Icon(
+                    _isEditing ? LucideIcons.check : LucideIcons.edit3,
+                    color: _isEditing ? AppTheme.success : textColor,
+                    size: 20,
+                  ),
+                ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildUserAvatar(dynamic user, Color textColor) {
     return Stack(
+      alignment: Alignment.bottomRight,
       children: [
         Container(
           padding: const EdgeInsets.all(4),
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            border: Border.all(color: AppTheme.primary, width: 2),
+            border: Border.all(
+                color: AppTheme.primary.withValues(alpha: 0.3), width: 2),
           ),
           child: CircleAvatar(
-            radius: 50,
-            backgroundColor: AppTheme.primary,
+            radius: 60,
+            backgroundColor: AppTheme.primary.withValues(alpha: 0.1),
             child: Text(
-              name.isNotEmpty ? name[0].toUpperCase() : 'U',
+              (user['full_name']?[0] ?? 'U').toUpperCase(),
               style: const TextStyle(
-                  fontSize: 40,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white),
+                fontSize: 48,
+                fontWeight: FontWeight.w900,
+                color: AppTheme.primary,
+              ),
             ),
           ),
         ),
         if (_isEditing)
-          Positioned(
-            bottom: 0,
-            right: 0,
-            child: GestureDetector(
-              onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                      content: Text('Profile picture upload coming soon!')),
-                );
-              },
-              child: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: const BoxDecoration(
-                  color: AppTheme.primary,
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(LucideIcons.camera,
-                    color: Colors.white, size: 16),
-              ),
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: const BoxDecoration(
+              color: AppTheme.primary,
+              shape: BoxShape.circle,
             ),
+            child:
+                const Icon(LucideIcons.camera, color: Colors.white, size: 20),
           ),
       ],
     );
   }
 
-  Widget _buildSettingsCard(
-      Map<String, dynamic> user, Color textColor, Color secondaryTextColor) {
+  Widget _buildAccountSummary(
+      BuildContext context, Color textColor, Color secondaryTextColor) {
     return Container(
       padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardTheme.color,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: AppTheme.softShadow,
-      ),
-      child: Column(
+      decoration: AppTheme.glassDecoration(context),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          _buildInfoRow(LucideIcons.user, 'Full Name', _nameController.text,
-              textColor: textColor,
-              secondaryTextColor: secondaryTextColor,
-              controller: _nameController),
-          Divider(height: 32, color: secondaryTextColor.withValues(alpha: 0.1)),
-          _buildInfoRow(
-              LucideIcons.mail, 'Email Address', _emailController.text,
-              textColor: textColor,
-              secondaryTextColor: secondaryTextColor,
-              controller: _emailController),
-          Divider(height: 32, color: secondaryTextColor.withValues(alpha: 0.1)),
-          _buildInfoRow(LucideIcons.calendar, 'Member Since',
-              _formatDate(user['created_at']),
-              textColor: textColor, secondaryTextColor: secondaryTextColor),
+          _buildSummaryItem(
+              'Member Status', 'Active', LucideIcons.shield, AppTheme.success),
+          Container(
+              width: 1,
+              height: 40,
+              color: secondaryTextColor.withValues(alpha: 0.1)),
+          _buildSummaryItem(
+              'Since',
+              _formatDate(context.read<AuthProvider>().user?['created_at']),
+              LucideIcons.calendar,
+              AppTheme.primary),
         ],
       ),
     );
   }
 
-  Widget _buildInfoRow(IconData icon, String label, String value,
-      {required Color textColor,
-      required Color secondaryTextColor,
-      TextEditingController? controller,
-      bool isNumber = false}) {
-    return Row(
+  Widget _buildSummaryItem(
+      String label, String value, IconData icon, Color color) {
+    return Column(
       children: [
-        Container(
-          padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(
-              color: AppTheme.primary.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(12)),
-          child: Icon(icon, size: 20, color: AppTheme.primary),
+        Icon(icon, color: color, size: 20),
+        const SizedBox(height: 8),
+        Text(value,
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900)),
+        Text(label.toUpperCase(),
+            style: const TextStyle(
+                fontSize: 9, fontWeight: FontWeight.bold, color: Colors.grey)),
+      ],
+    );
+  }
+
+  Widget _buildProfileDetails(
+      BuildContext context, Color textColor, Color secondaryTextColor) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Personal Information'.toUpperCase(),
+          style: TextStyle(
+            fontSize: 11,
+            fontWeight: FontWeight.w900,
+            color: secondaryTextColor.withValues(alpha: 0.6),
+            letterSpacing: 1.5,
+          ),
         ),
-        const SizedBox(width: 16),
-        Expanded(
+        const SizedBox(height: 16),
+        Container(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          decoration: AppTheme.glassDecoration(context),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(label,
-                  style: TextStyle(
-                      color: secondaryTextColor,
-                      fontSize: 11,
-                      fontWeight: FontWeight.w600)),
-              if (_isEditing && controller != null)
-                TextField(
-                  controller: controller,
-                  keyboardType:
-                      isNumber ? TextInputType.number : TextInputType.text,
-                  decoration: const InputDecoration(
-                      isDense: true,
-                      contentPadding: EdgeInsets.symmetric(vertical: 4),
-                      border: InputBorder.none),
-                  style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 15,
-                      color: textColor),
-                )
-              else
-                Text(value,
-                    style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 15,
-                        color: textColor)),
+              _buildModernTextField(
+                controller: _nameController,
+                label: 'Name',
+                icon: LucideIcons.user,
+                enabled: _isEditing,
+                textColor: textColor,
+                validator: (v) => v!.isEmpty ? 'Name is required' : null,
+              ),
+              _buildDivider(),
+              _buildModernTextField(
+                controller: _emailController,
+                label: 'Email Address',
+                icon: LucideIcons.mail,
+                enabled: _isEditing,
+                textColor: textColor,
+                validator: (v) => v!.isEmpty || !v.contains('@')
+                    ? 'Valid email required'
+                    : null,
+              ),
+              _buildDivider(),
+              _buildModernTextField(
+                controller: _phoneController,
+                label: 'Phone Number',
+                icon: LucideIcons.phone,
+                enabled: _isEditing,
+                textColor: textColor,
+              ),
+              _buildDivider(),
+              _buildModernTextField(
+                controller: _budgetController,
+                label: 'Monthly Budget',
+                icon: LucideIcons.target,
+                enabled: _isEditing,
+                textColor: textColor,
+                keyboardType: TextInputType.number,
+              ),
             ],
           ),
         ),
@@ -247,199 +344,188 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildLogoutButton(AuthProvider auth) {
-    return ElevatedButton(
-      onPressed: () => _showLogoutPrompt(context, auth),
-      style: ElevatedButton.styleFrom(
-        backgroundColor: Theme.of(context).brightness == Brightness.dark
-            ? AppTheme.bgCardDark
-            : Colors.white,
-        foregroundColor: AppTheme.danger,
-        side: BorderSide(color: AppTheme.danger.withValues(alpha: 0.2)),
-        minimumSize: const Size(double.infinity, 60),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        elevation: 0,
-      ),
-      child: const Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(LucideIcons.logOut, size: 20),
-          SizedBox(width: 12),
-          Text('Reset App Data', style: TextStyle(fontWeight: FontWeight.bold)),
-        ],
-      ),
-    );
-  }
-
-  void _showLogoutPrompt(BuildContext context, AuthProvider auth) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Reset Everything?'),
-        content: const Text(
-            'This will delete all your local data, expenses, and settings. This action is IRREVERSIBLE.'),
-        actions: [
-          TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel')),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context); // Close first dialog
-              _showMathChallenge(context, auth); // Open second
-            },
-            child:
-                const Text('Reset', style: TextStyle(color: AppTheme.danger)),
+  Widget _buildSecurityQuickLinks(
+      BuildContext context, Color textColor, Color secondaryTextColor) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Security & Preferences'.toUpperCase(),
+          style: TextStyle(
+            fontSize: 11,
+            fontWeight: FontWeight.w900,
+            color: secondaryTextColor.withValues(alpha: 0.6),
+            letterSpacing: 1.5,
           ),
-        ],
-      ),
+        ),
+        const SizedBox(height: 16),
+        _buildQuickLinkTile(
+          context,
+          icon: LucideIcons.lock,
+          title: 'Security Settings',
+          onTap: () => Navigator.pushNamed(context, '/settings'),
+          color: AppTheme.primary,
+        ),
+        const SizedBox(height: 12),
+        _buildQuickLinkTile(
+          context,
+          icon: LucideIcons.bell,
+          title: 'Manage Notifications',
+          onTap: () {},
+          color: AppTheme.secondary,
+        ),
+      ],
     );
   }
 
-  void _showMathChallenge(BuildContext context, AuthProvider auth) {
-    final a = Random().nextInt(10) + 1; // 1-10
-    final b = Random().nextInt(10) + 1;
-    final answerController = TextEditingController();
-    bool error = false;
-
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setState) => AlertDialog(
-          title: const Text('Security Verification'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text('Please solve this to confirm: $a + $b = ?',
-                  style: const TextStyle(fontWeight: FontWeight.bold)),
-              const SizedBox(height: 16),
-              TextField(
-                controller: answerController,
-                keyboardType: TextInputType.number,
-                autofocus: true,
-                decoration: InputDecoration(
-                  hintText: 'Enter answer',
-                  errorText: error ? 'Incorrect answer' : null,
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12)),
-                ),
+  Widget _buildQuickLinkTile(BuildContext context,
+      {required IconData icon,
+      required String title,
+      required VoidCallback onTap,
+      required Color color}) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(20),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: AppTheme.glassDecoration(context).copyWith(
+          color: color.withValues(alpha: 0.05),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(12),
               ),
-            ],
-          ),
-          actions: [
-            TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Cancel')),
-            TextButton(
-              onPressed: () {
-                if (int.tryParse(answerController.text) == a + b) {
-                  Navigator.pop(context);
-                  _showFinalWarning(context, auth);
-                } else {
-                  setState(() => error = true);
-                }
-              },
-              child: const Text('Verify'),
+              child: Icon(icon, color: color, size: 20),
             ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Text(
+                title,
+                style:
+                    const TextStyle(fontWeight: FontWeight.w700, fontSize: 15),
+              ),
+            ),
+            Icon(LucideIcons.chevronRight,
+                size: 16, color: color.withValues(alpha: 0.4)),
           ],
         ),
       ),
     );
   }
 
-  void _showFinalWarning(BuildContext context, AuthProvider auth) {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (dialogContext) => AlertDialog(
-        title: const Text(' one last thing...'),
-        content: const Text(
-            'Just so you know, we haven\'t introduced Google Drive backup yet.\n\nSo when we say "Deleted", we mean GONE. Poof. Forever.\n\nAre you absolutely sure?'),
-        actions: [
-          TextButton(
-              onPressed: () => Navigator.pop(dialogContext),
-              child: const Text('Wait, Go Back!')),
-          TextButton(
-            onPressed: () async {
-              Navigator.pop(dialogContext);
-              await auth.logout();
-              if (mounted) {
-                // ignore: use_build_context_synchronously
-                Navigator.pushNamedAndRemoveUntil(
-                    this.context, '/landing', (route) => false);
-              }
-            },
-            child: const Text('Yes, Nuke It All',
-                style: TextStyle(
-                    color: AppTheme.danger, fontWeight: FontWeight.bold)),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Future<void> _saveProfile() async {
-    final auth = context.read<AuthProvider>();
-    await auth.updateProfile(
-      fullName: _nameController.text,
-      email: _emailController.text,
-    );
-
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text('Profile synchronized successfully'),
-        backgroundColor: AppTheme.success,
-        behavior: SnackBarBehavior.floating,
-      ));
-    }
-  }
-
-  Widget _buildMotivationalCard() {
-    final quote = AppQuotes.motivational[_quoteIndex];
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [AppTheme.primary, AppTheme.primaryDark],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: AppTheme.softShadow,
-      ),
-      child: Column(
+  Widget _buildModernTextField({
+    required TextEditingController controller,
+    required String label,
+    required IconData icon,
+    required bool enabled,
+    required Color textColor,
+    TextInputType? keyboardType,
+    String? Function(String?)? validator,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+      child: Row(
         children: [
-          const Icon(LucideIcons.quote, color: Colors.white, size: 32),
-          const SizedBox(height: 16),
-          Text(
-            '"${quote['text']}"',
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-                color: Colors.white,
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                fontStyle: FontStyle.italic),
-          ),
-          const SizedBox(height: 12),
-          Text(
-            '- ${quote['author']}',
-            style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.8),
-                fontSize: 12,
-                fontWeight: FontWeight.w500),
+          Icon(icon, size: 20, color: AppTheme.primary.withValues(alpha: 0.4)),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label.toUpperCase(),
+                  style: const TextStyle(
+                      fontSize: 9,
+                      fontWeight: FontWeight.w900,
+                      color: Colors.grey,
+                      letterSpacing: 0.5),
+                ),
+                TextFormField(
+                  controller: controller,
+                  enabled: enabled,
+                  validator: validator,
+                  keyboardType: keyboardType,
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                    color:
+                        enabled ? textColor : textColor.withValues(alpha: 0.7),
+                  ),
+                  decoration: const InputDecoration(
+                    isDense: true,
+                    border: InputBorder.none,
+                    contentPadding: EdgeInsets.symmetric(vertical: 4),
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildDivider() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Divider(height: 1, color: Colors.grey.withValues(alpha: 0.05)),
+    );
+  }
+
+  Widget _buildLogoutButton(BuildContext context) {
+    return TextButton.icon(
+      onPressed: () {
+        showDialog(
+          context: context,
+          builder: (dialogContext) => AlertDialog(
+            title: const Text('Logout'),
+            content: const Text(
+                'Are you sure you want to logout? This will clear all local data from this device.'),
+            actions: [
+              TextButton(
+                  onPressed: () => Navigator.pop(dialogContext),
+                  child: const Text('Cancel')),
+              TextButton(
+                onPressed: () async {
+                  final auth = context.read<AuthProvider>();
+                  Navigator.pop(dialogContext);
+                  await auth.logout();
+                  if (context.mounted) {
+                    Navigator.pushNamedAndRemoveUntil(
+                        context, '/onboarding', (route) => false);
+                  }
+                },
+                child: const Text('Logout',
+                    style: TextStyle(
+                        color: AppTheme.danger, fontWeight: FontWeight.bold)),
+              ),
+            ],
+          ),
+        );
+      },
+      icon: const Icon(LucideIcons.logOut, color: AppTheme.danger, size: 20),
+      label: const Text(
+        'SIGN OUT FROM DEVICE',
+        style: TextStyle(
+            color: AppTheme.danger,
+            fontWeight: FontWeight.w900,
+            fontSize: 12,
+            letterSpacing: 1),
       ),
     );
   }
 
   String _formatDate(String? isoString) {
-    if (isoString == null) return 'Unknown';
+    if (isoString == null) return 'N/A';
     try {
       final date = DateTime.parse(isoString);
       return '${date.day}/${date.month}/${date.year}';
     } catch (_) {
-      return 'Unknown';
+      return 'N/A';
     }
   }
 }

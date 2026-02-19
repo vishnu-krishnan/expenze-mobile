@@ -338,7 +338,7 @@ class SettingsScreen extends StatelessWidget {
           Switch.adaptive(
             value: value,
             onChanged: onChanged,
-            activeColor: Colors.white,
+            activeThumbColor: Colors.white,
             activeTrackColor: AppTheme.primary,
           ),
         ],
