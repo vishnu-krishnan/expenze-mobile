@@ -47,40 +47,85 @@ class SmsService {
 
     final lowerBody = body.toLowerCase();
 
-    // Check if it's a debit/payment message
+    // 1. STRICTURE FILTERING: Exclude Non-Transaction Messages
+
+    // Explicitly exclude Reminders and Bill Alerts
+    final isReminder = lowerBody.contains('due date') ||
+        lowerBody.contains('bill generated') ||
+        lowerBody.contains('overdue') ||
+        lowerBody.contains('pay by') ||
+        lowerBody.contains('payment requested') ||
+        lowerBody.contains('statement for') ||
+        lowerBody.contains('upcoming') ||
+        lowerBody.contains('reminder');
+
+    if (isReminder) return null;
+
+    // Explicitly exclude Notifications (Login, OTP, Balance Inquiry)
+    final isNotification = lowerBody.contains('otp is') ||
+        lowerBody.contains('verification code') ||
+        lowerBody.contains('logged in') ||
+        lowerBody.contains('login') ||
+        lowerBody.contains('successful login') ||
+        lowerBody.contains('balance is') ||
+        lowerBody.contains('available balance') ||
+        lowerBody.contains('bal:') ||
+        lowerBody.contains('avl bal') ||
+        lowerBody.contains('blocked') ||
+        lowerBody.contains('your account has been');
+
+    // Also exclude common credit/income patterns (Income is not an Expense)
+    final isCredit = lowerBody.contains('credited') ||
+        lowerBody.contains('refund') ||
+        lowerBody.contains('received') ||
+        lowerBody.contains('reward') ||
+        lowerBody.contains('cashback') ||
+        lowerBody.contains('cr to');
+
+    // 2. IDENTIFY DEBIT TRANSACTIONS
+    // Must contain specific debit/payment markers
     final isDebit = lowerBody.contains('debited') ||
+        lowerBody.contains('debit') ||
         lowerBody.contains('paid') ||
         lowerBody.contains('spent') ||
         lowerBody.contains('payment') ||
         lowerBody.contains('withdrawn') ||
         lowerBody.contains('dr to') ||
+        lowerBody.contains('towards') ||
         lowerBody.contains('transfer to') ||
-        lowerBody.contains('txn') ||
+        lowerBody.contains('purc on') ||
         lowerBody.contains('purchased') ||
-        lowerBody.contains('upi') ||
-        lowerBody.contains('bank ac');
+        lowerBody.contains('txn') ||
+        lowerBody.contains('using upi') ||
+        lowerBody.contains('sent to') ||
+        lowerBody.contains('sent rs') ||
+        lowerBody.contains('recharge') ||
+        lowerBody.contains('recharged');
 
-    // Also exclude common credit/refund patterns
-    final isCredit = lowerBody.contains('credited') ||
-        lowerBody.contains('refund') ||
-        lowerBody.contains('received') ||
-        lowerBody.contains('cashback');
-
-    if (!isDebit || isCredit) return null;
+    // Logic: If it's a notification/credit but NOT a debit, ignore.
+    // If it's a notification/credit AND a debit, we need to be very careful.
+    // Usually, "credited" messages don't contain "debited".
+    if (!isDebit ||
+        isCredit ||
+        (isNotification &&
+            !(lowerBody.contains('debited') || lowerBody.contains('debit')))) {
+      return null;
+    }
 
     // Amount Extraction Patterns - Enhanced
     final amountPatterns = [
-      // Standard formats: Rs 500.00, Rs. 500, Rs.500
+      // Standard formats: Rs 500.00, Rs. 500, Rs.500, INR 100, ₹100
       RegExp(r'(?:rs\.?|inr|₹|amt:?)\s*?([\d,]+\.?\d{0,2})',
           caseSensitive: false),
-      // Specific debit phrases
+      // Specific debit phrases: "debited for Rs 100"
       RegExp(r'debited\s*(?:for|of)?\s*(?:rs\.?|inr|₹)?\s*?([\d,]+\.?\d{0,2})',
           caseSensitive: false),
-      // Payment phrases
+      // Payment phrases: "Paid Rs 100"
       RegExp(r'paid\s*(?:rs\.?|inr|₹)?\s*?([\d,]+\.?\d{0,2})',
           caseSensitive: false),
-      // UPI and VPA patterns
-      RegExp(r'transferred\s*(?:rs\.?|inr|₹)?\s*?([\d,]+\.?\d{0,2})',
+      // Transaction phrases: "Txn of Rs 100"
+      RegExp(
+          r'txn\s*(?:of|for|amount)?\s*(?:rs\.?|inr|₹)?\s*?([\d,]+\.?\d{0,2})',
           caseSensitive: false),
     ];
 
@@ -100,25 +145,24 @@ class SmsService {
 
     // Merchant Extraction Patterns - Enhanced
     final merchantPatterns = [
-      // UPI P2M / P2P
+      // UPI VPA: "to [VPA]"
       RegExp(r'(?:to|at)\s+([a-zA-Z0-9.\-_]{3,25}@[a-zA-Z0-9.\-_]{3,25})',
-          caseSensitive: false), // VPA in text
-      RegExp(r'(?:vf|vm|vz|bz|ax|ic|hs|py)-([a-zA-Z0-9]{3,10})',
-          caseSensitive: false), // Header based (simplistic)
-      // "Spent Rs X at [Merchant]"
-      RegExp(
-          r'(?:at|to|on)\s+([A-Za-z0-9\s&*_\-.]{3,40}?)(?:\s+on\s+card|\s+on\s+account|\s+ending|\s+via|\s+date|\s+ref|\s+txn|\.|\d)',
           caseSensitive: false),
-      // "Debited ... for [Merchant]"
+      // "Spent ... at/on [Merchant]"
+      RegExp(
+          r'(?:at|on|to)\s+([A-Za-z0-9\s&*_\-.]{3,40}?)(?:\s+on\s+card|\s+on\s+account|\s+ending|\s+via|\s+date|\s+ref|\s+txn|\.|\d)',
+          caseSensitive: false),
+      // "Debited for [Merchant]"
       RegExp(
           r'(?:for|info:)\s+([A-Za-z0-9\s&*_\-.]{3,40}?)(?:\s+on|\s+ref|\s+txn|\.|\d)',
           caseSensitive: false),
-      // Card usage: "Purchase of Rs X at [Merchant]"
+      // "Payment to [Merchant]"
+      RegExp(
+          r'payment\s+to\s+([A-Za-z0-9\s&*_\-.]{3,40}?)(?:\s+on|\s+ref|\s+txn|\.|\d)',
+          caseSensitive: false),
+      // Card usage: "Purchase of ... at [Merchant]"
       RegExp(
           r'purchase\s+of\s+.*?\s+at\s+([A-Za-z0-9\s&*_\-.]{3,40}?)(?:\s+on|\.|\d)',
-          caseSensitive: false),
-      // Generic "at"
-      RegExp(r'\s+at\s+([A-Za-z0-9\s&*_\-.]{3,40}?)(?:\s+on|\.|\d)',
           caseSensitive: false),
     ];
 
@@ -140,22 +184,28 @@ class SmsService {
           // Cleanup values
           val = val
               .replaceAll(
-                  RegExp(r'\s+(on|at|for|ref|from|to|with|by)$',
+                  RegExp(r'\s+(on|at|for|ref|from|to|with|by|via|date)$',
                       caseSensitive: false),
                   '')
               .trim();
 
-          // Filter out bad extractions
+          // Filter out generic banking noise
+          final lowerVal = val.toLowerCase();
           if (val.isNotEmpty &&
               val.length > 2 &&
-              !val.toLowerCase().contains('account') &&
-              !val.toLowerCase().contains('bank') &&
-              !val.toLowerCase().contains(' xxxx') &&
-              !val.toLowerCase().contains('ending') &&
-              !val.toLowerCase().contains('balance') &&
-              !val.toLowerCase().contains('limit') &&
-              !val.toLowerCase().contains('wallet') &&
-              !val.toLowerCase().contains('card')) {
+              !lowerVal.contains('account') &&
+              !lowerVal.contains('bank') &&
+              !lowerVal.contains('xxxx') &&
+              !lowerVal.contains('ending') &&
+              !lowerVal.contains('balance') &&
+              !lowerVal.contains('limit') &&
+              !lowerVal.contains('wallet') &&
+              !lowerVal.contains('card') &&
+              !lowerVal.contains('debit') &&
+              !lowerVal.contains('credit') &&
+              !lowerVal.contains('your ac') &&
+              !lowerVal.contains('reference') &&
+              !lowerVal.contains('txn')) {
             // If looks like a VPA, keep it
             if (val.contains('@')) {
               merchant = val;
@@ -163,8 +213,8 @@ class SmsService {
             }
 
             // If just text, verify it's not generic 'transaction'
-            if (!val.toLowerCase().contains('transaction') &&
-                !val.toLowerCase().contains('transfer')) {
+            if (!lowerVal.contains('transaction') &&
+                !lowerVal.contains('transfer')) {
               merchant = val;
               break;
             }
@@ -174,23 +224,37 @@ class SmsService {
     }
 
     if (merchant.isEmpty) {
-      // Fallback: look for VPA or common identifiers
-      final vpaMatch =
-          RegExp(r'([a-zA-Z0-9.\-_]+@[a-zA-Z0-9.\-_]+)').firstMatch(body);
-      if (vpaMatch != null) {
-        merchant = vpaMatch.group(1)!;
-      } else {
-        merchant = 'Transaction';
-      }
+      merchant = 'Transaction';
     }
 
     // Post-processing cleanup
     merchant = merchant.replaceAll(RegExp(r'\s+'), ' ').trim();
-    if (merchant.length > 30) merchant = merchant.substring(0, 30).trim();
+    if (merchant.length > 35) merchant = merchant.substring(0, 35).trim();
+
+    // Payment Mode Extraction
+    String paymentMode = 'Other';
+    if (lowerBody.contains('upi')) {
+      paymentMode = 'UPI';
+    } else if (lowerBody.contains('card') ||
+        lowerBody.contains('pos txn') ||
+        lowerBody.contains('ending in') ||
+        lowerBody.contains('spent on')) {
+      paymentMode = 'Card';
+    } else if (lowerBody.contains('wallet') ||
+        lowerBody.contains('paytm') ||
+        lowerBody.contains('amazon pay')) {
+      paymentMode = 'Wallet';
+    } else if (lowerBody.contains('netbanking') ||
+        lowerBody.contains('online banking') ||
+        lowerBody.contains('imps') ||
+        lowerBody.contains('neft')) {
+      paymentMode = 'Net Banking';
+    }
 
     return {
       'amount': amount,
       'merchant': merchant,
+      'payment_mode': paymentMode,
       'raw': body,
     };
   }

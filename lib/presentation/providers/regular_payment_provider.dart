@@ -15,6 +15,7 @@ class RegularPayment {
   final bool isActive;
   final String? status;
   final String? statusDescription;
+  final String priority;
 
   RegularPayment({
     this.id,
@@ -30,6 +31,7 @@ class RegularPayment {
     required this.isActive,
     this.status,
     this.statusDescription,
+    this.priority = 'MEDIUM',
   });
 
   factory RegularPayment.fromMap(Map<String, dynamic> map) {
@@ -48,6 +50,7 @@ class RegularPayment {
       isActive: map['is_active'] == 1,
       status: map['status'],
       statusDescription: map['status_description'],
+      priority: map['priority'] ?? 'MEDIUM',
     );
   }
 
@@ -65,6 +68,7 @@ class RegularPayment {
       'is_active': isActive ? 1 : 0,
       'status': status,
       'status_description': statusDescription,
+      'priority': priority,
       'updated_at': DateTime.now().toIso8601String(),
     };
   }
@@ -83,6 +87,7 @@ class RegularPayment {
     bool? isActive,
     String? status,
     String? statusDescription,
+    String? priority,
   }) {
     return RegularPayment(
       id: id ?? this.id,
@@ -98,6 +103,7 @@ class RegularPayment {
       isActive: isActive ?? this.isActive,
       status: status ?? this.status,
       statusDescription: statusDescription ?? this.statusDescription,
+      priority: priority ?? this.priority,
     );
   }
 }

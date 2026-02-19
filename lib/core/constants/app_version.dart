@@ -11,11 +11,54 @@ class ReleaseInfo {
 }
 
 class AppVersion {
-  static const String current = '1.0.2';
-  static const String buildNumber = '3';
-  static const String releaseName = 'Planner & Stability Update';
+  static const String current = '1.0.6';
+  static const String buildNumber = '7';
+  static const String releaseName = 'Stability & UI Polish';
 
   static const List<ReleaseInfo> history = [
+    ReleaseInfo(
+      version: '1.0.6',
+      date: '2026-02-18',
+      changes: [
+        'Improved stability: Added mounted guards for BuildContext across async operations',
+        'UI Refinement: Renamed "Actual" label to "Spent" for clearer terminology',
+        'SMS Import Update: "Uncategorized" transactions are now labeled as "Imported"',
+        'Formatting: Standardized "Amount Spent" labels in detail views'
+      ],
+    ),
+    ReleaseInfo(
+      version: '1.0.5',
+      date: '2026-02-18',
+      changes: [
+        'Enabled Payment Mode tracking: Auto-detect UPI, Card, and Wallet from SMS',
+        'Added manual Payment Mode selection when creating or editing expenses',
+        'Refined Analytics: Pie Chart now shows category labels on selection',
+        'Performance Fix: Implemented bulk-insertion for SMS imports',
+        'Planner Polish: Imported SMS transactions now match planned amount to reduce clutter',
+        'Database Fix: Resolved column missing issue during schema migrations'
+      ],
+    ),
+    ReleaseInfo(
+      version: '1.0.4',
+      date: '2026-02-18',
+      changes: [
+        'Rebranded "Spending Limit" to "Monthly Budget" across the app',
+        'Simplified Registration: Removed username requirement for faster sign-up',
+        'Enhanced UI: Improved visibility of budget adjustment inputs',
+        'Updated deriving logic for automatic username generation'
+      ],
+    ),
+    ReleaseInfo(
+      version: '1.0.3',
+      date: '2026-02-18',
+      changes: [
+        'Enhanced Analytics: Pie chart now shows dynamic percentage on interaction',
+        'Fixed Pie chart rendering issues (100% glitch and single category bug)',
+        'Improved SQL robustness for category aggregation',
+        'Refined Regular Expenses: Fixed modal navigation context checks',
+        'General stability improvements and bug fixes'
+      ],
+    ),
     ReleaseInfo(
       version: '1.0.2',
       date: '2026-02-18',

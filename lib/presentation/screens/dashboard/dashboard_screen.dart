@@ -7,6 +7,7 @@ import '../../providers/category_provider.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../data/models/expense.dart';
 import 'recent_expenses_screen.dart' hide RecentDoubleExtension;
+import 'category_transactions_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -113,7 +114,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             ),
                           ),
                           Text(
-                            user?['fullName'] ?? user?['username'] ?? 'User',
+                            user?['fullName'] ?? 'User',
                             style: TextStyle(
                               fontSize: 26,
                               fontWeight: FontWeight.w900,
@@ -171,7 +172,25 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     delegate: SliverChildBuilderDelegate(
                       (context, index) {
                         final item = provider.categoryBreakdown[index];
-                        return _buildCategoryItem(context, item);
+                        return GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    CategoryTransactionsScreen(
+                                  categoryId: item['id'] as int?,
+                                  categoryName:
+                                      item['category_name'] ?? 'Imported',
+                                  monthKey: provider.currentMonthKey,
+                                  categoryIcon: item['icon'],
+                                  categoryColor: item['color'],
+                                ),
+                              ),
+                            );
+                          },
+                          child: _buildCategoryItem(context, item),
+                        );
                       },
                       childCount: provider.categoryBreakdown.take(3).length,
                     ),
@@ -319,7 +338,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       const SizedBox(width: 8),
                       Expanded(
                         child: _buildBalanceInfo(
-                            'Spending Limit',
+                            'Monthly Budget',
                             summary['limit'] ?? (planned > 0 ? planned : 0.0),
                             Colors.white,
                             alignment: CrossAxisAlignment.end),
@@ -504,7 +523,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(item['category_name'] ?? 'Uncategorized',
+                Text(item['category_name'] ?? 'Imported',
                     style: TextStyle(
                         fontWeight: FontWeight.w800,
                         fontSize: 15,
@@ -523,7 +542,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               Text(
                   (planned == 0 && actual > 0)
                       ? 'Unplanned'
-                      : (actual > 0 ? 'Actual' : 'Planned'),
+                      : (actual > 0 ? 'Spent' : 'Planned'),
                   style: TextStyle(
                       color: (planned == 0 && actual > 0)
                           ? AppTheme.warning
@@ -544,6 +563,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final nameController = TextEditingController();
     final amountController = TextEditingController();
     int? selectedCategoryId;
+    String selectedPaymentMode = 'Other';
 
     showModalBottomSheet(
       context: context,
@@ -604,6 +624,32 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         context: context),
                   ),
                   const SizedBox(height: 20),
+                  DropdownButtonFormField<String>(
+                    value: selectedPaymentMode,
+                    dropdownColor: modalBgColor,
+                    items: [
+                      'Other',
+                      'Cash',
+                      'Card',
+                      'UPI',
+                      'Net Banking',
+                      'Wallet'
+                    ]
+                        .map((mode) => DropdownMenuItem(
+                            value: mode,
+                            child:
+                                Text(mode, style: TextStyle(color: textColor))))
+                        .toList(),
+                    onChanged: (val) {
+                      if (val != null) {
+                        setModalState(() => selectedPaymentMode = val);
+                      }
+                    },
+                    decoration: AppTheme.inputDecoration(
+                        'Payment Mode', LucideIcons.creditCard,
+                        context: context),
+                  ),
+                  const SizedBox(height: 20),
                   TextField(
                     controller: nameController,
                     decoration: AppTheme.inputDecoration(
@@ -641,6 +687,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           plannedAmount: 0.0,
                           actualAmount: amount,
                           isPaid: true,
+                          paymentMode: selectedPaymentMode,
                           paidDate: DateTime.now().toIso8601String(),
                         ));
                         if (context.mounted) Navigator.pop(context);

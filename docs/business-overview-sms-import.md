@@ -7,14 +7,18 @@ Users find it difficult to manually enter every expense, especially small daily 
 To provide a seamless, "magic" experience where the user can click a single button to pull their recent spending history from their SMS inbox directly into the app.
 
 ## Feature Summary
-The SMS Automated Import will scan the user's messaging inbox for transaction notifications from banks and payment apps (UPI, Credit Cards, etc.). It will intelligently extract the amount and the merchant, presenting them as a list of suggested expenses for the user to categorize and save.
+The SMS Automated Import scans the user's messaging inbox for transaction notifications from banks and payment apps (UPI, Credit Cards, Wallet, etc.). It intelligently extracts:
+- Transaction Amount
+- Merchant/Recipient
+- Payment Mode (UPI, Card, Wallet, Net Banking)
+These are presented as suggested expenses. Imported SMS expenses automatically set their planned amount to match the actual amount to avoid "unplanned" clutter in the Monthly Planner.
 
 ## High-Level Workflow
 1. User navigates to "Import" screen.
 2. User taps "Sync from Inbox".
 3. App requests SMS permissions if not already granted.
-4. App scans recent 50 messages.
-5. Items matching "Spent/Debited/Paid" patterns are displayed.
+4. App scans recent messages.
+5. Items matching spending patterns (including Payment Mode) are displayed.
 6. User reviews, selects categories, and taps "Save All".
 
 ## Business Value
@@ -34,4 +38,4 @@ The SMS Automated Import will scan the user's messaging inbox for transaction no
 - Documentation & Review: 1 day
 - Testing: 1 day
 
-Date: 2026-02-13
+Date: 2026-02-18

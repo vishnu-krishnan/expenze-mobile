@@ -167,6 +167,14 @@ class ExpenseProvider with ChangeNotifier {
     await loadMonthData(_currentMonthKey);
   }
 
+  Future<void> addExpenses(List<Expense> expenses) async {
+    if (expenses.isEmpty) return;
+    for (var expense in expenses) {
+      await _repository.insertExpense(expense);
+    }
+    await loadMonthData(_currentMonthKey);
+  }
+
   Future<void> updateExpense(Expense expense) async {
     await _repository.updateExpense(expense);
     await loadMonthData(_currentMonthKey);

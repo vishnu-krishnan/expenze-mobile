@@ -429,11 +429,33 @@ class _MonthPlanScreenState extends State<MonthPlanScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(expense.name,
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                              color: textColor)),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(expense.name,
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                    color: textColor)),
+                          ),
+                          if (expense.paymentMode != 'Other')
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 6, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: AppTheme.primary.withValues(alpha: 0.1),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Text(
+                                expense.paymentMode.toUpperCase(),
+                                style: const TextStyle(
+                                    color: AppTheme.primary,
+                                    fontSize: 8,
+                                    fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                        ],
+                      ),
                       if (dateStr.isNotEmpty)
                         Text(dateStr,
                             style: TextStyle(
@@ -496,7 +518,7 @@ class _MonthPlanScreenState extends State<MonthPlanScreen> {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        Text('Actual',
+                        Text('Spent',
                             style: TextStyle(
                                 color: secondaryTextColor, fontSize: 12)),
                         Text('₹${expense.actualAmount.toInt()}',
@@ -598,7 +620,7 @@ class _MonthPlanScreenState extends State<MonthPlanScreen> {
             if (expense.isPaid) ...[
               const SizedBox(height: 16),
               _buildDetailRow(
-                  'Actual Spent', '₹${expense.actualAmount.toInt()}'),
+                  'Amount Spent', '₹${expense.actualAmount.toInt()}'),
             ],
             const SizedBox(height: 16),
             if (expense.createdAt != null)
@@ -725,6 +747,7 @@ class _MonthPlanScreenState extends State<MonthPlanScreen> {
         text: (expense.isPaid ? expense.actualAmount : expense.plannedAmount)
             .toStringAsFixed(0));
     int? selectedCategoryId = expense.categoryId;
+    String selectedPaymentMode = expense.paymentMode;
 
     showModalBottomSheet(
       context: context,
@@ -773,6 +796,24 @@ class _MonthPlanScreenState extends State<MonthPlanScreen> {
                     context: context),
               ),
               const SizedBox(height: 20),
+              DropdownButtonFormField<String>(
+                value: selectedPaymentMode,
+                dropdownColor: modalBgColor,
+                items: ['Other', 'Cash', 'Card', 'UPI', 'Net Banking', 'Wallet']
+                    .map((mode) => DropdownMenuItem(
+                        value: mode,
+                        child: Text(mode, style: TextStyle(color: textColor))))
+                    .toList(),
+                onChanged: (val) {
+                  if (val != null) {
+                    setModalState(() => selectedPaymentMode = val);
+                  }
+                },
+                decoration: AppTheme.inputDecoration(
+                    'Payment Mode', LucideIcons.creditCard,
+                    context: context),
+              ),
+              const SizedBox(height: 20),
               TextField(
                 controller: nameController,
                 decoration: AppTheme.inputDecoration(
@@ -811,6 +852,7 @@ class _MonthPlanScreenState extends State<MonthPlanScreen> {
                           ? 0
                           : (expense.isPaid ? expense.plannedAmount : amount),
                       actualAmount: expense.isPaid ? amount : 0,
+                      paymentMode: selectedPaymentMode,
                     );
 
                     await context

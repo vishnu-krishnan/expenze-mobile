@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:provider/provider.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../providers/auth_provider.dart';
 
@@ -14,9 +15,7 @@ class RegisterScreen extends StatefulWidget {
 class _RegisterScreenState extends State<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
   final _fullNameController = TextEditingController();
-  final _usernameController = TextEditingController();
   final _emailController = TextEditingController();
-  final _phoneController = TextEditingController();
   final _passwordController = TextEditingController();
 
   bool _isLoading = false;
@@ -25,9 +24,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   @override
   void dispose() {
     _fullNameController.dispose();
-    _usernameController.dispose();
     _emailController.dispose();
-    _phoneController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
@@ -43,7 +40,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     try {
       final auth = context.read<AuthProvider>();
       final success = await auth.register(
-        username: _usernameController.text.trim(),
+        username: _fullNameController.text.trim(),
         password: _passwordController.text,
         fullName: _fullNameController.text.trim(),
         email: _emailController.text.trim(),
@@ -54,11 +51,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
       if (success) {
         Navigator.pushReplacementNamed(context, '/main');
       } else {
-        setState(
-            () => _errorMessage = auth.error ?? 'Failed to create account');
+        setState(() => _errorMessage = auth.error ?? 'Registration failed');
       }
     } catch (e) {
-      setState(() => _errorMessage = 'Registration failed. Please try again.');
+      setState(() => _errorMessage = 'An error occurred during registration');
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -66,149 +62,128 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: AppTheme.bgPrimary,
-      body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24.0),
-            child: Container(
-              constraints: const BoxConstraints(maxWidth: 400),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.06),
-                    blurRadius: 20,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              padding: const EdgeInsets.all(32.0),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    // Logo
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                            color: AppTheme.primary,
-                            borderRadius: BorderRadius.circular(14),
-                          ),
-                          child: const Text(
-                            '₹',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        const Text(
-                          'Expenze',
-                          style: TextStyle(
-                            fontSize: 26,
-                            fontWeight: FontWeight.bold,
-                            color: AppTheme.textPrimary,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 32),
-                    const Text(
-                      'Create Account',
-                      style:
-                          TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 8),
-                    const Text(
-                      'Start your offline-first financial journey',
-                      style: TextStyle(
-                          color: AppTheme.textSecondary, fontSize: 13),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 24),
-
-                    if (_errorMessage != null)
-                      _buildErrorContainer(_errorMessage!),
-
-                    _buildTextField(
-                      controller: _fullNameController,
-                      label: 'Full Name',
-                      hint: 'What should we call you?',
-                      icon: LucideIcons.user,
-                      validator: (v) => v!.isEmpty ? 'Required' : null,
-                    ),
-                    const SizedBox(height: 16),
-                    _buildTextField(
-                      controller: _usernameController,
-                      label: 'Username',
-                      hint: 'Unique identification name',
-                      icon: LucideIcons.atSign,
-                      validator: (v) => v!.isEmpty ? 'Required' : null,
-                    ),
-                    const SizedBox(height: 16),
-                    _buildTextField(
-                      controller: _emailController,
-                      label: 'Email (Optional)',
-                      hint: 'For better identification',
-                      icon: LucideIcons.mail,
-                      keyboardType: TextInputType.emailAddress,
-                    ),
-                    const SizedBox(height: 16),
-                    _buildTextField(
-                      controller: _passwordController,
-                      label: 'Passcode',
-                      hint: 'Choose a strong code',
-                      icon: LucideIcons.lock,
-                      obscureText: true,
-                      validator: (v) =>
-                          v!.length < 4 ? 'Min 4 characters' : null,
-                    ),
-                    const SizedBox(height: 32),
-
-                    ElevatedButton(
-                      onPressed: _isLoading ? null : _handleRegister,
-                      style: AppTheme.primaryButtonStyle.copyWith(
-                        padding: WidgetStateProperty.all(
-                            const EdgeInsets.symmetric(vertical: 16)),
+      backgroundColor: Colors.transparent,
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: isDark
+            ? AppTheme.darkBackgroundDecoration
+            : AppTheme.backgroundDecoration,
+        child: SafeArea(
+          child: Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 32.0),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 400),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const SizedBox(height: 48),
+                      // Back Button
+                      IconButton(
+                        onPressed: () => Navigator.pop(context),
+                        icon: Icon(LucideIcons.arrowLeft,
+                            color: AppTheme.getTextColor(context)),
+                        padding: EdgeInsets.zero,
+                        alignment: Alignment.centerLeft,
                       ),
-                      child: _isLoading
-                          ? const SizedBox(
-                              height: 20,
-                              width: 20,
-                              child: CircularProgressIndicator(
-                                  strokeWidth: 2, color: Colors.white))
-                          : const Text('Sign Up'),
-                    ),
-                    const SizedBox(height: 24),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Text('Already have an account? ',
-                            style: TextStyle(
-                                color: AppTheme.textSecondary, fontSize: 13)),
-                        GestureDetector(
-                          onTap: () =>
-                              Navigator.pushReplacementNamed(context, '/login'),
-                          child: const Text('Sign In',
-                              style: TextStyle(
-                                  color: AppTheme.primary,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 13)),
+                      const SizedBox(height: 24),
+                      Text(
+                        'Join Expenze',
+                        style: GoogleFonts.outfit(
+                          fontSize: 42,
+                          fontWeight: FontWeight.w900,
+                          color: AppTheme.getTextColor(context),
+                          letterSpacing: -1.5,
                         ),
-                      ],
-                    ),
-                  ],
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        'Start your journey towards financial freedom with a secure, offline-first experience.',
+                        style: GoogleFonts.inter(
+                          fontSize: 16,
+                          color:
+                              AppTheme.getTextColor(context, isSecondary: true),
+                          height: 1.5,
+                        ),
+                      ),
+                      const SizedBox(height: 48),
+
+                      if (_errorMessage != null)
+                        _buildErrorBanner(_errorMessage!),
+
+                      _buildPremiumField(
+                        controller: _fullNameController,
+                        label: 'FULL NAME',
+                        hint: 'How should we call you?',
+                        icon: LucideIcons.user,
+                        isDark: isDark,
+                        validator: (v) =>
+                            v!.isEmpty ? 'Please enter your name' : null,
+                      ),
+                      const SizedBox(height: 24),
+
+                      _buildPremiumField(
+                        controller: _emailController,
+                        label: 'EMAIL ADDRESS',
+                        hint: 'For identification (optional)',
+                        icon: LucideIcons.mail,
+                        isDark: isDark,
+                        keyboardType: TextInputType.emailAddress,
+                      ),
+                      const SizedBox(height: 24),
+
+                      _buildPremiumField(
+                        controller: _passwordController,
+                        label: 'SECURITY PIN / PASSCODE',
+                        hint: 'Minimum 4 characters',
+                        icon: LucideIcons.lock,
+                        isDark: isDark,
+                        obscureText: true,
+                        validator: (v) =>
+                            v!.length < 4 ? 'Min 4 characters required' : null,
+                      ),
+                      const SizedBox(height: 48),
+
+                      _buildSubmitButton(context),
+                      const SizedBox(height: 32),
+
+                      Center(
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              'Already using Expenze? ',
+                              style: GoogleFonts.inter(
+                                fontSize: 14,
+                                color: AppTheme.getTextColor(context,
+                                    isSecondary: true),
+                              ),
+                            ),
+                            TextButton(
+                              onPressed: () => Navigator.pushReplacementNamed(
+                                  context, '/login'),
+                              child: Text(
+                                'Sign In',
+                                style: GoogleFonts.inter(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w800,
+                                  color: AppTheme.primary,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 48),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -218,57 +193,138 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 
-  Widget _buildErrorContainer(String message) {
+  Widget _buildErrorBanner(String message) {
     return Container(
-      padding: const EdgeInsets.all(12),
-      margin: const EdgeInsets.only(bottom: 20),
+      padding: const EdgeInsets.all(16),
+      margin: const EdgeInsets.only(bottom: 32),
       decoration: BoxDecoration(
-        color: AppTheme.danger.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(10),
+        color: AppTheme.danger.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(20),
         border: Border.all(color: AppTheme.danger.withValues(alpha: 0.2)),
       ),
       child: Row(
         children: [
-          const Icon(LucideIcons.alertCircle, color: AppTheme.danger, size: 18),
-          const SizedBox(width: 8),
+          const Icon(LucideIcons.alertCircle, color: AppTheme.danger, size: 20),
+          const SizedBox(width: 12),
           Expanded(
-              child: Text(message,
-                  style:
-                      const TextStyle(color: AppTheme.danger, fontSize: 12))),
+            child: Text(
+              message,
+              style: GoogleFonts.inter(
+                color: AppTheme.danger,
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildTextField({
+  Widget _buildPremiumField({
     required TextEditingController controller,
     required String label,
     required String hint,
     required IconData icon,
+    required bool isDark,
     bool obscureText = false,
-    TextInputType? keyboardType,
+    TextInputType keyboardType = TextInputType.text,
     String? Function(String?)? validator,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label,
-            style: const TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: AppTheme.textPrimary)),
-        const SizedBox(height: 8),
-        TextFormField(
-          controller: controller,
-          obscureText: obscureText,
-          keyboardType: keyboardType,
-          validator: validator,
-          decoration: AppTheme.inputDecoration(hint, icon).copyWith(
-            contentPadding:
-                const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        Text(
+          label,
+          style: GoogleFonts.outfit(
+            fontSize: 12,
+            fontWeight: FontWeight.w800,
+            letterSpacing: 1.2,
+            color: isDark
+                ? AppTheme.primary
+                : AppTheme.primaryDark.withValues(alpha: 0.7),
+          ),
+        ),
+        const SizedBox(height: 12),
+        Container(
+          decoration: BoxDecoration(
+            color: isDark
+                ? AppTheme.bgCardDark
+                : Colors.white.withValues(alpha: 0.6),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: isDark
+                  ? AppTheme.borderDark
+                  : AppTheme.primary.withValues(alpha: 0.15),
+            ),
+          ),
+          child: TextFormField(
+            controller: controller,
+            obscureText: obscureText,
+            keyboardType: keyboardType,
+            validator: validator,
+            style: GoogleFonts.inter(
+              fontSize: 16,
+              color: isDark ? Colors.white : AppTheme.textPrimary,
+              fontWeight: FontWeight.w600,
+            ),
+            decoration: InputDecoration(
+              hintText: hint,
+              hintStyle: GoogleFonts.inter(
+                  color: isDark ? Colors.white24 : Colors.black26),
+              prefixIcon: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 18),
+                child: Icon(icon, color: AppTheme.primary, size: 22),
+              ),
+              border: InputBorder.none,
+              contentPadding: const EdgeInsets.symmetric(vertical: 20),
+              errorStyle: const TextStyle(
+                  height: 0), // Use manual validation messages if needed
+            ),
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildSubmitButton(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      height: 64,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: AppTheme.primary.withValues(alpha: 0.3),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: ElevatedButton(
+        onPressed: _isLoading ? null : _handleRegister,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppTheme.primary,
+          foregroundColor: Colors.white,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          elevation: 0,
+        ),
+        child: _isLoading
+            ? const SizedBox(
+                height: 24,
+                width: 24,
+                child: CircularProgressIndicator(
+                    strokeWidth: 3, color: Colors.white))
+            : Text(
+                'Create Secure Account',
+                style: GoogleFonts.outfit(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 0.5,
+                ),
+              ),
+      ),
     );
   }
 }

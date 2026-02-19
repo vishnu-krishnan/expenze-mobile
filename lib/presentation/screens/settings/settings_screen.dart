@@ -81,10 +81,10 @@ class SettingsScreen extends StatelessWidget {
                             color: secondaryTextColor.withValues(alpha: 0.1)),
                         _buildSettingsItem(
                           icon: LucideIcons.target,
-                          label: 'Spending Limit',
+                          label: 'Monthly Budget',
                           subtitle: limit > 0
                               ? 'Target: ₹${limit.toStringAsFixed(0)}'
-                              : 'No limit set',
+                              : 'No budget set',
                           onTap: () => _showLimitDialog(context, limit),
                           textColor: textColor,
                           secondaryTextColor: secondaryTextColor,
@@ -406,14 +406,19 @@ class SettingsScreen extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Adjust Spending Limit',
+        title: const Text('Adjust Monthly Budget',
             style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: -0.5)),
         content: TextField(
           controller: controller,
           keyboardType: TextInputType.number,
           decoration: AppTheme.inputDecoration(
-              'Limit Amount', LucideIcons.indianRupee,
+              'Budget Amount', LucideIcons.indianRupee,
               context: context),
+          style: const TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: AppTheme.primary,
+          ),
         ),
         actions: [
           TextButton(
@@ -451,7 +456,7 @@ class SettingsScreen extends StatelessWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: AppVersion.history.map((release) {
+                children: AppVersion.history.take(5).map((release) {
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [

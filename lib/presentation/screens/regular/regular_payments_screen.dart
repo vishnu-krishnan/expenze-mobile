@@ -6,7 +6,9 @@ import '../../../core/theme/app_theme.dart';
 import '../../providers/regular_payment_provider.dart';
 import '../../providers/category_provider.dart';
 import '../../providers/theme_provider.dart';
+import '../../providers/expense_provider.dart';
 import '../../../data/models/category.dart' as model;
+import '../../../data/models/expense.dart';
 
 class RegularPaymentsScreen extends StatefulWidget {
   const RegularPaymentsScreen({super.key});
@@ -70,8 +72,10 @@ class _RegularPaymentsScreenState extends State<RegularPaymentsScreen> {
             ),
             SliverPadding(
               padding: const EdgeInsets.symmetric(horizontal: 26),
-              sliver: Consumer2<RegularPaymentProvider, CategoryProvider>(
-                builder: (context, provider, categoryProvider, child) {
+              sliver: Consumer3<RegularPaymentProvider, CategoryProvider,
+                  ExpenseProvider>(
+                builder: (context, provider, categoryProvider, expenseProvider,
+                    child) {
                   if (provider.isLoading) {
                     return const SliverFillRemaining(
                         child: Center(child: CircularProgressIndicator()));
@@ -93,6 +97,13 @@ class _RegularPaymentsScreenState extends State<RegularPaymentsScreen> {
                     ),
                   );
                 },
+              ),
+            ),
+            SliverToBoxAdapter(
+              child: Consumer2<RegularPaymentProvider, ExpenseProvider>(
+                builder: (context, rProvider, eProvider, _) =>
+                    _buildSummaryFooter(rProvider.payments, eProvider.expenses,
+                        textColor, secondaryTextColor),
               ),
             ),
             const SliverToBoxAdapter(child: SizedBox(height: 140)),
@@ -198,11 +209,24 @@ class _RegularPaymentsScreenState extends State<RegularPaymentsScreen> {
                   ],
                 ),
               ),
-              Text('₹${payment.defaultPlannedAmount.toStringAsFixed(0)}',
-                  style: TextStyle(
-                      fontWeight: FontWeight.w900,
-                      fontSize: 20,
-                      color: textColor)),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text('₹${payment.defaultPlannedAmount.toStringAsFixed(0)}',
+                      style: TextStyle(
+                          fontWeight: FontWeight.w900,
+                          fontSize: 20,
+                          color: textColor)),
+                  GestureDetector(
+                    onTap: () => _showAddDialog(context, payment: payment),
+                    child: Padding(
+                      padding: const EdgeInsets.all(4.0),
+                      child: Icon(LucideIcons.edit3,
+                          size: 16, color: secondaryTextColor),
+                    ),
+                  ),
+                ],
+              ),
             ],
           ),
           const SizedBox(height: 20),
@@ -260,12 +284,117 @@ class _RegularPaymentsScreenState extends State<RegularPaymentsScreen> {
     );
   }
 
-  void _showAddDialog(BuildContext context) {
-    final nameController = TextEditingController();
-    final amountController = TextEditingController();
-    int? selectedCategoryId;
-    DateTime startDate = DateTime.now();
-    DateTime? endDate;
+  Widget _buildSummaryFooter(List<RegularPayment> payments,
+      List<Expense> expenses, Color textColor, Color secondaryTextColor) {
+    if (payments.isEmpty) return const SizedBox.shrink();
+
+    final activePayments = payments.where((p) => p.isActive).toList();
+    if (activePayments.isEmpty) return const SizedBox.shrink();
+
+    double totalCommitment = 0.0;
+    double paidAmount = 0.0;
+
+    for (final payment in activePayments) {
+      totalCommitment += payment.defaultPlannedAmount;
+
+      // Check if this regular payment is "paid" in the current month's expenses
+      // A payment is considered paid if an expense with the same name exists
+      final isPaid = expenses.any((e) =>
+          e.name.trim().toLowerCase() == payment.name.trim().toLowerCase() &&
+          e.categoryId == payment.categoryId);
+
+      if (isPaid) {
+        paidAmount += payment.defaultPlannedAmount;
+      }
+    }
+
+    final pendingAmount = totalCommitment - paidAmount;
+    final isAllCleared = pendingAmount <= 0 && totalCommitment > 0;
+
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 26, vertical: 8),
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: isAllCleared
+            ? AppTheme.success.withValues(alpha: 0.1)
+            : AppTheme.primary.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+            color: isAllCleared
+                ? AppTheme.success.withValues(alpha: 0.2)
+                : AppTheme.primary.withValues(alpha: 0.2)),
+      ),
+      child: Column(
+        children: [
+          Text('Total Monthly Commitments',
+              style: TextStyle(
+                  color: secondaryTextColor,
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold)),
+          const SizedBox(height: 8),
+          Text(
+            '₹${totalCommitment.toStringAsFixed(0)}',
+            style: TextStyle(
+                color: isAllCleared ? AppTheme.success : AppTheme.primary,
+                fontWeight: FontWeight.w900,
+                fontSize: 32),
+          ),
+          const SizedBox(height: 12),
+          if (isAllCleared)
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(LucideIcons.checkCircle,
+                    color: AppTheme.success, size: 16),
+                const SizedBox(width: 8),
+                Text(
+                  'All commitments cleared!',
+                  style: TextStyle(
+                      color: AppTheme.success.withValues(alpha: 0.8),
+                      fontWeight: FontWeight.bold,
+                      fontSize: 13),
+                ),
+              ],
+            )
+          else
+            Text(
+              'Pending: ₹${pendingAmount.toStringAsFixed(0)}',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                  color: AppTheme.danger,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14),
+            ),
+          const SizedBox(height: 4),
+          Text(
+            isAllCleared
+                ? 'Great job managing your monthly expenses!'
+                : 'You have ₹${pendingAmount.toStringAsFixed(0)} in recurring commitments awaiting payment.',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+                color: secondaryTextColor.withValues(alpha: 0.8),
+                fontSize: 11,
+                height: 1.4),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showAddDialog(BuildContext context, {RegularPayment? payment}) {
+    final nameController = TextEditingController(text: payment?.name);
+    final amountController = TextEditingController(
+        text: payment != null
+            ? payment.defaultPlannedAmount.toStringAsFixed(0)
+            : '');
+    final notesController = TextEditingController(text: payment?.notes);
+    int? selectedCategoryId = payment?.categoryId;
+    DateTime startDate =
+        payment != null ? DateTime.parse(payment.startDate) : DateTime.now();
+    DateTime? endDate =
+        payment?.endDate != null ? DateTime.parse(payment!.endDate!) : null;
+
+    String priority = payment?.priority ?? 'MEDIUM';
 
     showModalBottomSheet(
       context: context,
@@ -303,7 +432,10 @@ class _RegularPaymentsScreenState extends State<RegularPaymentsScreen> {
                               color: Colors.grey.withValues(alpha: 0.3),
                               borderRadius: BorderRadius.circular(2)))),
                   const SizedBox(height: 24),
-                  Text('Setup Regular Expense',
+                  Text(
+                      payment == null
+                          ? 'Setup Regular Expense'
+                          : 'Edit Regular Expense',
                       style: TextStyle(
                           fontSize: 22,
                           fontWeight: FontWeight.w900,
@@ -335,12 +467,38 @@ class _RegularPaymentsScreenState extends State<RegularPaymentsScreen> {
                   ),
                   const SizedBox(height: 20),
                   TextField(
+                    controller: notesController,
+                    decoration: AppTheme.inputDecoration(
+                        'Description (Optional)', LucideIcons.fileText,
+                        context: context),
+                    style: TextStyle(color: textColor),
+                  ),
+                  const SizedBox(height: 20),
+                  TextField(
                     controller: amountController,
                     keyboardType: TextInputType.number,
                     decoration: AppTheme.inputDecoration(
                         'Amount', LucideIcons.indianRupee,
                         context: context),
                     style: TextStyle(color: textColor),
+                  ),
+                  const SizedBox(height: 20),
+                  DropdownButtonFormField<String>(
+                    value: priority,
+                    dropdownColor: modalBgColor,
+                    items: ['LOW', 'MEDIUM', 'HIGH']
+                        .map((p) => DropdownMenuItem(
+                            value: p,
+                            child: Text(p, style: TextStyle(color: textColor))))
+                        .toList(),
+                    onChanged: (val) {
+                      if (val != null) {
+                        setModalState(() => priority = val);
+                      }
+                    },
+                    decoration: AppTheme.inputDecoration(
+                        'Priority', LucideIcons.alertCircle,
+                        context: context),
                   ),
                   const SizedBox(height: 20),
                   Row(
@@ -406,22 +564,39 @@ class _RegularPaymentsScreenState extends State<RegularPaymentsScreen> {
                             double.tryParse(amountController.text) ?? 0.0;
                         if (amount <= 0) return;
 
-                        await context
-                            .read<RegularPaymentProvider>()
-                            .addPayment(RegularPayment(
-                              categoryId: selectedCategoryId!,
-                              name: nameController.text,
-                              defaultPlannedAmount: amount,
-                              frequency: 'MONTHLY',
-                              startDate:
-                                  DateFormat('yyyy-MM-dd').format(startDate),
-                              endDate: endDate != null
-                                  ? DateFormat('yyyy-MM-dd').format(endDate!)
-                                  : null,
-                              durationMonths: null,
-                              isActive: true,
-                            ));
-                        if (mounted) Navigator.pop(context);
+                        final provider = context.read<RegularPaymentProvider>();
+
+                        if (payment == null) {
+                          await provider.addPayment(RegularPayment(
+                            categoryId: selectedCategoryId!,
+                            name: nameController.text,
+                            defaultPlannedAmount: amount,
+                            notes: notesController.text,
+                            frequency: 'MONTHLY',
+                            startDate:
+                                DateFormat('yyyy-MM-dd').format(startDate),
+                            endDate: endDate != null
+                                ? DateFormat('yyyy-MM-dd').format(endDate!)
+                                : null,
+                            durationMonths: null,
+                            isActive: true,
+                            priority: priority,
+                          ));
+                        } else {
+                          await provider.updatePayment(payment.copyWith(
+                            categoryId: selectedCategoryId!,
+                            name: nameController.text,
+                            defaultPlannedAmount: amount,
+                            notes: notesController.text,
+                            startDate:
+                                DateFormat('yyyy-MM-dd').format(startDate),
+                            endDate: endDate != null
+                                ? DateFormat('yyyy-MM-dd').format(endDate!)
+                                : null,
+                            priority: priority,
+                          ));
+                        }
+                        if (context.mounted) Navigator.pop(context);
                       },
                       style: ElevatedButton.styleFrom(
                           backgroundColor: AppTheme.primary,

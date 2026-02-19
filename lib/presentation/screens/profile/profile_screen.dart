@@ -81,15 +81,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     return const Center(child: Text('Not logged in'));
                   }
 
+                  // Sync controllers with user data when not editing
+                  if (!_isEditing) {
+                    _nameController.text = user['full_name'] ?? '';
+                    _emailController.text = user['email'] ?? '';
+                  }
+
                   return SingleChildScrollView(
                     padding: const EdgeInsets.symmetric(
                         horizontal: 24, vertical: 20),
                     child: Column(
                       children: [
-                        _buildModernAvatar(
-                            user['fullName'] ?? user['username'] ?? 'U'),
+                        _buildModernAvatar(user['full_name'] ?? 'U'),
                         const SizedBox(height: 12),
-                        Text(user['fullName'] ?? user['username'] ?? 'Member',
+                        Text(user['full_name'] ?? 'Member',
                             style: TextStyle(
                                 fontSize: 20,
                                 fontWeight: FontWeight.bold,
@@ -272,21 +277,101 @@ class _ProfileScreenState extends State<ProfileScreen> {
       builder: (context) => AlertDialog(
         title: const Text('Reset Everything?'),
         content: const Text(
-            'This will delete all your local data and security settings. This action is IRREVERSIBLE.'),
+            'This will delete all your local data, expenses, and settings. This action is IRREVERSIBLE.'),
         actions: [
           TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Go Back')),
+              child: const Text('Cancel')),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context); // Close first dialog
+              _showMathChallenge(context, auth); // Open second
+            },
+            child:
+                const Text('Reset', style: TextStyle(color: AppTheme.danger)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showMathChallenge(BuildContext context, AuthProvider auth) {
+    final a = Random().nextInt(10) + 1; // 1-10
+    final b = Random().nextInt(10) + 1;
+    final answerController = TextEditingController();
+    bool error = false;
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          title: const Text('Security Verification'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('Please solve this to confirm: $a + $b = ?',
+                  style: const TextStyle(fontWeight: FontWeight.bold)),
+              const SizedBox(height: 16),
+              TextField(
+                controller: answerController,
+                keyboardType: TextInputType.number,
+                autofocus: true,
+                decoration: InputDecoration(
+                  hintText: 'Enter answer',
+                  errorText: error ? 'Incorrect answer' : null,
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12)),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Cancel')),
+            TextButton(
+              onPressed: () {
+                if (int.tryParse(answerController.text) == a + b) {
+                  Navigator.pop(context);
+                  _showFinalWarning(context, auth);
+                } else {
+                  setState(() => error = true);
+                }
+              },
+              child: const Text('Verify'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showFinalWarning(BuildContext context, AuthProvider auth) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text(' one last thing...'),
+        content: const Text(
+            'Just so you know, we haven\'t introduced Google Drive backup yet.\n\nSo when we say "Deleted", we mean GONE. Poof. Forever.\n\nAre you absolutely sure?'),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: const Text('Wait, Go Back!')),
           TextButton(
             onPressed: () async {
+              Navigator.pop(dialogContext);
               await auth.logout();
               if (mounted) {
+                // ignore: use_build_context_synchronously
                 Navigator.pushNamedAndRemoveUntil(
-                    context, '/landing', (route) => false);
+                    this.context, '/landing', (route) => false);
               }
             },
-            child: const Text('Reset Everything',
-                style: TextStyle(color: Colors.redAccent)),
+            child: const Text('Yes, Nuke It All',
+                style: TextStyle(
+                    color: AppTheme.danger, fontWeight: FontWeight.bold)),
           ),
         ],
       ),

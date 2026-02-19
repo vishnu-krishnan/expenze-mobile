@@ -11,16 +11,19 @@ The SMS Import module extends the current `SmsImportScreen` by adding a direct c
 [ SmsService (Telephony) ] <---> [ Android SMS Provider ]
       |
       v
-[ Regex Engine ]
+[ Regex Engine (incl. Payment Mode) ]
       |
       v
 [ List<DetectedExpense> ]
+      |
+      v
+[ ExpenseProvider (Bulk Insert) ]
 ```
 
 ## Component Breakdown
 - **SmsService**: A singleton service that wraps the `telephony` plugin. It handles permission checks and message collection.
 - **PermissionHandler**: Used to manage and verify system-level SMS permissions.
-- **Regex Engine**: Enhanced version of the current parsing logic to filter bank-specific keywords.
+- **Regex Engine**: Enhanced version of the current parsing logic to filter bank-specific keywords and identify Payment Modes (UPI, Card, Wallet, Net Banking).
 
 ## Data Flow
 1. User triggers `syncFromInbox()`.
@@ -44,7 +47,8 @@ N/A - Direct Native Content Provider access.
 - **Parse Failure**: Logged to console; raw message is discarded.
 
 ## Schema Changes
-None.
+- `expenses` table: Added `payment_mode` (TEXT) column (Database v13).
+- Migration: Automatic `ALTER TABLE` during `onUpgrade`.
 
 ## Security Model
 - **Permission Gating**: Runtime permission request (Android 6.0+).
@@ -53,8 +57,9 @@ None.
 
 ## Performance Analysis
 - Frequency: On-demand (button press).
-- Complexity: O(N) where N is the number of messages scanned (capped at 50).
-- Memory: Minimal, only holding transient strings.
+- Efficiency: Bulk insertion implemented in `ExpenseProvider.addExpenses()` to minimize database transactions and UI rebuilds.
+- Complexity: O(N) for scanning; O(1) for saving via bulk insert.
+- Memory: Minimal, transient objects.
 
 ## Scalability Plan
 - Future: Add support for background listeners for real-time tracking.
@@ -71,4 +76,4 @@ None.
 - Disable the "Sync" button in UI.
 - Remove permissions from manifest.
 
-Date: 2026-02-13
+Date: 2026-02-18

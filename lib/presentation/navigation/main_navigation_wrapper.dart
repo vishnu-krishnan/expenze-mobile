@@ -35,22 +35,29 @@ class _MainNavigationWrapperState extends State<MainNavigationWrapper> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return Container(
-      decoration: isDark
-          ? AppTheme.darkBackgroundDecoration
-          : AppTheme.backgroundDecoration,
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
-        extendBody: true,
-        body: SafeArea(
-          top: true,
-          bottom: false,
-          child: IndexedStack(
-            index: _selectedIndex,
-            children: _screens,
+    return PopScope(
+      canPop: _selectedIndex == 0,
+      onPopInvoked: (didPop) {
+        if (didPop) return;
+        setState(() => _selectedIndex = 0);
+      },
+      child: Container(
+        decoration: isDark
+            ? AppTheme.darkBackgroundDecoration
+            : AppTheme.backgroundDecoration,
+        child: Scaffold(
+          backgroundColor: Colors.transparent,
+          extendBody: true,
+          body: SafeArea(
+            top: true,
+            bottom: false,
+            child: IndexedStack(
+              index: _selectedIndex,
+              children: _screens,
+            ),
           ),
+          bottomNavigationBar: _buildModernNavBar(isDark),
         ),
-        bottomNavigationBar: _buildModernNavBar(isDark),
       ),
     );
   }

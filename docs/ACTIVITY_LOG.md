@@ -1058,7 +1058,14 @@ Reason: Ensure total visual cohesion and eliminate background jumping during nav
 Impact: Seamless transition between all app modules with a premium, focused aesthetic.
 Rollback Strategy: Revert Scaffolds to solid colors and remove decoration containers.
 
-Date: 2026-02-17
+[2026-02-18] [SMS Parsing Improvement]
+Change Type: Minor
+Decision made: Enhanced the SMS parsing engine to strictly filter out banking "noise" such as login alerts, OTPs, balance inquiries, and bill reminders. The system now prioritizes actual debit transactions (UPI, Card, Net Banking) and uses refined regex for and amount extraction.
+Reason: User reported issues with non-transactional messages being incorrectly calculated or identified as expenses.
+Impact: Significant reduction in "junk" detections during SMS sync; improved accuracy for automated expense tracking.
+Rollback Strategy: Revert `parseExpenseFromSms` method in `sms_service.dart` to the previous version.
+
+Date: 2026-02-18
 
 [2026-02-17] [Theme & Color Refinement]
 Change Type: Minor
@@ -1099,5 +1106,44 @@ Decision made: Rebranded the "Bills" feature to **"Regular Expenses"** across th
 Reason: Fulfill user request for a descriptive and accurate term for consistent monthly outgoings.
 Impact: Improved nomenclature clarity and professionalism across the core UI.
 Rollback Strategy: Restore "Bills" or "Recurring" labels across the UI and Dashboard.
+
+Date: 2026-02-18
+
+[2026-02-18] [SMS Parsing Improvement]
+Change Type: Minor
+Decision made: Enhanced the SMS parsing engine to strictly filter out banking "noise" such as login alerts, OTPs, balance inquiries, and bill reminders. The system now prioritizes actual debit transactions (UPI, Card, Net Banking, Mobile Recharges) by including specific markers like 'debit', 'debited', 'sent', 'recharge', and 'recharged'. Used refined regex for merchant and amount extraction.
+Reason: User reported issues with non-transactional messages being incorrectly calculated and requested better detection for recharge, money transfer, and explicit 'debit' messages.
+Impact: Significant reduction in "junk" detections during SMS sync; improved accuracy for automated expense tracking and money transfer/recharge detection.
+Rollback Strategy: Revert `parseExpenseFromSms` method in `sms_service.dart` to the previous version.
+
+Date: 2026-02-18
+
+[2026-02-18] [User Identity & Profile Refinement]
+Change Type: Minor
+Decision made: Standardized user identity to use "Full Name" only. Removed "Username" creation and display across Dashboard and Profile screens. Fixed "Member Since" persistence by ensuring `created_at` date is included in the session user map immediately upon onboarding.
+Reason: To simplify the user experience and ensure immediate profile data synchronization.
+Impact: Cleaner UI and immediate feedback on user profile information.
+Rollback Strategy: Restore fallback logic for `username` and revert `AuthProvider.setOnboardingComplete`.
+
+[2026-02-18] [SMS Import & Detail Enhancements]
+Change Type: Minor
+Decision made: Refined SMS import logic to set `plannedAmount` to 0.0 for all imported expenses (actual-first). Enhanced the `ExpenseDetailScreen` to display a prominent Payment Mode badge (e.g., UPI, Card) next to the category name for better visibility.
+Reason: Reflect that imported expenses are actual spends, not planned, and fulfill user request for clearer payment mode visibility.
+Impact: Better data accuracy and improved transaction detail clarity.
+Rollback Strategy: Revert `_importAll` in `sms_import_screen.dart` and the UI header in `expense_detail_screen.dart`.
+
+[2026-02-18] [Dashboard Connectivity]
+Change Type: Minor
+Decision made: Implemented navigation from the Dashboard category breakdown list to the `CategoryTransactionsScreen`.
+Reason: Improve usability and allow users to drill down into specific category expenses directly from the main screen.
+Impact: Enhanced navigation flow and user engagement.
+Rollback Strategy: Remove `GestureDetector` from `_buildCategoryItem` in `dashboard_screen.dart`.
+
+[2026-02-18] [Category Detail Connectivity]
+Change Type: Minor
+Decision made: Enabled navigation to the `ExpenseDetailScreen` from individual transaction items within the `CategoryTransactionsScreen`.
+Reason: Improve user flow by allowing users to view full details and edit/delete expenses directly from the category list.
+Impact: Enhanced navigation and transaction management usability.
+Rollback Strategy: Remove the `GestureDetector` wrapper from `_buildTransactionItem` in `category_transactions_screen.dart`.
 
 Date: 2026-02-18

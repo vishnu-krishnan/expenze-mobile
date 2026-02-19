@@ -8,6 +8,7 @@ class Expense {
   final bool isPaid;
   final String? dueDate;
   final String? paidDate;
+  final String paymentMode;
   final String? notes;
   final String priority;
   final int synced;
@@ -24,6 +25,7 @@ class Expense {
     this.isPaid = false,
     this.dueDate,
     this.paidDate,
+    this.paymentMode = 'Other',
     this.notes,
     this.priority = 'MEDIUM',
     this.synced = 0,
@@ -43,6 +45,7 @@ class Expense {
       'is_paid': isPaid ? 1 : 0,
       'due_date': dueDate,
       'paid_date': paidDate,
+      'payment_mode': paymentMode,
       'notes': notes,
       'priority': priority,
       'synced': synced,
@@ -63,6 +66,7 @@ class Expense {
       isPaid: map['is_paid'] == 1,
       dueDate: map['due_date'],
       paidDate: map['paid_date'],
+      paymentMode: map['payment_mode'] ?? 'Other',
       notes: map['notes'],
       priority: map['priority'] ?? 'MEDIUM',
       synced: map['synced'] ?? 0,
@@ -85,6 +89,7 @@ class Expense {
       isPaid: json['isPaid'] ?? json['is_paid'] ?? false,
       dueDate: json['dueDate'] ?? json['due_date'],
       paidDate: json['paidDate'] ?? json['paid_date'],
+      paymentMode: json['paymentMode'] ?? json['payment_mode'] ?? 'Other',
       notes: json['notes'],
       priority: json['priority'] ?? 'MEDIUM',
       synced: 1, // Data from API is already synced
@@ -105,6 +110,7 @@ class Expense {
       'isPaid': isPaid,
       'dueDate': dueDate,
       'paidDate': paidDate,
+      'paymentMode': paymentMode,
       'priority': priority,
       'notes': notes,
     };
@@ -121,6 +127,7 @@ class Expense {
     bool? isPaid,
     String? dueDate,
     String? paidDate,
+    String? paymentMode,
     String? notes,
     String? priority,
     int? synced,
@@ -137,6 +144,7 @@ class Expense {
       isPaid: isPaid ?? this.isPaid,
       dueDate: dueDate ?? this.dueDate,
       paidDate: paidDate ?? this.paidDate,
+      paymentMode: paymentMode ?? this.paymentMode,
       notes: notes ?? this.notes,
       priority: priority ?? this.priority,
       synced: synced ?? this.synced,

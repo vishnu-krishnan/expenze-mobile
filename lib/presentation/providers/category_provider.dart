@@ -20,7 +20,8 @@ class CategoryProvider with ChangeNotifier {
 
     try {
       final db = await _dbHelper.database;
-      final List<Map<String, dynamic>> maps = await db.query('categories');
+      final List<Map<String, dynamic>> maps =
+          await db.query('categories', orderBy: 'name ASC');
       _categories = maps.map((m) => Category.fromMap(m)).toList();
     } catch (e) {
       logger.e('Error loading categories', error: e);

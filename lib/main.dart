@@ -7,6 +7,8 @@ import 'presentation/providers/expense_provider.dart';
 import 'presentation/providers/category_provider.dart';
 import 'presentation/providers/regular_payment_provider.dart';
 import 'presentation/screens/auth/app_lock_screen.dart';
+import 'presentation/screens/auth/login_screen.dart';
+import 'presentation/screens/auth/register_screen.dart';
 import 'presentation/screens/onboarding/landing_page.dart';
 import 'presentation/screens/month/month_plan_screen.dart';
 import 'presentation/screens/categories/categories_screen.dart';
@@ -17,6 +19,7 @@ import 'presentation/navigation/main_navigation_wrapper.dart';
 import 'presentation/providers/theme_provider.dart';
 import 'presentation/providers/note_provider.dart';
 import 'presentation/screens/notes/notes_screen.dart';
+import 'data/services/notification_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -25,6 +28,7 @@ void main() async {
   } catch (_) {
     // If .env is missing or not bundled, continue without crashing.
   }
+  await NotificationService().init();
   runApp(const MyApp());
 }
 
@@ -72,6 +76,8 @@ class MyApp extends StatelessWidget {
             home: const AuthWrapper(),
             routes: {
               '/landing': (context) => const LandingPage(),
+              '/login': (context) => const LoginScreen(),
+              '/register': (context) => const RegisterScreen(),
               '/lock': (context) => const AppLockScreen(),
               '/main': (context) => const MainNavigationWrapper(),
               '/month': (context) => const MonthPlanScreen(),

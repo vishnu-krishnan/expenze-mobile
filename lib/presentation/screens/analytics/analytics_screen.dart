@@ -230,7 +230,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                       color: textColor)),
               Row(
                 children: [
-                  _buildLegendItem('Actual', AppTheme.primary),
+                  _buildLegendItem('Spent', AppTheme.primary),
                   const SizedBox(width: 12),
                   _buildLegendItem(
                       'Planned', AppTheme.secondary.withValues(alpha: 0.5)),
@@ -343,7 +343,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
               return touchedSpots.map((spot) {
                 final isActual = spot.barIndex == 0;
                 return LineTooltipItem(
-                  '${isActual ? "Actual" : "Planned"}: ₹${spot.y.toInt()}',
+                  '${isActual ? "Spent" : "Planned"}: ₹${spot.y.toInt()}',
                   TextStyle(
                     color: isActual ? AppTheme.primary : AppTheme.secondary,
                     fontWeight: FontWeight.bold,
@@ -566,15 +566,16 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                           color: color,
                           value: value,
                           title: isTouched
-                              ? '${percentage.toStringAsFixed(2)}%'
+                              ? '${item['category_name']}\n${percentage.toStringAsFixed(1)}%'
                               : '',
                           radius: radius,
+                          titlePositionPercentageOffset: 0.55,
                           titleStyle: TextStyle(
                             fontSize: fontSize,
                             fontWeight: FontWeight.bold,
                             color: Colors.white,
-                            shadows: [
-                              Shadow(color: Colors.black26, blurRadius: 2)
+                            shadows: const [
+                              Shadow(color: Colors.black45, blurRadius: 4)
                             ],
                           ),
                         );
@@ -599,8 +600,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                       padding: const EdgeInsets.only(bottom: 8),
                       child: _buildIndicator(
                         color: color,
-                        text: (item['category_name'] as String?) ??
-                            'Uncategorized',
+                        text: (item['category_name'] as String?) ?? 'Imported',
                         textColor: secondaryTextColor,
                       ),
                     );

@@ -19,7 +19,7 @@ class DatabaseHelper {
 
     return await openDatabase(
       path,
-      version: 11,
+      version: 14,
       onCreate: _createDB,
       onUpgrade: _onUpgrade,
     );
@@ -95,6 +95,25 @@ class DatabaseHelper {
     if (oldVersion < 11) {
       await _insertDefaultCategories(db);
     }
+    if (oldVersion < 12) {
+      try {
+        await db.execute(
+            "ALTER TABLE expenses ADD COLUMN payment_mode TEXT DEFAULT 'Other'");
+      } catch (_) {}
+    }
+    if (oldVersion < 13) {
+      try {
+        // Double check fix for version 12 failure
+        await db.execute(
+            "ALTER TABLE expenses ADD COLUMN payment_mode TEXT DEFAULT 'Other'");
+      } catch (_) {}
+    }
+    if (oldVersion < 14) {
+      try {
+        await db.execute(
+            "ALTER TABLE regular_payments ADD COLUMN priority TEXT DEFAULT 'MEDIUM'");
+      } catch (_) {}
+    }
   }
 
   Future<void> _createDB(Database db, int version) async {
@@ -153,6 +172,7 @@ class DatabaseHelper {
         is_paid INTEGER DEFAULT 0,
         due_date TEXT,
         paid_date TEXT,
+        payment_mode TEXT DEFAULT 'Other',
         notes TEXT,
         priority TEXT DEFAULT 'MEDIUM',
         synced INTEGER DEFAULT 0,
@@ -177,6 +197,7 @@ class DatabaseHelper {
         status TEXT,
         status_description TEXT,
         duration_months INTEGER,
+        priority TEXT DEFAULT 'MEDIUM',
         synced INTEGER DEFAULT 0,
         created_at TEXT,
         updated_at TEXT,
@@ -288,6 +309,7 @@ class DatabaseHelper {
     await db.delete('regular_payments');
     await db.delete('sms_messages');
     await db.delete('sync_queue');
+    await db.delete('notes');
   }
 
   // Auth related

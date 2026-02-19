@@ -16,6 +16,7 @@ class DetectedExpense {
   double amount;
   int? categoryId;
   String priority;
+  String paymentMode;
   final DateTime? date;
   bool isSaving;
   bool isSuccess;
@@ -27,6 +28,7 @@ class DetectedExpense {
     required this.amount,
     this.categoryId,
     this.priority = 'MEDIUM',
+    this.paymentMode = 'Other',
     this.date,
     this.isSaving = false,
     this.isSuccess = false,
@@ -84,6 +86,7 @@ class _SmsImportScreenState extends State<SmsImportScreen>
             raw: parsed['raw'],
             name: parsed['merchant'],
             amount: parsed['amount'],
+            paymentMode: parsed['payment_mode'] ?? 'Other',
             date: msg.date,
           ));
         }
@@ -138,6 +141,7 @@ class _SmsImportScreenState extends State<SmsImportScreen>
           raw: parsed['raw'],
           name: parsed['merchant'],
           amount: parsed['amount'],
+          paymentMode: parsed['payment_mode'] ?? 'Other',
         ));
       }
     }
@@ -160,6 +164,7 @@ class _SmsImportScreenState extends State<SmsImportScreen>
 
     try {
       final response = await _apiService.aiParseSms(text);
+      if (!mounted) return;
       if (response.statusCode == 200) {
         final data = response.data;
         final List<dynamic> expensesJson = data['expenses'] ?? [];
@@ -201,48 +206,69 @@ class _SmsImportScreenState extends State<SmsImportScreen>
 
   Future<void> _importAll() async {
     final provider = context.read<ExpenseProvider>();
+    final List<Expense> toImport = [];
+    final List<int> indices = [];
 
-    int successCount = 0;
     for (var i = 0; i < _detectedExpenses.length; i++) {
       final item = _detectedExpenses[i];
       if (item.amount == 0 || item.isSuccess) continue;
 
-      setState(() => _detectedExpenses[i].isSaving = true);
-      try {
-        final date = item.date ?? DateTime.now();
-        // Format month key as YYYY-MM
-        final monthKey =
-            "${date.year}-${date.month.toString().padLeft(2, '0')}";
+      final date = item.date ?? DateTime.now();
+      final monthKey = "${date.year}-${date.month.toString().padLeft(2, '0')}";
 
-        final expense = Expense(
-          monthKey: monthKey,
-          categoryId: item.categoryId,
-          name: item.name,
-          plannedAmount: 0, // Set to 0 so it counts as Unplanned
-          actualAmount: item.amount,
-          priority: item.priority,
-          isPaid: true,
-          paidDate: date.toIso8601String(),
-          notes: 'SMS_ID:${item.id} | MSG:${item.raw}',
-        );
-        await provider.addExpense(expense);
-        setState(() => _detectedExpenses[i].isSuccess = true);
-        successCount++;
-      } catch (e) {
-        _smsService.logger.e('Error importing item ${item.name}: $e');
-      } finally {
-        setState(() => _detectedExpenses[i].isSaving = false);
-      }
+      toImport.add(Expense(
+        monthKey: monthKey,
+        categoryId: item.categoryId,
+        name: item.name,
+        plannedAmount: 0.0,
+        actualAmount: item.amount,
+        priority: item.priority,
+        paymentMode: item.paymentMode,
+        isPaid: true,
+        paidDate: date.toIso8601String(),
+        notes: 'SMS_ID:${item.id} | MSG:${item.raw}',
+      ));
+      indices.add(i);
+      setState(() => _detectedExpenses[i].isSaving = true);
     }
 
-    if (successCount > 0 && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Successfully imported $successCount transactions'),
-          backgroundColor: AppTheme.success,
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
+    if (toImport.isEmpty) return;
+
+    try {
+      await provider.addExpenses(toImport);
+      setState(() {
+        for (var idx in indices) {
+          _detectedExpenses[idx].isSuccess = true;
+          _detectedExpenses[idx].isSaving = false;
+        }
+      });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content:
+                Text('Successfully imported ${toImport.length} transactions'),
+            backgroundColor: AppTheme.success,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } catch (e) {
+      _smsService.logger.e('Bulk import error: $e');
+      setState(() {
+        for (var idx in indices) {
+          _detectedExpenses[idx].isSaving = false;
+        }
+      });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: ${e.toString()}'),
+            backgroundColor: AppTheme.danger,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
     }
   }
 
@@ -552,11 +578,33 @@ class _SmsImportScreenState extends State<SmsImportScreen>
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(expense.name,
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 15,
-                            color: textColor)),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(expense.name,
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 15,
+                                  color: textColor)),
+                        ),
+                        if (expense.paymentMode != 'Other')
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: AppTheme.primary.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Text(
+                              expense.paymentMode.toUpperCase(),
+                              style: const TextStyle(
+                                  color: AppTheme.primary,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                      ],
+                    ),
                     Text(
                       expense.raw.length > 50
                           ? '${expense.raw.substring(0, 50)}...'

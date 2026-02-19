@@ -117,7 +117,7 @@ class RecentExpensesScreen extends StatelessWidget {
             MaterialPageRoute(
               builder: (context) => CategoryTransactionsScreen(
                 categoryId: item['id'] as int?,
-                categoryName: item['category_name'] ?? 'Uncategorized',
+                categoryName: item['category_name'] ?? 'Imported',
                 monthKey: Provider.of<ExpenseProvider>(context, listen: false)
                     .currentMonthKey,
                 categoryIcon: item['icon'],
@@ -152,7 +152,7 @@ class RecentExpensesScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(item['category_name'] ?? 'Uncategorized',
+                    Text(item['category_name'] ?? 'Imported',
                         style: TextStyle(
                             fontWeight: FontWeight.w800,
                             fontSize: 15,
@@ -171,7 +171,7 @@ class RecentExpensesScreen extends StatelessWidget {
                   Text(
                       (planned == 0 && actual > 0)
                           ? 'Unplanned'
-                          : (actual > 0 ? 'Actual' : 'Planned'),
+                          : (actual > 0 ? 'Spent' : 'Planned'),
                       style: TextStyle(
                           color: (planned == 0 && actual > 0)
                               ? AppTheme.warning

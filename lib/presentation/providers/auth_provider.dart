@@ -65,6 +65,7 @@ class AuthProvider with ChangeNotifier {
 
     try {
       // 1. Save to Local DB
+      final now = DateTime.now().toIso8601String();
       final userId = await _dbHelper.upsertUser(
         username: name.toLowerCase().replaceAll(' ', '_'),
         fullName: name,
@@ -83,9 +84,10 @@ class AuthProvider with ChangeNotifier {
       _user = {
         'id': userId,
         'username': name.toLowerCase().replaceAll(' ', '_'),
-        'fullName': name,
+        'full_name': name,
         'email': email,
         'defaultBudget': budget,
+        'created_at': now,
       };
 
       _isLoading = false;
@@ -180,6 +182,7 @@ class AuthProvider with ChangeNotifier {
 
   Future<void> logout() async {
     final prefs = await SharedPreferences.getInstance();
+    await _dbHelper.clearAllData();
     await prefs.clear(); // Reset everything
     _user = null;
     _isOnboarded = false;

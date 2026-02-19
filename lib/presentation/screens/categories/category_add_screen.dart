@@ -129,7 +129,7 @@ class _CategoryAddScreenState extends State<CategoryAddScreen> {
               ? null
               : () async {
                   await provider.addCategory(cat['name'], cat['emoji']);
-                  if (context.mounted) Navigator.pop(context);
+                  if (mounted) Navigator.pop(context);
                 },
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -305,7 +305,7 @@ class _CategoryAddScreenState extends State<CategoryAddScreen> {
               if (_nameController.text.isEmpty) return;
               await provider.addCategory(
                   _nameController.text, _iconController.text);
-              if (context.mounted) Navigator.pop(context);
+              if (mounted) Navigator.pop(context);
             },
             style: AppTheme.primaryButtonStyle.copyWith(
               minimumSize:

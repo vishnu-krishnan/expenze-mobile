@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:expenze_mobile/data/repositories/note_repository.dart';
 import 'package:expenze_mobile/data/models/note.dart';
 
+import 'package:expenze_mobile/data/services/notification_service.dart';
+
 class NoteProvider with ChangeNotifier {
   final NoteRepository _repository = NoteRepository();
   List<Note> _notes = [];
@@ -36,20 +38,44 @@ class NoteProvider with ChangeNotifier {
       createdAt: now,
       updatedAt: now,
     );
-    await _repository.insertNote(note);
+    final id = await _repository.insertNote(note);
+    if (reminderDate != null) {
+      await NotificationService().scheduleNotification(
+        id: id,
+        title: title,
+        body: content,
+        scheduledDate: reminderDate,
+      );
+    }
     await loadNotes();
   }
 
   Future<void> updateNote(Note note) async {
     final updatedNote = note.copyWith(updatedAt: DateTime.now());
     await _repository.updateNote(updatedNote);
+
+    // Handle notification
+    await NotificationService().cancelNotification(note.id!);
+    if (note.isReminderActive &&
+        note.reminderDate != null &&
+        note.reminderDate!.isAfter(DateTime.now())) {
+      await NotificationService().scheduleNotification(
+        id: note.id!,
+        title: note.title,
+        body: note.content,
+        scheduledDate: note.reminderDate!,
+      );
+    }
+
     await loadNotes();
   }
 
   Future<void> deleteNote(int id) async {
+    await NotificationService().cancelNotification(id);
     await _repository.deleteNote(id);
     await loadNotes();
   }
+// ...
 
   Future<void> togglePin(Note note) async {
     await updateNote(note.copyWith(isPinned: !note.isPinned));

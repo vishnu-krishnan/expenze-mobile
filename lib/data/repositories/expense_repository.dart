@@ -199,7 +199,7 @@ class ExpenseRepository {
     final result = await db.rawQuery('''
       SELECT 
         COALESCE(c.id, -1) as id,
-        COALESCE(c.name, 'Uncategorized') as category_name,
+        COALESCE(c.name, 'Imported') as category_name,
         COALESCE(c.icon, '❓') as icon,
         COALESCE(c.color, '#808080') as color,
         SUM(COALESCE(e.planned_amount, 0)) as total_planned,
