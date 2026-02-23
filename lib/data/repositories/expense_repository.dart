@@ -12,7 +12,7 @@ class ExpenseRepository {
       'expenses',
       where: 'month_key = ?',
       whereArgs: [monthKey],
-      orderBy: 'is_paid ASC, created_at DESC',
+      orderBy: 'created_at DESC',
     );
 
     return List.generate(maps.length, (i) => Expense.fromMap(maps[i]));
@@ -234,8 +234,8 @@ class ExpenseRepository {
     final result = await db.rawQuery('''
       SELECT 
         COALESCE(c.id, -1) as id,
-        COALESCE(c.name, 'Imported') as category_name,
-        COALESCE(c.icon, '❓') as icon,
+        COALESCE(c.name, 'General') as category_name,
+        COALESCE(c.icon, '📦') as icon,
         COALESCE(c.color, '#808080') as color,
         SUM(COALESCE(e.planned_amount, 0)) as total_planned,
         SUM(COALESCE(e.actual_amount, 0)) as total_actual,
@@ -262,8 +262,8 @@ class ExpenseRepository {
     final result = await db.rawQuery('''
       SELECT 
         COALESCE(c.id, -1) as id,
-        COALESCE(c.name, 'Imported') as category_name,
-        COALESCE(c.icon, '❓') as icon,
+        COALESCE(c.name, 'General') as category_name,
+        COALESCE(c.icon, '📦') as icon,
         COALESCE(c.color, '#808080') as color,
         SUM(COALESCE(e.planned_amount, 0)) as total_planned,
         SUM(COALESCE(e.actual_amount, 0)) as total_actual,

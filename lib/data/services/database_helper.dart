@@ -20,7 +20,7 @@ class DatabaseHelper {
 
     return await openDatabase(
       path,
-      version: 17,
+      version: 18,
       onCreate: _createDB,
       onUpgrade: _onUpgrade,
     );
@@ -155,6 +155,28 @@ class DatabaseHelper {
         }
       } catch (e) {
         logger.e("Database migration error (v17)", error: e);
+      }
+    }
+    if (oldVersion < 18) {
+      try {
+        final userInfo = await db.rawQuery('PRAGMA table_info(users)');
+
+        if (!userInfo.any((col) => col['name'] == 'default_budget')) {
+          await db.execute(
+              'ALTER TABLE users ADD COLUMN default_budget REAL DEFAULT 0');
+        }
+        if (!userInfo.any((col) => col['name'] == 'synced')) {
+          await db
+              .execute('ALTER TABLE users ADD COLUMN synced INTEGER DEFAULT 0');
+        }
+        if (!userInfo.any((col) => col['name'] == 'created_at')) {
+          await db.execute('ALTER TABLE users ADD COLUMN created_at TEXT');
+        }
+        if (!userInfo.any((col) => col['name'] == 'updated_at')) {
+          await db.execute('ALTER TABLE users ADD COLUMN updated_at TEXT');
+        }
+      } catch (e) {
+        logger.e("Database migration error (v18)", error: e);
       }
     }
   }

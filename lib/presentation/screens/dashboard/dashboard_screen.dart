@@ -108,7 +108,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
           final pctUsed = target > 0 ? (actual / target) : 0.0;
 
           return RefreshIndicator(
-            onRefresh: () => provider.resetToCurrentMonth(),
+            onRefresh: () => Future.wait([
+              provider.resetToCurrentMonth(),
+              _fetchQuote(),
+            ]),
             displacement: 40,
             color: AppTheme.primary,
             child: CustomScrollView(
@@ -767,7 +770,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           fontWeight: FontWeight.w900,
                           color: textColor,
                           letterSpacing: -0.5)),
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 28),
+                  _fieldLabel('Category', textColor),
+                  const SizedBox(height: 6),
                   DropdownButtonFormField<int>(
                     initialValue: selectedCategoryId,
                     dropdownColor: modalBgColor,
@@ -780,10 +785,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     onChanged: (val) =>
                         setModalState(() => selectedCategoryId = val),
                     decoration: AppTheme.inputDecoration(
-                        'Category', LucideIcons.layoutGrid,
+                        'Select category', LucideIcons.layoutGrid,
                         context: context),
                   ),
                   const SizedBox(height: 20),
+                  _fieldLabel('Payment Mode', textColor),
+                  const SizedBox(height: 6),
                   DropdownButtonFormField<String>(
                     initialValue: selectedPaymentMode,
                     dropdownColor: modalBgColor,
@@ -806,23 +813,27 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       }
                     },
                     decoration: AppTheme.inputDecoration(
-                        'Payment Mode', LucideIcons.creditCard,
+                        'Select mode', LucideIcons.creditCard,
                         context: context),
                   ),
                   const SizedBox(height: 20),
+                  _fieldLabel('Description', textColor),
+                  const SizedBox(height: 6),
                   TextField(
                     controller: nameController,
                     decoration: AppTheme.inputDecoration(
-                        'Description', LucideIcons.edit3,
+                        'e.g. Electricity bill', LucideIcons.edit3,
                         context: context),
                     style: TextStyle(color: textColor),
                   ),
                   const SizedBox(height: 20),
+                  _fieldLabel('Amount (₹)', textColor),
+                  const SizedBox(height: 6),
                   TextField(
                     controller: amountController,
                     keyboardType: TextInputType.number,
                     decoration: AppTheme.inputDecoration(
-                        'Amount', LucideIcons.target,
+                        'e.g. 1200', LucideIcons.indianRupee,
                         context: context),
                     style: TextStyle(color: textColor),
                   ),
@@ -866,6 +877,32 @@ class _DashboardScreenState extends State<DashboardScreen> {
           );
         },
       ),
+    );
+  }
+
+  Widget _fieldLabel(String label, Color textColor, {bool optional = false}) {
+    return Row(
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            color: textColor,
+            fontSize: 12,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 0.4,
+          ),
+        ),
+        if (optional) ...[
+          const SizedBox(width: 4),
+          Text(
+            '(optional)',
+            style: TextStyle(
+              color: textColor.withValues(alpha: 0.4),
+              fontSize: 11,
+            ),
+          ),
+        ],
+      ],
     );
   }
 }

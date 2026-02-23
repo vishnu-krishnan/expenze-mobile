@@ -57,7 +57,16 @@ class SmsService {
         lowerBody.contains('payment requested') ||
         lowerBody.contains('statement for') ||
         lowerBody.contains('upcoming') ||
-        lowerBody.contains('reminder');
+        lowerBody.contains('min due') ||
+        lowerBody.contains('minimum due') ||
+        lowerBody.contains('total due') ||
+        lowerBody.contains('outstanding') ||
+        lowerBody.contains('reminder') ||
+        lowerBody.contains('self transfer') ||
+        lowerBody.contains('transfer to own') ||
+        lowerBody.contains('transfer to self') ||
+        lowerBody.contains('between own accounts') ||
+        lowerBody.contains('to your own account');
 
     if (isReminder) return null;
 

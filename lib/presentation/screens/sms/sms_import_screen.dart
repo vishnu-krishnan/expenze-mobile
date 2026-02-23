@@ -4,6 +4,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../providers/expense_provider.dart';
 import '../../providers/category_provider.dart';
+import '../../providers/auth_provider.dart';
 import '../../../data/models/category.dart';
 import '../../../data/models/expense.dart';
 import '../../../data/services/sms_service.dart';
@@ -71,34 +72,31 @@ class _SmsImportScreenState extends State<SmsImportScreen>
       final importedIds =
           await context.read<ExpenseProvider>().getImportedSmsIds();
       final messages = await _smsService.getRecentSms(months: 6);
-      final List<DetectedExpense> newExpenses = [];
+
+      final List<Map<String, dynamic>> potentialMessages = [];
 
       for (var msg in messages) {
         final smsId = 'sms-${msg.id ?? DateTime.now().millisecondsSinceEpoch}';
 
         // Skip if already imported
         if (importedIds.contains(smsId)) continue;
+        if (msg.body == null || msg.body!.isEmpty) continue;
 
-        final parsed = _smsService.parseExpenseFromSms(msg.body ?? '');
+        // Native pre-filter to drop generic non-expenses quickly
+        final parsed = _smsService.parseExpenseFromSms(msg.body!);
         if (parsed != null) {
-          newExpenses.add(DetectedExpense(
-            id: smsId,
-            raw: parsed['raw'],
-            name: parsed['merchant'],
-            amount: parsed['amount'],
-            paymentMode: parsed['payment_mode'] ?? 'Other',
-            date: msg.date,
-          ));
+          potentialMessages.add({
+            'id': smsId,
+            'body': msg.body,
+            'date': msg.date,
+          });
         }
       }
 
-      setState(() {
-        _detectedExpenses = [...newExpenses, ..._detectedExpenses];
-        final seen = <String>{};
-        _detectedExpenses.retainWhere((e) => seen.add(e.raw));
-      });
+      // Limit to 20 messages for AI parse to save tokens and time
+      final limitedToSend = potentialMessages.take(20).toList();
 
-      if (newExpenses.isEmpty) {
+      if (limitedToSend.isEmpty) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
@@ -106,11 +104,93 @@ class _SmsImportScreenState extends State<SmsImportScreen>
                 behavior: SnackBarBehavior.floating),
           );
         }
-      } else {
+        return;
+      }
+
+      final buffer = StringBuffer();
+      for (var item in limitedToSend) {
+        buffer.writeln('[ID: ${item['id']}] ${item['body']}');
+      }
+
+      if (!mounted) return;
+      final catProvider = context.read<CategoryProvider>();
+      final categories = catProvider.categories;
+      final categoryStrings = categories.map((c) => c.name).toList();
+
+      final userName =
+          context.read<AuthProvider>().user?['full_name'] as String?;
+
+      final response = await _apiService
+          .aiParseSms(buffer.toString(), categoryStrings, userName: userName);
+      if (!mounted) return;
+
+      if (response.statusCode == 200) {
+        final data = response.data;
+        final List<dynamic> expensesJson = data['expenses'] ?? [];
+        final List<DetectedExpense> newExpenses = [];
+
+        for (var entry in expensesJson.asMap().entries) {
+          final json = entry.value;
+          final index = entry.key;
+
+          final suggestion =
+              json['categorySuggestion']?.toString().toLowerCase() ?? '';
+          int? matchedId;
+          for (var cat in categories) {
+            if (suggestion.contains(cat.name.toLowerCase()) ||
+                cat.name.toLowerCase().contains(suggestion)) {
+              matchedId = cat.id;
+              break;
+            }
+          }
+
+          DateTime? parsedDate;
+          if (json['date'] != null) {
+            try {
+              parsedDate = DateTime.parse(json['date']);
+            } catch (_) {}
+          }
+
+          final extractedId = json['id']?.toString() ??
+              'ai-${DateTime.now().millisecondsSinceEpoch}-$index';
+          final originalItem = limitedToSend.firstWhere(
+              (item) => item['id'] == extractedId,
+              orElse: () => {});
+
+          final DateTime? fallbackDate = originalItem.containsKey('date')
+              ? (originalItem['date'] as DateTime?)
+              : null;
+          final finalDate = parsedDate ?? fallbackDate ?? DateTime.now();
+          final finalId = originalItem.containsKey('id')
+              ? (originalItem['id'] as String)
+              : extractedId;
+          final amount = (json['amount'] as num?)?.toDouble() ?? 0.0;
+
+          if (amount <= 0) continue;
+
+          newExpenses.add(DetectedExpense(
+            id: finalId,
+            raw: json['rawText'] ?? 'AI parsed',
+            name: json['name'] ?? 'Unknown',
+            amount: amount,
+            categoryId: matchedId,
+            priority: json['priority'] ?? 'MEDIUM',
+            paymentMode: 'Other',
+            date: finalDate,
+          ));
+        }
+
+        setState(() {
+          _detectedExpenses = [...newExpenses, ..._detectedExpenses];
+          final seen = <String>{};
+          _detectedExpenses.retainWhere((e) => seen.add(e.raw));
+        });
+
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Found ${newExpenses.length} new transactions'),
+              content: Text(
+                  'Found ${newExpenses.length} new categorized transactions'),
               backgroundColor: AppTheme.success,
               behavior: SnackBarBehavior.floating,
             ),
@@ -119,8 +199,19 @@ class _SmsImportScreenState extends State<SmsImportScreen>
       }
     } catch (e) {
       _smsService.logger.e('Sync error: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error analyzing SMS: \${e.toString()}'),
+            backgroundColor: AppTheme.danger,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
     } finally {
-      setState(() => _isLoading = false);
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 
@@ -135,13 +226,19 @@ class _SmsImportScreenState extends State<SmsImportScreen>
     setState(() => _isLoading = true);
 
     try {
-      final response = await _apiService.aiParseSms(text);
+      final catProvider = context.read<CategoryProvider>();
+      final categories = catProvider.categories;
+      final categoryStrings = categories.map((c) => c.name).toList();
+
+      final userName =
+          context.read<AuthProvider>().user?['full_name'] as String?;
+
+      final response = await _apiService.aiParseSms(text, categoryStrings,
+          userName: userName);
       if (!mounted) return;
       if (response.statusCode == 200) {
         final data = response.data;
         final List<dynamic> expensesJson = data['expenses'] ?? [];
-        final catProvider = context.read<CategoryProvider>();
-        final categories = catProvider.categories;
 
         final results = expensesJson.asMap().entries.map((entry) {
           final json = entry.value;
@@ -157,6 +254,13 @@ class _SmsImportScreenState extends State<SmsImportScreen>
             }
           }
 
+          DateTime? parsedDate;
+          if (json['date'] != null) {
+            try {
+              parsedDate = DateTime.parse(json['date']);
+            } catch (_) {}
+          }
+
           return DetectedExpense(
             id: 'ai-$index-${DateTime.now().millisecondsSinceEpoch}',
             raw: json['rawText'] ?? 'AI parsed',
@@ -164,6 +268,7 @@ class _SmsImportScreenState extends State<SmsImportScreen>
             amount: (json['amount'] as num?)?.toDouble() ?? 0.0,
             categoryId: matchedId,
             priority: json['priority'] ?? 'MEDIUM',
+            date: parsedDate,
           );
         }).toList();
 
@@ -198,6 +303,7 @@ class _SmsImportScreenState extends State<SmsImportScreen>
         paymentMode: item.paymentMode,
         isPaid: true,
         paidDate: date.toIso8601String(),
+        createdAt: date.toIso8601String(),
         notes: 'SMS_ID:${item.id} | MSG:${item.raw}',
       ));
       indices.add(i);
@@ -209,10 +315,14 @@ class _SmsImportScreenState extends State<SmsImportScreen>
     try {
       await provider.addExpenses(toImport);
       setState(() {
-        for (var idx in indices) {
-          _detectedExpenses[idx].isSuccess = true;
-          _detectedExpenses[idx].isSaving = false;
+        final importedSet = indices.toSet();
+        final remaining = <DetectedExpense>[];
+        for (var i = 0; i < _detectedExpenses.length; i++) {
+          if (!importedSet.contains(i)) {
+            remaining.add(_detectedExpenses[i]);
+          }
         }
+        _detectedExpenses = remaining;
       });
 
       if (mounted) {

@@ -93,9 +93,11 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                         const SizedBox(height: 32),
                       ],
                       Text(
-                          _selectedPeriod >= 30
-                              ? 'Monthly Total Expenses'
-                              : 'Daily Total Expenses',
+                          _selectedPeriod <= 7
+                              ? 'Daily Breakdown'
+                              : _selectedPeriod <= 30
+                                  ? 'Weekly Breakdown'
+                                  : 'Daily Summary for Last 3 Months',
                           style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
@@ -103,10 +105,10 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                               letterSpacing: -0.5)),
                       Text(
                           _selectedPeriod <= 7
-                              ? 'Last 1 Week'
-                              : (_selectedPeriod <= 30
-                                  ? 'Last 1 Month'
-                                  : 'Last 3 Months'),
+                              ? 'Last 7 Days'
+                              : _selectedPeriod <= 30
+                                  ? 'Last 30 Days'
+                                  : 'Last 90 Days',
                           style: TextStyle(
                               fontSize: 13,
                               color: secondaryTextColor,
@@ -290,9 +292,9 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
               interval: _selectedPeriod == 7
                   ? 1
                   : (_selectedPeriod == 30
-                          ? 7 // Weekly labels for 1 Month view
+                          ? 5 // Label every 5 days for 1-month view
                           : (_selectedPeriod == 90
-                              ? 30 // Monthly labels for 3 Month view
+                              ? 30 // Monthly labels for 3-month view
                               : 1))
                       .toDouble(),
               getTitlesWidget: (val, meta) {
@@ -314,10 +316,10 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
 
                   return SideTitleWidget(
                     meta: meta,
-                    space: 8,
+                    space: 4,
                     child: Text(label,
                         style: TextStyle(
-                            fontSize: 10,
+                            fontSize: _selectedPeriod == 30 ? 9 : 10,
                             fontWeight: FontWeight.bold,
                             color: secondaryTextColor)),
                   );
@@ -454,11 +456,18 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                       fontSize: 10,
                       fontWeight: FontWeight.bold)),
               const SizedBox(height: 4),
-              Text('₹${actual.toStringAsFixed(0)}',
-                  style: TextStyle(
-                      color: textColor,
-                      fontSize: 18,
-                      fontWeight: FontWeight.w900)),
+              // Show 'Saved!' when actual is zero — zero spending is a win
+              actual == 0
+                  ? Text('Saved!',
+                      style: TextStyle(
+                          color: AppTheme.success,
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold))
+                  : Text('₹${actual.toStringAsFixed(0)}',
+                      style: TextStyle(
+                          color: textColor,
+                          fontSize: 18,
+                          fontWeight: FontWeight.w900)),
             ],
           ),
         );
@@ -468,13 +477,17 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
 
   Widget _buildSpendingSummary(
       ExpenseProvider provider, Color textColor, Color secondaryTextColor) {
-    String avgLabel = 'Average';
+    String avgLabel;
+    String highLabel;
     if (_selectedPeriod <= 7) {
       avgLabel = 'Daily Avg';
-    } else if (_selectedPeriod <= 90) {
-      avgLabel = 'Weekly Avg';
+      highLabel = 'Peak Day';
+    } else if (_selectedPeriod <= 30) {
+      avgLabel = 'Active Day Avg';
+      highLabel = 'Peak Day';
     } else {
-      avgLabel = 'Monthly Avg';
+      avgLabel = 'Active Day Avg';
+      highLabel = 'Peak Day';
     }
 
     return Container(
@@ -496,10 +509,16 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
       ),
       child: Row(
         children: [
+          _buildSummaryItem(
+              'Total Spent',
+              '₹${provider.periodTotalSpent.toInt()}',
+              Colors.white,
+              Colors.white70),
+          Container(height: 40, width: 1, color: Colors.white24),
           _buildSummaryItem(avgLabel, '₹${provider.avgMonthlySpent.toInt()}',
               Colors.white, Colors.white70),
           Container(height: 40, width: 1, color: Colors.white24),
-          _buildSummaryItem('Highest', '₹${provider.maxMonthlySpent.toInt()}',
+          _buildSummaryItem(highLabel, '₹${provider.maxMonthlySpent.toInt()}',
               Colors.white, Colors.white70),
         ],
       ),
@@ -628,7 +647,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                       padding: const EdgeInsets.only(bottom: 8),
                       child: _buildIndicator(
                         color: color,
-                        text: (item['category_name'] as String?) ?? 'Imported',
+                        text: (item['category_name'] as String?) ?? 'General',
                         textColor: secondaryTextColor,
                       ),
                     );

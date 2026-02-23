@@ -17,38 +17,89 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
   final _emailController = TextEditingController();
   final _budgetController = TextEditingController();
 
+  String? _nameError;
+  String? _emailError;
+
+  @override
+  void initState() {
+    super.initState();
+    _nameController.addListener(() {
+      if (_nameError != null && _nameController.text.trim().isNotEmpty) {
+        setState(() => _nameError = null);
+      }
+    });
+    _emailController.addListener(() {
+      if (_emailError != null) {
+        final email = _emailController.text.trim();
+        if (email.isNotEmpty && email.contains('@')) {
+          setState(() => _emailError = null);
+        }
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _emailController.dispose();
+    _budgetController.dispose();
+    super.dispose();
+  }
+
   void _handleSubmit() async {
-    if (_nameController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please enter your name'),
-          backgroundColor: AppTheme.danger,
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-      return;
+    FocusScope.of(context)
+        .unfocus(); // Dismiss keyboard to prevent tap unresponsiveness
+
+    setState(() {
+      _nameError = null;
+      _emailError = null;
+    });
+
+    bool hasError = false;
+
+    if (_nameController.text.trim().isEmpty) {
+      setState(() => _nameError = 'Please enter your name');
+      hasError = true;
     }
 
-    if (_emailController.text.isEmpty || !_emailController.text.contains('@')) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please enter a valid email address'),
-          backgroundColor: AppTheme.danger,
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-      return;
+    final email = _emailController.text.trim();
+    if (email.isEmpty || !email.contains('@')) {
+      setState(() => _emailError = 'Please enter a valid email address');
+      hasError = true;
     }
+
+    if (hasError) return;
 
     final auth = Provider.of<AuthProvider>(context, listen: false);
-    final success = await auth.setOnboardingComplete(
-      name: _nameController.text,
-      email: _emailController.text,
-      budget: double.tryParse(_budgetController.text),
-    );
+    final nav = Navigator.of(context);
+    final messenger = ScaffoldMessenger.of(context);
 
-    if (success && mounted) {
-      Navigator.pushNamedAndRemoveUntil(context, '/main', (route) => false);
+    try {
+      final success = await auth.setOnboardingComplete(
+        name: _nameController.text.trim(),
+        email: email,
+        budget: double.tryParse(_budgetController.text.trim()),
+      );
+
+      if (success) {
+        nav.pushNamedAndRemoveUntil('/main', (route) => false);
+      } else {
+        messenger.showSnackBar(
+          SnackBar(
+            content: Text(auth.error ?? 'Failed to complete profile setup.'),
+            backgroundColor: AppTheme.danger,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } catch (e) {
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text('An unexpected error occurred: $e'),
+          backgroundColor: AppTheme.danger,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
     }
   }
 
@@ -107,15 +158,17 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
                         controller: _nameController,
                         icon: LucideIcons.user,
                         isDark: isDark,
+                        errorText: _nameError,
                       ),
                       const SizedBox(height: 28),
                       _buildInputField(
-                        label: 'EMAIL (OPTIONAL)',
-                        hint: 'For identification only',
+                        label: 'EMAIL',
+                        hint: 'your.email@example.com',
                         controller: _emailController,
                         icon: LucideIcons.mail,
                         keyboardType: TextInputType.emailAddress,
                         isDark: isDark,
+                        errorText: _emailError,
                       ),
                       const SizedBox(height: 28),
                       _buildInputField(
@@ -147,6 +200,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
     required IconData icon,
     required bool isDark,
     TextInputType keyboardType = TextInputType.text,
+    String? errorText,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -157,9 +211,11 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
             fontSize: 13,
             fontWeight: FontWeight.w800,
             letterSpacing: 1.5,
-            color: isDark
-                ? AppTheme.primary
-                : AppTheme.primaryDark.withValues(alpha: 0.6),
+            color: errorText != null
+                ? AppTheme.danger
+                : (isDark
+                    ? AppTheme.primary
+                    : AppTheme.primaryDark.withValues(alpha: 0.6)),
           ),
         ),
         const SizedBox(height: 14),
@@ -170,9 +226,12 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
                 : AppTheme.info.withValues(alpha: 0.3),
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
-              color: isDark
-                  ? AppTheme.borderDark
-                  : AppTheme.primary.withValues(alpha: 0.2),
+              color: errorText != null
+                  ? AppTheme.danger
+                  : (isDark
+                      ? AppTheme.borderDark
+                      : AppTheme.primary.withValues(alpha: 0.2)),
+              width: errorText != null ? 1.5 : 1.0,
             ),
           ),
           child: TextField(
@@ -187,13 +246,28 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
                   color: isDark ? Colors.white30 : AppTheme.textLight),
               prefixIcon: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 18),
-                child: Icon(icon, color: AppTheme.primary, size: 22),
+                child: Icon(icon,
+                    color:
+                        errorText != null ? AppTheme.danger : AppTheme.primary,
+                    size: 22),
               ),
               border: InputBorder.none,
               contentPadding: const EdgeInsets.symmetric(vertical: 20),
             ),
           ),
         ),
+        if (errorText != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 8, left: 16),
+            child: Text(
+              errorText,
+              style: GoogleFonts.inter(
+                color: AppTheme.danger,
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
       ],
     );
   }
@@ -223,7 +297,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
           elevation: 0,
         ),
         child: Text(
-          'Complete Setup',
+          'Get Started',
           style: GoogleFonts.outfit(
             fontSize: 18,
             fontWeight: FontWeight.w800,

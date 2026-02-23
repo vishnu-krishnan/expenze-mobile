@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import 'package:logger/logger.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../../core/config/api_config.dart';
+import '../../core/constants/ai_prompts.dart';
 
 class ApiService {
   late final Dio _dio;
@@ -221,7 +222,8 @@ class ApiService {
     }
   }
 
-  Future<Response> aiParseSms(String text) async {
+  Future<Response> aiParseSms(String text, List<String> categories,
+      {String? userName}) async {
     // Direct call to Groq API (no backend)
     final groqKey = dotenv.env['GROQ_API_KEY'];
     if (groqKey == null || groqKey.isEmpty) {
@@ -240,21 +242,7 @@ class ApiService {
       ),
     );
 
-    final prompt = '''
-You are an assistant that extracts expense transactions from raw SMS text from Indian banks / cards / UPI.
-
-Input text may contain multiple messages.
-Return a JSON object with an "expenses" array.
-Each expense should have:
-- "rawText": original SMS line
-- "name": short merchant or label
-- "amount": number
-- "categorySuggestion": simple category name (e.g. "Food & Dining", "Shopping", "Bills & Utilities")
-- "priority": "HIGH" | "MEDIUM" | "LOW"
-
-Only include messages that look like debit / spend / payment transactions.
-Output ONLY valid JSON. Do not include markdown or explanations.
-''';
+    final prompt = AiPrompts.getSmsParsePrompt(categories, userName: userName);
 
     final payload = {
       'model': 'llama-3.3-70b-versatile',

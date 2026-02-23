@@ -11,11 +11,38 @@ class ReleaseInfo {
 }
 
 class AppVersion {
-  static const String current = '1.2.0';
-  static const String buildNumber = '8';
-  static const String releaseName = 'Smart Budget & Calculation Fixes';
+  static const String current = '1.3.0';
+  static const String buildNumber = '10';
+  static const String releaseName = 'AI-Powered SMS Import';
 
   static const List<ReleaseInfo> history = [
+    ReleaseInfo(
+      version: '1.3.0',
+      date: '2026-02-23',
+      changes: [
+        'SMS Import: Inbox scan now uses AI (Groq) for all parsing — better accuracy, proper categories',
+        'SMS Import: Imported expenses now show real categories in Analytics pie chart',
+        'SMS Import: AI batch capped at 20 messages per scan to save API tokens',
+        'SMS Import: Self-transfers between own accounts are now excluded automatically',
+        'SMS Import: Payment reminders, min-due, total-due alerts are now reliably filtered out',
+        'SMS Import: Per-AI prompt is now centralised in ai_prompts.dart for easy tuning',
+        'Analytics: Summary card now shows Total Spent + Active Day Avg + Peak Day for the selected period',
+        'Analytics: Section labels now correctly reflect the selected time range (7d / 30d / 90d)',
+        'Analytics: Uncategorised expenses show as "General" instead of "Imported"',
+        'Profile: Removed redundant Monthly Budget field (manage budget via Settings)',
+      ],
+    ),
+    ReleaseInfo(
+      version: '1.2.1',
+      date: '2026-02-23',
+      changes: [
+        'Analytics: Zero-spend periods now show "Saved!" in green instead of ₹0',
+        'Analytics: Fixed 1-month chart x-axis label overlap (interval reduced to every 5 days)',
+        'Monthly Planner: Added horizontal swipe gesture for month navigation',
+        'Dashboard: Pull-to-refresh now also refreshes the daily motivational quote',
+        'Navigation: Switching tabs always resets to the current month',
+      ],
+    ),
     ReleaseInfo(
       version: '1.2.0',
       date: '2026-02-23',

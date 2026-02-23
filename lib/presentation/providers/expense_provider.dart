@@ -103,6 +103,9 @@ class ExpenseProvider with ChangeNotifier {
   List<Map<String, dynamic>> get periodCategoryBreakdown =>
       _periodCategoryBreakdown;
 
+  double _periodTotalSpent = 0;
+  double get periodTotalSpent => _periodTotalSpent;
+
   Future<void> loadTrends(int value, {bool isDays = false}) async {
     _isLoading = true;
     notifyListeners();
@@ -179,12 +182,19 @@ class ExpenseProvider with ChangeNotifier {
 
       _periodCategoryBreakdown = List<Map<String, dynamic>>.from(rawBreakdown);
 
-      final summary = isDays
-          ? await _repository
-              .getAnalyticsSummary((value / 30).ceil()) // Fallback for summary
-          : await _repository.getAnalyticsSummary(value);
-      _avgMonthlySpent = summary['avg_spent'] ?? 0;
-      _maxMonthlySpent = summary['max_spent'] ?? 0;
+      // Compute period-accurate summary stats directly from the filled trends
+      final nonZero = _trends
+          .where((e) => (e['total_actual'] as num).toDouble() > 0)
+          .toList();
+      _periodTotalSpent = _trends.fold(
+          0.0, (s, e) => s + (e['total_actual'] as num).toDouble());
+      _avgMonthlySpent =
+          nonZero.isEmpty ? 0 : _periodTotalSpent / nonZero.length;
+      _maxMonthlySpent = nonZero.isEmpty
+          ? 0
+          : nonZero
+              .map((e) => (e['total_actual'] as num).toDouble())
+              .reduce((a, b) => a > b ? a : b);
     } catch (e) {
       logger.e('Error loading trends', error: e);
     } finally {
@@ -234,10 +244,14 @@ class ExpenseProvider with ChangeNotifier {
     await loadMonthData(_currentMonthKey);
   }
 
-  Future<void> togglePaid(Expense expense, double actualAmount) async {
+  Future<void> togglePaid(Expense expense, double actualAmount,
+      {String? paidDate}) async {
     final updated = expense.copyWith(
       isPaid: !expense.isPaid,
       actualAmount: !expense.isPaid ? actualAmount : 0,
+      paidDate: !expense.isPaid
+          ? (paidDate ?? DateTime.now().toIso8601String())
+          : null,
     );
     await updateExpense(updated);
   }

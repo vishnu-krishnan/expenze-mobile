@@ -15,7 +15,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
-  final _phoneController = TextEditingController();
   final _budgetController = TextEditingController();
 
   bool _isEditing = false;
@@ -28,7 +27,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (user != null) {
       _nameController.text = user['full_name'] ?? '';
       _emailController.text = user['email'] ?? '';
-      _phoneController.text = user['phone'] ?? '';
       _budgetController.text = user['default_budget']?.toString() ?? '0';
     }
   }
@@ -37,7 +35,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void dispose() {
     _nameController.dispose();
     _emailController.dispose();
-    _phoneController.dispose();
     _budgetController.dispose();
     super.dispose();
   }
@@ -52,7 +49,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
       await auth.updateProfile(
         fullName: _nameController.text.trim(),
         email: _emailController.text.trim(),
-        phone: _phoneController.text.trim(),
         defaultBudget: double.tryParse(_budgetController.text),
       );
 
@@ -141,9 +137,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ),
                         const SizedBox(height: 32),
                         _buildAccountSummary(
-                            context, textColor, secondaryTextColor),
-                        const SizedBox(height: 32),
-                        _buildProfileDetails(
                             context, textColor, secondaryTextColor),
                         const SizedBox(height: 32),
                         _buildSecurityQuickLinks(
@@ -264,7 +257,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
           _buildSummaryItem(
-              'Status', 'Verified', LucideIcons.badgeCheck, AppTheme.success),
+            'Status',
+            (context.read<AuthProvider>().user?['is_verified'] == true)
+                ? 'Verified'
+                : 'Unverified',
+            (context.read<AuthProvider>().user?['is_verified'] == true)
+                ? LucideIcons.badgeCheck
+                : LucideIcons.alertCircle,
+            (context.read<AuthProvider>().user?['is_verified'] == true)
+                ? AppTheme.success
+                : AppTheme.danger,
+          ),
           Container(
               width: 1,
               height: 40,
@@ -299,55 +302,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildProfileDetails(
-      BuildContext context, Color textColor, Color secondaryTextColor) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(left: 8, bottom: 12),
-          child: Text(
-            'Personal Information'.toUpperCase(),
-            style: TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w900,
-              color: secondaryTextColor.withValues(alpha: 0.6),
-              letterSpacing: 1.5,
-            ),
-          ),
-        ),
-        Container(
-          decoration: BoxDecoration(
-            color: Theme.of(context).cardTheme.color,
-            borderRadius: BorderRadius.circular(24),
-            boxShadow: AppTheme.softShadow,
-          ),
-          child: Column(
-            children: [
-              _buildModernTextField(
-                controller: _phoneController,
-                label: 'Phone Number',
-                icon: LucideIcons.phone,
-                enabled: _isEditing,
-                textColor: textColor,
-                keyboardType: TextInputType.phone,
-              ),
-              _buildDivider(),
-              _buildModernTextField(
-                controller: _budgetController,
-                label: 'Global Monthly Budget',
-                icon: LucideIcons.indianRupee,
-                enabled: _isEditing,
-                textColor: textColor,
-                keyboardType: TextInputType.number,
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
+  // Monthly Budget section removed entirely.
   Widget _buildSecurityQuickLinks(
       BuildContext context, Color textColor, Color secondaryTextColor) {
     return Column(
@@ -386,10 +341,34 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 icon: LucideIcons.helpCircle,
                 title: 'Help & Support',
                 onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Support center coming soon!'),
-                      behavior: SnackBarBehavior.floating,
+                  showDialog(
+                    context: context,
+                    builder: (ctx) => AlertDialog(
+                      title: const Text('Help & Support',
+                          style: TextStyle(fontWeight: FontWeight.bold)),
+                      content: const Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                              'For any issues or feedback, please reach out to us:'),
+                          SizedBox(height: 16),
+                          Text('Email: support@expenze.com',
+                              style: TextStyle(fontWeight: FontWeight.w600)),
+                          SizedBox(height: 8),
+                          Text('Website: www.expenze.com',
+                              style: TextStyle(fontWeight: FontWeight.w600)),
+                          SizedBox(height: 16),
+                          Text('App Version: 1.2.1+9',
+                              style:
+                                  TextStyle(fontSize: 12, color: Colors.grey)),
+                        ],
+                      ),
+                      actions: [
+                        TextButton(
+                            onPressed: () => Navigator.pop(ctx),
+                            child: const Text('Close'))
+                      ],
                     ),
                   );
                 },
@@ -438,69 +417,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildModernTextField({
-    required TextEditingController controller,
-    required String label,
-    required IconData icon,
-    required bool enabled,
-    required Color textColor,
-    TextInputType? keyboardType,
-    String? Function(String?)? validator,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: AppTheme.primary.withValues(alpha: 0.05),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(icon, size: 18, color: AppTheme.primary),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  label.toUpperCase(),
-                  style: TextStyle(
-                      fontSize: 9,
-                      fontWeight: FontWeight.w900,
-                      color: AppTheme.getTextColor(context, isSecondary: true)
-                          .withValues(alpha: 0.5),
-                      letterSpacing: 0.5),
-                ),
-                TextFormField(
-                  controller: controller,
-                  enabled: enabled,
-                  validator: validator,
-                  keyboardType: keyboardType,
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                    color:
-                        enabled ? textColor : textColor.withValues(alpha: 0.8),
-                  ),
-                  decoration: const InputDecoration(
-                    isDense: true,
-                    border: InputBorder.none,
-                    contentPadding: EdgeInsets.symmetric(vertical: 4),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          if (enabled)
-            Icon(LucideIcons.edit2,
-                size: 14, color: AppTheme.primary.withValues(alpha: 0.5)),
-        ],
-      ),
-    );
-  }
-
   Widget _buildDivider() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -514,14 +430,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
         showDialog(
           context: context,
           builder: (dialogContext) => AlertDialog(
-            title: const Text('Sign Out',
+            title: const Text('Clear App Data',
                 style: TextStyle(fontWeight: FontWeight.w900)),
             content: const Text(
-                'Are you sure you want to sign out? This will clear all local synchronized data.'),
+                'Are you sure you want to clear all app data? This will delete all local records and sign you out.'),
             actions: [
               TextButton(
                   onPressed: () => Navigator.pop(dialogContext),
-                  child: const Text('Stay')),
+                  child: const Text('Cancel')),
               ElevatedButton(
                 onPressed: () async {
                   final auth = context.read<AuthProvider>();
@@ -539,7 +455,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12)),
                 ),
-                child: const Text('Sign Out'),
+                child: const Text('Clear Data'),
               ),
             ],
             shape:
@@ -547,9 +463,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
         );
       },
-      icon: const Icon(LucideIcons.logOut, color: AppTheme.danger, size: 20),
+      icon: const Icon(LucideIcons.trash2, color: AppTheme.danger, size: 20),
       label: const Text(
-        'SIGN OUT FROM DEVICE',
+        'CLEAR APP DATA',
         style: TextStyle(
             color: AppTheme.danger,
             fontWeight: FontWeight.w900,

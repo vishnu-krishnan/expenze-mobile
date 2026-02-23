@@ -40,98 +40,110 @@ class _MonthPlanScreenState extends State<MonthPlanScreen> {
             : AppTheme.backgroundDecoration,
         child: Consumer2<ExpenseProvider, CategoryProvider>(
           builder: (context, expenseProvider, categoryProvider, child) {
-            return CustomScrollView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              slivers: [
-                SliverAppBar(
-                  automaticallyImplyLeading: false,
-                  backgroundColor: Colors.transparent,
-                  expandedHeight: 100,
-                  floating: true,
-                  pinned: false,
-                  flexibleSpace: FlexibleSpaceBar(
-                    titlePadding: EdgeInsets.zero,
-                    background: Padding(
-                      padding: const EdgeInsets.fromLTRB(26, 10, 26, 0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text('Financial Overview',
-                              style: TextStyle(
-                                  color: themeProvider.isDarkMode
-                                      ? AppTheme.getTextColor(context,
-                                          isSecondary: true)
-                                      : AppTheme.getTextColor(context,
-                                          isSecondary: true),
-                                  fontSize: 13,
-                                  letterSpacing: 0.5)),
-                          Text('Monthly Planner',
-                              style: TextStyle(
-                                  fontSize: 26,
-                                  fontWeight: FontWeight.w900,
-                                  color: textColor,
-                                  letterSpacing: -1)),
-                        ],
+            return GestureDetector(
+              onHorizontalDragEnd: (details) {
+                if (details.primaryVelocity != null) {
+                  if (details.primaryVelocity! > 0) {
+                    _handleMonthChange(-1); // Swipe right → previous month
+                  } else if (details.primaryVelocity! < 0) {
+                    _handleMonthChange(1); // Swipe left → next month
+                  }
+                }
+              },
+              child: CustomScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                slivers: [
+                  SliverAppBar(
+                    automaticallyImplyLeading: false,
+                    backgroundColor: Colors.transparent,
+                    expandedHeight: 100,
+                    floating: true,
+                    pinned: false,
+                    flexibleSpace: FlexibleSpaceBar(
+                      titlePadding: EdgeInsets.zero,
+                      background: Padding(
+                        padding: const EdgeInsets.fromLTRB(26, 10, 26, 0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text('Financial Overview',
+                                style: TextStyle(
+                                    color: themeProvider.isDarkMode
+                                        ? AppTheme.getTextColor(context,
+                                            isSecondary: true)
+                                        : AppTheme.getTextColor(context,
+                                            isSecondary: true),
+                                    fontSize: 13,
+                                    letterSpacing: 0.5)),
+                            Text('Monthly Planner',
+                                style: TextStyle(
+                                    fontSize: 26,
+                                    fontWeight: FontWeight.w900,
+                                    color: textColor,
+                                    letterSpacing: -1)),
+                          ],
+                        ),
                       ),
                     ),
                   ),
-                ),
-                if (expenseProvider.isLoading &&
-                    expenseProvider.expenses.isEmpty)
-                  const SliverFillRemaining(
-                    child: Center(child: CircularProgressIndicator()),
-                  )
-                else ...[
-                  // 1. Month Navigation
-                  SliverToBoxAdapter(
-                    child:
-                        _buildMonthNavigator(expenseProvider.currentMonthKey),
-                  ),
-
-                  // 2. Summary Header (Vibrant)
-                  SliverToBoxAdapter(
-                    child: _buildPremiumSummary(expenseProvider),
-                  ),
-
-                  // 3. Section Title
-                  if (expenseProvider.expenses.isNotEmpty)
+                  if (expenseProvider.isLoading &&
+                      expenseProvider.expenses.isEmpty)
+                    const SliverFillRemaining(
+                      child: Center(child: CircularProgressIndicator()),
+                    )
+                  else ...[
+                    // 1. Month Navigation
                     SliverToBoxAdapter(
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(24, 24, 24, 12),
-                        child: Text(
-                          'Transaction List',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: textColor,
+                      child:
+                          _buildMonthNavigator(expenseProvider.currentMonthKey),
+                    ),
+
+                    // 2. Summary Header (Vibrant)
+                    SliverToBoxAdapter(
+                      child: _buildPremiumSummary(expenseProvider),
+                    ),
+
+                    // 3. Section Title
+                    if (expenseProvider.expenses.isNotEmpty)
+                      SliverToBoxAdapter(
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(24, 24, 24, 12),
+                          child: Text(
+                            'Transaction List',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: textColor,
+                            ),
                           ),
                         ),
                       ),
-                    ),
 
-                  // 4. Expense List
-                  if (expenseProvider.expenses.isEmpty)
-                    SliverFillRemaining(
-                      hasScrollBody: false,
-                      child: _buildEmptyState(),
-                    )
-                  else
-                    SliverPadding(
-                      padding: const EdgeInsets.symmetric(horizontal: 24),
-                      sliver: SliverList(
-                        delegate: SliverChildBuilderDelegate(
-                          (context, index) {
-                            final expense = expenseProvider.expenses[index];
-                            return _buildExpenseCard(expense, expenseProvider);
-                          },
-                          childCount: expenseProvider.expenses.length,
+                    // 4. Expense List
+                    if (expenseProvider.expenses.isEmpty)
+                      SliverFillRemaining(
+                        hasScrollBody: false,
+                        child: _buildEmptyState(),
+                      )
+                    else
+                      SliverPadding(
+                        padding: const EdgeInsets.symmetric(horizontal: 24),
+                        sliver: SliverList(
+                          delegate: SliverChildBuilderDelegate(
+                            (context, index) {
+                              final expense = expenseProvider.expenses[index];
+                              return _buildExpenseCard(
+                                  expense, expenseProvider);
+                            },
+                            childCount: expenseProvider.expenses.length,
+                          ),
                         ),
                       ),
-                    ),
-                  const SliverToBoxAdapter(child: SizedBox(height: 100)),
+                    const SliverToBoxAdapter(child: SizedBox(height: 100)),
+                  ],
                 ],
-              ],
+              ),
             );
           },
         ),
@@ -181,10 +193,8 @@ class _MonthPlanScreenState extends State<MonthPlanScreen> {
   Widget _buildPremiumSummary(ExpenseProvider provider) {
     final summary = provider.summary;
     final confirmedPlanned = (summary['confirmed_planned'] ?? 0.0).toDouble();
+    final pendingPlanned = (summary['pending_planned'] ?? 0.0).toDouble();
     final unplanned = (summary['unplanned'] ?? 0.0).toDouble();
-
-    // The user wants only confirmed planned on the card
-    final target = confirmedPlanned;
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
@@ -206,148 +216,137 @@ class _MonthPlanScreenState extends State<MonthPlanScreen> {
       ),
       child: Column(
         children: [
+          // ── Stat Row: Confirmed | Pending | Unplanned ──
           Row(
             children: [
+              // Confirmed (high priority)
               Expanded(
-                child: Column(
-                  children: [
-                    const Text('Planned',
-                        style: TextStyle(color: Colors.white70, fontSize: 11)),
-                    const SizedBox(height: 4),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Flexible(
-                          child: Column(
-                            children: [
-                              FittedBox(
-                                fit: BoxFit.scaleDown,
-                                child: Text(
-                                    '₹${confirmedPlanned.toLocaleString()}',
-                                    style: const TextStyle(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 16)),
-                              ),
-                              const Text('Confirmed',
-                                  style: TextStyle(
-                                      color: Colors.white54, fontSize: 8)),
-                            ],
-                          ),
-                        ),
-                        Container(
-                            margin: const EdgeInsets.symmetric(horizontal: 8),
-                            width: 1,
-                            height: 15,
-                            color: Colors.white12),
-                        Flexible(
-                          child: Column(
-                            children: [
-                              FittedBox(
-                                fit: BoxFit.scaleDown,
-                                child: Text(
-                                    '₹${(summary['pending_planned'] ?? 0.0).toDouble().toLocaleString()}',
-                                    style: const TextStyle(
-                                        color: Colors.white70,
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 16)),
-                              ),
-                              const Text('Pending',
-                                  style: TextStyle(
-                                      color: Colors.white54, fontSize: 8)),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
+                child: _buildSummaryStatColumn(
+                  label: 'Confirmed',
+                  amount: confirmedPlanned,
+                  valueColor: Colors.white,
+                  labelColor: Colors.white70,
                 ),
               ),
-              Container(width: 1, height: 30, color: Colors.white24),
+              Container(width: 1, height: 36, color: Colors.white24),
+              // Pending (high priority)
               Expanded(
-                child: Column(
-                  children: [
-                    const Text('Unplanned',
-                        style: TextStyle(color: Colors.white70, fontSize: 11)),
-                    const SizedBox(height: 4),
-                    FittedBox(
-                      fit: BoxFit.scaleDown,
-                      child: Text('₹${unplanned.toLocaleString()}',
-                          style: const TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16)),
-                    ),
-                  ],
+                child: _buildSummaryStatColumn(
+                  label: 'Pending',
+                  amount: pendingPlanned,
+                  valueColor: const Color(0xFFFFB74D), // amber
+                  labelColor: Colors.white70,
+                ),
+              ),
+              Container(width: 1, height: 36, color: Colors.white24),
+              // Unplanned (low priority — muted)
+              Expanded(
+                child: _buildSummaryStatColumn(
+                  label: 'Unplanned',
+                  amount: unplanned,
+                  valueColor: Colors.white38,
+                  labelColor: Colors.white38,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 24),
-          // Multi-colored Progress Bar
+          const SizedBox(height: 20),
+          // ── 3-segment Progress Bar ──
           Builder(builder: (context) {
-            // Reference logic: Total Plan vs Unplanned Expenses
-            final total = target + unplanned;
+            final total = confirmedPlanned + pendingPlanned + unplanned;
             final base = total > 0 ? total : 1.0;
-
-            final pctPlanned = (target / base * 100).toInt();
+            final pctConfirmed = (confirmedPlanned / base * 100).toInt();
+            final pctPending = (pendingPlanned / base * 100).toInt();
             final pctUnplanned = (unplanned / base * 100).toInt();
 
             return Container(
-              height: 12,
+              height: 10,
               width: double.infinity,
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(6),
+                color: Colors.white.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(5),
               ),
               child: ClipRRect(
-                borderRadius: BorderRadius.circular(6),
+                borderRadius: BorderRadius.circular(5),
                 child: Row(
                   children: [
-                    if (pctPlanned > 0)
+                    if (pctConfirmed > 0)
                       Flexible(
-                        flex: pctPlanned,
+                        flex: pctConfirmed,
                         child: Container(color: Colors.white),
+                      ),
+                    if (pctPending > 0)
+                      Flexible(
+                        flex: pctPending,
+                        child:
+                            Container(color: const Color(0xFFFFB74D)), // amber
                       ),
                     if (pctUnplanned > 0)
                       Flexible(
                         flex: pctUnplanned,
-                        child: Container(color: const Color(0xFFFFAB40)),
+                        child: Container(color: Colors.white24), // muted
                       ),
                   ],
                 ),
               ),
             );
           }),
-          const SizedBox(height: 8),
+          const SizedBox(height: 10),
+          // ── Legend ──
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Row(children: [
-                Container(
-                    width: 8,
-                    height: 8,
-                    decoration: const BoxDecoration(
-                        color: Colors.white, shape: BoxShape.circle)),
-                const SizedBox(width: 4),
-                const Text('Confirmed',
-                    style: TextStyle(color: Colors.white70, fontSize: 10)),
-              ]),
-              Row(children: [
-                Container(
-                    width: 8,
-                    height: 8,
-                    decoration: const BoxDecoration(
-                        color: Color(0xFFFFAB40), shape: BoxShape.circle)),
-                const SizedBox(width: 4),
-                const Text('Unplanned',
-                    style: TextStyle(color: Colors.white70, fontSize: 10)),
-              ]),
+              _buildLegendDot(Colors.white, 'Confirmed'),
+              const SizedBox(width: 16),
+              _buildLegendDot(const Color(0xFFFFB74D), 'Pending'),
+              const SizedBox(width: 16),
+              _buildLegendDot(Colors.white38, 'Unplanned'),
             ],
-          )
+          ),
         ],
       ),
     );
+  }
+
+  Widget _buildSummaryStatColumn({
+    required String label,
+    required double amount,
+    required Color valueColor,
+    required Color labelColor,
+  }) {
+    return Column(
+      children: [
+        Text(label,
+            style: TextStyle(
+                color: labelColor,
+                fontSize: 10,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 0.3)),
+        const SizedBox(height: 4),
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Text(
+            '₹${amount.toLocaleString()}',
+            style: TextStyle(
+                color: valueColor, fontWeight: FontWeight.w900, fontSize: 16),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildLegendDot(Color color, String label) {
+    return Row(children: [
+      Container(
+          width: 7,
+          height: 7,
+          decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
+      const SizedBox(width: 4),
+      Text(label,
+          style: TextStyle(
+              color: color == Colors.white38 ? Colors.white38 : Colors.white70,
+              fontSize: 9)),
+    ]);
   }
 
   Widget _buildEmptyState() {
@@ -397,151 +396,187 @@ class _MonthPlanScreenState extends State<MonthPlanScreen> {
       dateStr = DateFormat('MMM d, h:mm a').format(date);
     }
 
+    // Status-driven colour palette
+    final Color statusColor = isConfirmed
+        ? const Color(0xFF66BB6A) // green  — confirmed
+        : isUnplanned
+            ? Colors.grey // grey   — unplanned (low priority)
+            : const Color(0xFFFFB74D); // amber — pending
+
     return GestureDetector(
       onTap: () => _showExpenseDetails(context, expense, category),
       child: Container(
         margin: const EdgeInsets.only(bottom: 12),
-        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: isDark ? AppTheme.bgCardDark : Colors.white,
           borderRadius: BorderRadius.circular(24),
           boxShadow: AppTheme.softShadow,
-        ),
-        child: Column(
-          children: [
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color:
-                        (expense.isPaid ? AppTheme.success : AppTheme.primary)
-                            .withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Text(
-                    category.icon ?? '📁',
-                    style: const TextStyle(fontSize: 20),
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(expense.name,
-                                style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 16,
-                                    color: textColor)),
-                          ),
-                          if (expense.paymentMode != 'Other')
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 6, vertical: 2),
-                              decoration: BoxDecoration(
-                                color: AppTheme.primary.withValues(alpha: 0.1),
-                                borderRadius: BorderRadius.circular(6),
-                              ),
-                              child: Text(
-                                expense.paymentMode.toUpperCase(),
-                                style: const TextStyle(
-                                    color: AppTheme.primary,
-                                    fontSize: 8,
-                                    fontWeight: FontWeight.bold),
-                              ),
-                            ),
-                        ],
-                      ),
-                      if (dateStr.isNotEmpty)
-                        Text(dateStr,
-                            style: TextStyle(
-                                color: secondaryTextColor, fontSize: 12)),
-                    ],
-                  ),
-                ),
-                IconButton(
-                  icon: Icon(LucideIcons.edit3,
-                      size: 18, color: secondaryTextColor),
-                  onPressed: () => _showEditExpenseDialog(context, expense),
-                ),
-                if (!isUnplanned)
-                  Checkbox(
-                    value: expense.isPaid,
-                    onChanged: (val) => _showPaidDialog(expense, provider),
-                    activeColor: AppTheme.success,
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(6)),
-                  )
-                else
-                  const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 12),
-                    child: Icon(LucideIcons.checkCircle2,
-                        color: AppTheme.success, size: 20),
-                  ),
-              ],
+          // Left accent border indicates priority/status
+          border: Border(
+            left: BorderSide(
+              color: isUnplanned
+                  ? Colors.grey.withValues(alpha: 0.4)
+                  : statusColor,
+              width: 4,
             ),
-            const Divider(height: 24),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                if (isUnplanned)
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text('Unplanned',
-                          style: TextStyle(
-                              color: AppTheme.warning,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 12)),
-                      Text('₹${expense.actualAmount.toInt()}',
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold, color: textColor)),
-                    ],
-                  )
-                else ...[
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Planned',
-                          style: TextStyle(
-                              color: secondaryTextColor, fontSize: 12)),
-                      Text('₹${expense.plannedAmount.toInt()}',
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold, color: textColor)),
-                    ],
+          ),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: statusColor.withValues(
+                          alpha: isUnplanned ? 0.07 : 0.12),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Text(
+                      category.icon ?? '📁',
+                      style: const TextStyle(fontSize: 20),
+                    ),
                   ),
-                  if (isConfirmed)
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Spent',
-                            style: TextStyle(
-                                color: secondaryTextColor, fontSize: 12)),
-                        Text('₹${expense.actualAmount.toInt()}',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: isOver ? AppTheme.danger : textColor,
-                            )),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(expense.name,
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16,
+                                      color: textColor)),
+                            ),
+                            if (expense.paymentMode != 'Other')
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 6, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color:
+                                      AppTheme.primary.withValues(alpha: 0.1),
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: Text(
+                                  expense.paymentMode.toUpperCase(),
+                                  style: const TextStyle(
+                                      color: AppTheme.primary,
+                                      fontSize: 8,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                          ],
+                        ),
+                        if (dateStr.isNotEmpty)
+                          Text(dateStr,
+                              style: TextStyle(
+                                  color: secondaryTextColor, fontSize: 12)),
                       ],
+                    ),
+                  ),
+                  IconButton(
+                    icon: Icon(LucideIcons.edit3,
+                        size: 18, color: secondaryTextColor),
+                    onPressed: () => _showEditExpenseDialog(context, expense),
+                  ),
+                  if (!isUnplanned)
+                    Checkbox(
+                      value: expense.isPaid,
+                      onChanged: (val) => _showPaidDialog(expense, provider),
+                      activeColor:
+                          const Color(0xFF66BB6A), // green when checked
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(6)),
                     )
                   else
-                    const Text('Pending',
-                        style: TextStyle(
-                            color: AppTheme.warning,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 12)),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      child: Icon(LucideIcons.checkCircle2,
+                          color: Colors.grey.withValues(alpha: 0.5), size: 20),
+                    ),
                 ],
-              ],
-            ),
-          ],
+              ),
+              Divider(height: 24, color: statusColor.withValues(alpha: 0.15)),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  if (isUnplanned)
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Unplanned',
+                            style: TextStyle(
+                                color: Colors.grey.withValues(alpha: 0.7),
+                                fontWeight: FontWeight.w600,
+                                fontSize: 12)),
+                        Text('₹${expense.actualAmount.toInt()}',
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: secondaryTextColor)),
+                      ],
+                    )
+                  else ...[
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Planned',
+                            style: TextStyle(
+                                color: secondaryTextColor, fontSize: 12)),
+                        Text('₹${expense.plannedAmount.toInt()}',
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold, color: textColor)),
+                      ],
+                    ),
+                    if (isConfirmed)
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Text('Spent',
+                              style: TextStyle(
+                                  color: const Color(0xFF66BB6A),
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600)),
+                          Text('₹${expense.actualAmount.toInt()}',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: isOver
+                                    ? AppTheme.danger
+                                    : const Color(0xFF66BB6A),
+                              )),
+                        ],
+                      )
+                    else
+                      Row(
+                        children: [
+                          Container(
+                            width: 6,
+                            height: 6,
+                            decoration: const BoxDecoration(
+                                color: Color(0xFFFFB74D),
+                                shape: BoxShape.circle),
+                          ),
+                          const SizedBox(width: 5),
+                          const Text('Pending',
+                              style: TextStyle(
+                                  color: Color(0xFFFFB74D),
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 12)),
+                        ],
+                      ),
+                  ],
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
-  }
+  } // end _buildExpenseCard
 
   void _showExpenseDetails(
       BuildContext context, Expense expense, dynamic category) {
@@ -699,43 +734,121 @@ class _MonthPlanScreenState extends State<MonthPlanScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final controller =
         TextEditingController(text: expense.plannedAmount.toStringAsFixed(0));
+    DateTime selectedDate = DateTime.now();
+
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Confirm Expense',
-            style: TextStyle(fontWeight: FontWeight.bold)),
-        backgroundColor: isDark ? AppTheme.bgCardDark : Colors.white,
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text('Enter the final amount spent:'),
-            const SizedBox(height: 16),
-            TextField(
-              controller: controller,
-              keyboardType: TextInputType.number,
-              autofocus: true,
-              decoration: AppTheme.inputDecoration(
-                  'Amount', LucideIcons.indianRupee,
-                  context: context),
-              style: TextStyle(color: AppTheme.getTextColor(context)),
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          title: const Text('Confirm Expense',
+              style: TextStyle(fontWeight: FontWeight.bold)),
+          backgroundColor: isDark ? AppTheme.bgCardDark : Colors.white,
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('Enter the final amount spent:'),
+              const SizedBox(height: 16),
+              TextField(
+                controller: controller,
+                keyboardType: TextInputType.number,
+                autofocus: true,
+                decoration: AppTheme.inputDecoration(
+                    'Amount', LucideIcons.indianRupee,
+                    context: context),
+                style: TextStyle(color: AppTheme.getTextColor(context)),
+              ),
+              const SizedBox(height: 20),
+              const Text('Payment Date:'),
+              const SizedBox(height: 8),
+              InkWell(
+                onTap: () async {
+                  final DateTime? picked = await showDatePicker(
+                    context: context,
+                    initialDate: selectedDate,
+                    firstDate: DateTime(2000),
+                    lastDate: DateTime.now(),
+                    builder: (context, child) {
+                      return Theme(
+                        data: Theme.of(context).copyWith(
+                          colorScheme: isDark
+                              ? const ColorScheme.dark(
+                                  primary: AppTheme.primary,
+                                  onPrimary: Colors.white,
+                                  surface: AppTheme.bgCardDark,
+                                  onSurface: Colors.white,
+                                )
+                              : const ColorScheme.light(
+                                  primary: AppTheme.primary,
+                                  onPrimary: Colors.white,
+                                  surface: Colors.white,
+                                  onSurface: Colors.black,
+                                ),
+                        ),
+                        child: child!,
+                      );
+                    },
+                  );
+                  if (picked != null && picked != selectedDate) {
+                    setDialogState(() {
+                      selectedDate = DateTime(
+                        picked.year,
+                        picked.month,
+                        picked.day,
+                        DateTime.now().hour,
+                        DateTime.now().minute,
+                      );
+                    });
+                  }
+                },
+                borderRadius: BorderRadius.circular(12),
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: isDark
+                        ? Colors.white.withValues(alpha: 0.05)
+                        : Colors.grey.shade100,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: isDark
+                          ? Colors.white.withValues(alpha: 0.1)
+                          : Colors.grey.shade300,
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(LucideIcons.calendar,
+                          size: 20,
+                          color: AppTheme.getTextColor(context,
+                              isSecondary: true)),
+                      const SizedBox(width: 12),
+                      Text(DateFormat('MMM d, yyyy').format(selectedDate),
+                          style: TextStyle(
+                              fontSize: 15,
+                              color: AppTheme.getTextColor(context))),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Cancel')),
+            ElevatedButton(
+              onPressed: () {
+                final amount =
+                    double.tryParse(controller.text) ?? expense.plannedAmount;
+                provider.togglePaid(expense, amount,
+                    paidDate: selectedDate.toIso8601String());
+                if (context.mounted) Navigator.pop(context);
+              },
+              child: const Text('Confirm'),
             ),
           ],
         ),
-        actions: [
-          TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel')),
-          ElevatedButton(
-            onPressed: () {
-              final amount =
-                  double.tryParse(controller.text) ?? expense.plannedAmount;
-              provider.togglePaid(expense, amount);
-              if (context.mounted) Navigator.pop(context);
-            },
-            child: const Text('Confirm'),
-          ),
-        ],
       ),
     );
   }
@@ -746,6 +859,7 @@ class _MonthPlanScreenState extends State<MonthPlanScreen> {
     final amountController = TextEditingController(
         text: (expense.isPaid ? expense.actualAmount : expense.plannedAmount)
             .toStringAsFixed(0));
+    final remarksController = TextEditingController(text: expense.notes ?? '');
     int? selectedCategoryId = expense.categoryId;
     String selectedPaymentMode = expense.paymentMode;
 
@@ -779,7 +893,9 @@ class _MonthPlanScreenState extends State<MonthPlanScreen> {
                       fontSize: 22,
                       fontWeight: FontWeight.w900,
                       color: textColor)),
-              const SizedBox(height: 32),
+              const SizedBox(height: 28),
+              _fieldLabel('Category', textColor),
+              const SizedBox(height: 6),
               DropdownButtonFormField<int>(
                 initialValue: selectedCategoryId,
                 dropdownColor: modalBgColor,
@@ -792,10 +908,12 @@ class _MonthPlanScreenState extends State<MonthPlanScreen> {
                 onChanged: (val) =>
                     setModalState(() => selectedCategoryId = val),
                 decoration: AppTheme.inputDecoration(
-                    'Category', LucideIcons.layoutGrid,
+                    'Select category', LucideIcons.layoutGrid,
                     context: context),
               ),
               const SizedBox(height: 20),
+              _fieldLabel('Payment Mode', textColor),
+              const SizedBox(height: 6),
               DropdownButtonFormField<String>(
                 initialValue: selectedPaymentMode,
                 dropdownColor: modalBgColor,
@@ -810,23 +928,40 @@ class _MonthPlanScreenState extends State<MonthPlanScreen> {
                   }
                 },
                 decoration: AppTheme.inputDecoration(
-                    'Payment Mode', LucideIcons.creditCard,
+                    'Select mode', LucideIcons.creditCard,
                     context: context),
               ),
               const SizedBox(height: 20),
+              _fieldLabel('Description', textColor),
+              const SizedBox(height: 6),
               TextField(
                 controller: nameController,
                 decoration: AppTheme.inputDecoration(
-                    'Description', LucideIcons.edit3,
+                    'e.g. Electricity bill', LucideIcons.edit3,
                     context: context),
                 style: TextStyle(color: textColor),
               ),
               const SizedBox(height: 20),
+              _fieldLabel('Amount (₹)', textColor),
+              const SizedBox(height: 6),
               TextField(
                 controller: amountController,
                 keyboardType: TextInputType.number,
                 decoration: AppTheme.inputDecoration(
-                    'Amount', LucideIcons.target,
+                    'e.g. 1200', LucideIcons.indianRupee,
+                    context: context),
+                style: TextStyle(color: textColor),
+              ),
+              const SizedBox(height: 20),
+              _fieldLabel('Remarks', textColor, optional: true),
+              const SizedBox(height: 6),
+              TextField(
+                controller: remarksController,
+                maxLines: 3,
+                minLines: 1,
+                textCapitalization: TextCapitalization.sentences,
+                decoration: AppTheme.inputDecoration(
+                    'Add a note or comment…', LucideIcons.messageSquare,
                     context: context),
                 style: TextStyle(color: textColor),
               ),
@@ -853,6 +988,9 @@ class _MonthPlanScreenState extends State<MonthPlanScreen> {
                           : (expense.isPaid ? expense.plannedAmount : amount),
                       actualAmount: expense.isPaid ? amount : 0,
                       paymentMode: selectedPaymentMode,
+                      notes: remarksController.text.trim().isEmpty
+                          ? null
+                          : remarksController.text.trim(),
                     );
 
                     await context
@@ -872,6 +1010,32 @@ class _MonthPlanScreenState extends State<MonthPlanScreen> {
           ),
         );
       }),
+    );
+  }
+
+  Widget _fieldLabel(String label, Color textColor, {bool optional = false}) {
+    return Row(
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            color: textColor,
+            fontSize: 12,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 0.4,
+          ),
+        ),
+        if (optional) ...[
+          const SizedBox(width: 4),
+          Text(
+            '(optional)',
+            style: TextStyle(
+              color: textColor.withValues(alpha: 0.4),
+              fontSize: 11,
+            ),
+          ),
+        ],
+      ],
     );
   }
 }

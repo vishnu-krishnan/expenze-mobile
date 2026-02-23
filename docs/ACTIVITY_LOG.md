@@ -1147,3 +1147,36 @@ Impact: Enhanced navigation and transaction management usability.
 Rollback Strategy: Remove the `GestureDetector` wrapper from `_buildTransactionItem` in `category_transactions_screen.dart`.
 
 Date: 2026-02-18
+
+## [2026-02-23] AI-Powered SMS Import & Profile Cleanup
+
+**Change Type:** Minor
+
+**Version:** 1.2.1+9 → 1.3.0+10
+
+**Decision made:**
+Overhauled the SMS import pipeline to route all inbox parsing through the Groq AI (Llama 3.3 70B) instead of the legacy on-device regex engine. The AI is now given the user's live category list to ensure every imported expense is matched to a real existing category (visible in Analytics). Introduced a centralised prompt file for maintainability. Strengthened exclusion rules to prevent banking reminders, minimum-due alerts, and upcoming-debit notifications from being treated as completed expenses. Removed the Monthly Budget field from the Profile screen.
+
+**Reason:**
+1. Regex-only parsing was accepting YES Bank minimum-due notices and other reminder messages as completed debit transactions.
+2. Categorisation was previously performed as a post-hoc keyword-match, causing expenses to land in wrong or "Imported" buckets not visible in Analytics.
+3. Budget field on the Profile screen was redundant with Settings → Monthly Budget.
+
+**Changes:**
+- `lib/core/constants/ai_prompts.dart` (new) – Centralised, professionally structured system prompt with OBJECTIVE / EXTRACTION SCHEMA / EXCLUSION RULES / CONSTRAINTS sections.
+- `lib/data/services/api_service.dart` – `aiParseSms(text, categories)` now accepts the live category list and delegates prompt construction to `AiPrompts`.
+- `lib/data/services/sms_service.dart` – Exclusion list extended with `min due`, `minimum due`, `total due`, `outstanding`.
+- `lib/presentation/screens/sms/sms_import_screen.dart` – `_syncFromInbox` uses AI for all parsing (capped at 20 messages per call); imported items are removed from the pending list immediately after `_importAll`.
+- `lib/presentation/screens/profile/profile_screen.dart` – Monthly Budget section and associated helpers removed.
+- `pubspec.yaml` – Version bumped to `1.3.0+10`.
+
+**Impact:**
+- UX: Imported expenses carry real categories visible in the Analytics/pie chart screen.
+- Performance: AI calls capped at 20 messages per batch.
+- Maintainability: Prompt centralised in `ai_prompts.dart`.
+- Cost: Hard cap of 20 messages per sync to control Groq token usage.
+
+**Rollback Strategy:**
+Revert `_syncFromInbox` to the previous regex-only loop. Revert `aiParseSms` to single-argument form and inline the old prompt. Restore `_buildProfileDetails` block in `profile_screen.dart`.
+
+Date: 2026-02-23
