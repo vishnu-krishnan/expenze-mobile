@@ -85,7 +85,8 @@ class SettingsScreen extends StatelessWidget {
                           subtitle: limit > 0
                               ? 'Target: ₹${limit.toStringAsFixed(0)}'
                               : 'No budget set',
-                          onTap: () => _showLimitDialog(context, limit),
+                          onTap: () => _showLimitDialog(
+                              context, limit, expenseProvider.currentMonthKey),
                           textColor: textColor,
                           secondaryTextColor: secondaryTextColor,
                         ),
@@ -399,21 +400,46 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
-  void _showLimitDialog(BuildContext context, double currentLimit) {
+  void _showLimitDialog(BuildContext context, double currentLimit,
+      [String? currentMonthKey]) {
     final controller = TextEditingController(
         text: currentLimit > 0 ? currentLimit.toStringAsFixed(0) : '');
 
+    // Determine if the viewed month is in the past
+    final liveMonthKey = DateTime.now().toIso8601String().substring(0, 7);
+    final isPastMonth =
+        currentMonthKey != null && currentMonthKey.compareTo(liveMonthKey) < 0;
+
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Adjust Monthly Budget',
-            style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: -0.5)),
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('Set Monthly Budget',
+                style: TextStyle(fontWeight: FontWeight.w900, fontSize: 18)),
+            const SizedBox(height: 4),
+            Text(
+              isPastMonth
+                  ? 'Updating budget for a past month'
+                  : 'Set a budget to stay on track',
+              style: TextStyle(
+                  fontSize: 13,
+                  color: isPastMonth
+                      ? AppTheme.warning
+                      : AppTheme.getTextColor(ctx, isSecondary: true),
+                  fontWeight: FontWeight.w500),
+            ),
+          ],
+        ),
         content: TextField(
           controller: controller,
           keyboardType: TextInputType.number,
+          autofocus: true,
           decoration: AppTheme.inputDecoration(
-              'Budget Amount', LucideIcons.indianRupee,
-              context: context),
+              'Budget Amount (₹)', LucideIcons.indianRupee,
+              context: ctx),
           style: const TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.bold,
@@ -422,20 +448,190 @@ class SettingsScreen extends StatelessWidget {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.pop(ctx),
             child: const Text('Cancel'),
           ),
           ElevatedButton(
             onPressed: () {
               final val = double.tryParse(controller.text) ?? 0.0;
-              context.read<ExpenseProvider>().updateMonthlyLimit(val);
-              Navigator.pop(context);
+              if (val <= 0) return;
+              Navigator.pop(ctx);
+              if (isPastMonth) {
+                // Past months: always apply to that month only — no scope dialog
+                context
+                    .read<ExpenseProvider>()
+                    .updateMonthlyLimitThisMonthOnly(val);
+              } else {
+                // Current or future month: show scope confirmation
+                _showBudgetScopeDialog(context, val);
+              }
             },
             style: AppTheme.primaryButtonStyle,
-            child: const Text('Save'),
+            child: Text(isPastMonth ? 'Update This Month' : 'Apply Budget'),
           ),
         ],
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      ),
+    );
+  }
+
+  void _showBudgetScopeDialog(BuildContext context, double amount) {
+    showDialog(
+      context: context,
+      builder: (ctx) {
+        final secondaryText = AppTheme.getTextColor(ctx, isSecondary: true);
+        return AlertDialog(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+          titlePadding: const EdgeInsets.fromLTRB(24, 28, 24, 0),
+          contentPadding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
+          actionsPadding: EdgeInsets.zero,
+          title: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Apply Budget',
+                style: TextStyle(
+                  fontWeight: FontWeight.w900,
+                  fontSize: 18,
+                  color: AppTheme.getTextColor(ctx),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: AppTheme.primary.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  '₹${amount.toStringAsFixed(0)}  /  month',
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                    color: AppTheme.primary,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Choose when this budget takes effect.',
+                style:
+                    TextStyle(fontSize: 13, color: secondaryText, height: 1.5),
+              ),
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildScopeOption(
+                      ctx: ctx,
+                      icon: LucideIcons.calendar,
+                      title: 'This Month',
+                      subtitle: 'Applies only to\nthe current month',
+                      filled: false,
+                      onTap: () {
+                        context
+                            .read<ExpenseProvider>()
+                            .updateMonthlyLimitThisMonthOnly(amount);
+                        Navigator.pop(ctx);
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _buildScopeOption(
+                      ctx: ctx,
+                      icon: LucideIcons.calendarRange,
+                      title: 'All Future',
+                      subtitle: 'Applies now and\ngoing forward',
+                      filled: true,
+                      onTap: () {
+                        context
+                            .read<ExpenseProvider>()
+                            .updateMonthlyLimitFuture(amount);
+                        Navigator.pop(ctx);
+                      },
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 6),
+              Center(
+                child: TextButton(
+                  onPressed: () => Navigator.pop(ctx),
+                  style: TextButton.styleFrom(
+                    foregroundColor: secondaryText,
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                  ),
+                  child: const Text('Cancel', style: TextStyle(fontSize: 13)),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildScopeOption({
+    required BuildContext ctx,
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required bool filled,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 14),
+        decoration: BoxDecoration(
+          color: filled
+              ? AppTheme.primary
+              : AppTheme.primary.withValues(alpha: 0.06),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: AppTheme.primary.withValues(alpha: filled ? 1 : 0.25),
+            width: 1.5,
+          ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(
+              icon,
+              size: 20,
+              color: filled ? Colors.white : AppTheme.primary,
+            ),
+            const SizedBox(height: 10),
+            Text(
+              title,
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w800,
+                color: filled ? Colors.white : AppTheme.primary,
+                letterSpacing: -0.2,
+              ),
+            ),
+            const SizedBox(height: 3),
+            Text(
+              subtitle,
+              style: TextStyle(
+                fontSize: 11,
+                height: 1.4,
+                color: filled
+                    ? Colors.white.withValues(alpha: 0.75)
+                    : AppTheme.getTextColor(ctx, isSecondary: true),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

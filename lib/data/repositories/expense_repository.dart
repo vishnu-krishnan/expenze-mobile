@@ -99,12 +99,13 @@ class ExpenseRepository {
 
     final result = await db.rawQuery('''
       SELECT 
-        SUM(planned_amount) as total_planned,
+        SUM(CASE WHEN is_paid = 1 AND planned_amount > 0 THEN planned_amount ELSE 0 END) +
+        SUM(CASE WHEN is_paid = 0 AND planned_amount > 0 THEN planned_amount ELSE 0 END) as total_planned,
         SUM(CASE WHEN is_paid = 1 AND planned_amount > 0 THEN planned_amount ELSE 0 END) as confirmed_planned,
         SUM(CASE WHEN is_paid = 0 AND planned_amount > 0 THEN planned_amount ELSE 0 END) as pending_planned,
         SUM(CASE WHEN is_paid = 1 THEN actual_amount ELSE 0 END) as total_actual,
-        SUM(CASE WHEN planned_amount = 0 AND actual_amount > 0 THEN actual_amount ELSE 0 END) as total_unplanned,
-        COUNT(CASE WHEN is_paid = 0 THEN 1 END) as pending_count
+        SUM(CASE WHEN is_paid = 1 AND planned_amount = 0 AND actual_amount > 0 THEN actual_amount ELSE 0 END) as total_unplanned,
+        COUNT(CASE WHEN is_paid = 0 AND planned_amount > 0 THEN 1 END) as pending_count
       FROM expenses
       WHERE month_key = ?
     ''', [monthKey]);
@@ -162,6 +163,40 @@ class ExpenseRepository {
     );
   }
 
+  /// Sets a budget limit for the given month AND all existing future months
+  /// from the current real month onward. Past months are never touched, even
+  /// if [fromMonthKey] is in the past (defence-in-depth guard).
+  Future<void> updateMonthlyLimitForFuture(
+      String fromMonthKey, double limit) async {
+    final db = await _dbHelper.database;
+    final now = DateTime.now().toIso8601String();
+    final liveMonthKey = DateTime.now().toIso8601String().substring(0, 7);
+
+    // Update the chosen month itself
+    await db.insert(
+      'month_plans',
+      {
+        'month_key': fromMonthKey,
+        'total_planned': limit,
+        'updated_at': now,
+      },
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+
+    // Update future months that already have a plan entry.
+    // Lower bound: must be > fromMonthKey AND >= liveMonthKey
+    // so that past months between fromMonthKey and today are never changed.
+    final lowerBound =
+        fromMonthKey.compareTo(liveMonthKey) >= 0 ? fromMonthKey : liveMonthKey;
+
+    await db.update(
+      'month_plans',
+      {'total_planned': limit, 'updated_at': now},
+      where: 'month_key > ? AND total_planned > 0',
+      whereArgs: [lowerBound],
+    );
+  }
+
   // Get category breakdown for a month
   Future<List<Map<String, dynamic>>> getCategoryBreakdown(
       String monthKey) async {
@@ -216,7 +251,58 @@ class ExpenseRepository {
     return result;
   }
 
-  // Get spending trends for specified months (calendar-aligned)
+  // Get category breakdown for a specific period in days
+  Future<List<Map<String, dynamic>>> getCategoryBreakdownForDays(
+      int days) async {
+    final db = await _dbHelper.database;
+    final now = DateTime.now();
+    final startDate = now.subtract(Duration(days: days));
+    final startDateStr = startDate.toIso8601String().split('T')[0];
+
+    final result = await db.rawQuery('''
+      SELECT 
+        COALESCE(c.id, -1) as id,
+        COALESCE(c.name, 'Imported') as category_name,
+        COALESCE(c.icon, '❓') as icon,
+        COALESCE(c.color, '#808080') as color,
+        SUM(COALESCE(e.planned_amount, 0)) as total_planned,
+        SUM(COALESCE(e.actual_amount, 0)) as total_actual,
+        MAX(e.created_at) as last_activity
+      FROM expenses e
+      LEFT JOIN categories c ON CAST(e.category_id AS INTEGER) = CAST(c.id AS INTEGER)
+      WHERE SUBSTR(e.paid_date, 1, 10) >= ? OR (e.paid_date IS NULL AND SUBSTR(e.created_at, 1, 10) >= ?)
+      GROUP BY c.id, c.name, c.color, c.icon
+      HAVING total_planned > 0 OR total_actual > 0
+      ORDER BY total_actual DESC
+    ''', [startDateStr, startDateStr]);
+
+    return result;
+  }
+
+  // Get spending trends for specified days (only paid/debit transactions)
+  Future<List<Map<String, dynamic>>> getDailyTrends(int days) async {
+    final db = await _dbHelper.database;
+    final now = DateTime.now();
+    final startDate = now.subtract(Duration(days: days));
+    final startDateStr = startDate.toIso8601String().split('T')[0];
+
+    final result = await db.rawQuery('''
+      SELECT 
+        SUBSTR(paid_date, 1, 10) as date_key,
+        SUM(CASE WHEN planned_amount > 0 THEN planned_amount ELSE 0 END) as total_planned,
+        SUM(actual_amount) as total_actual
+      FROM expenses
+      WHERE is_paid = 1
+        AND paid_date IS NOT NULL
+        AND SUBSTR(paid_date, 1, 10) >= ?
+      GROUP BY date_key
+      ORDER BY date_key ASC
+    ''', [startDateStr]);
+
+    return result;
+  }
+
+  // Get spending trends for specified months (calendar-aligned, only paid/debit transactions)
   Future<List<Map<String, dynamic>>> getTrends(int months) async {
     final db = await _dbHelper.database;
     final now = DateTime.now();
@@ -228,8 +314,8 @@ class ExpenseRepository {
     final result = await db.rawQuery('''
       SELECT 
         month_key,
-        SUM(planned_amount) as total_planned,
-        SUM(actual_amount) as total_actual
+        SUM(CASE WHEN planned_amount > 0 THEN planned_amount ELSE 0 END) as total_planned,
+        SUM(CASE WHEN is_paid = 1 THEN actual_amount ELSE 0 END) as total_actual
       FROM expenses
       WHERE month_key >= ?
       GROUP BY month_key
@@ -400,7 +486,7 @@ class ExpenseRepository {
     return result;
   }
 
-  // Get list of imported SMS IDs
+  // Get list of imported SMS IDs (correctly extracts just the SMS ID portion from notes)
   Future<List<String>> getImportedSmsIds() async {
     final db = await _dbHelper.database;
     final result = await db.query(
@@ -408,8 +494,15 @@ class ExpenseRepository {
       columns: ['notes'],
       where: "notes LIKE 'SMS_ID:%'",
     );
-    return result
-        .map((e) => (e['notes'] as String).replaceFirst('SMS_ID:', ''))
-        .toList();
+    return result.map((e) {
+      final notes = e['notes'] as String;
+      // Notes format: 'SMS_ID:{id} | MSG:{raw}'
+      // We need to extract only the ID portion before ' | '
+      final smsIdPart = notes.replaceFirst('SMS_ID:', '');
+      final separatorIdx = smsIdPart.indexOf(' | ');
+      return separatorIdx >= 0
+          ? smsIdPart.substring(0, separatorIdx)
+          : smsIdPart;
+    }).toList();
   }
 }

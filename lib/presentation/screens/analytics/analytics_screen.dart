@@ -13,14 +13,14 @@ class AnalyticsScreen extends StatefulWidget {
 }
 
 class _AnalyticsScreenState extends State<AnalyticsScreen> {
-  int _selectedPeriod = 6; // Default: 6 months
+  int _selectedPeriod = 7; // Default: 7 days (1 Week)
   int _touchedIndex = -1;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<ExpenseProvider>().loadTrends(_selectedPeriod);
+      context.read<ExpenseProvider>().loadTrends(_selectedPeriod, isDays: true);
     });
   }
 
@@ -93,18 +93,20 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                         const SizedBox(height: 32),
                       ],
                       Text(
-                          _selectedPeriod >= 60
-                              ? 'Yearly Total Expenses'
-                              : 'Monthly Total Expenses',
+                          _selectedPeriod >= 30
+                              ? 'Monthly Total Expenses'
+                              : 'Daily Total Expenses',
                           style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
                               color: textColor,
                               letterSpacing: -0.5)),
                       Text(
-                          _selectedPeriod >= 12
-                              ? 'Last ${_selectedPeriod ~/ 12} ${(_selectedPeriod ~/ 12) > 1 ? "Years" : "Year"}'
-                              : 'Last $_selectedPeriod Months',
+                          _selectedPeriod <= 7
+                              ? 'Last 1 Week'
+                              : (_selectedPeriod <= 30
+                                  ? 'Last 1 Month'
+                                  : 'Last 3 Months'),
                           style: TextStyle(
                               fontSize: 13,
                               color: secondaryTextColor,
@@ -167,23 +169,23 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          _buildPeriodButton('6M', 6),
-          _buildPeriodButton('1Y', 12),
-          _buildPeriodButton('5Y', 60),
+          _buildPeriodButton('1W', 7, isDays: true),
+          _buildPeriodButton('1M', 30, isDays: true),
+          _buildPeriodButton('3M', 90, isDays: true),
         ],
       ),
     );
   }
 
-  Widget _buildPeriodButton(String label, int months) {
-    final isSelected = _selectedPeriod == months;
+  Widget _buildPeriodButton(String label, int value, {bool isDays = false}) {
+    final isSelected = _selectedPeriod == value;
     return GestureDetector(
       onTap: () {
         setState(() {
-          _selectedPeriod = months;
+          _selectedPeriod = value;
           _visibleMonths = 6; // Reset pagination
         });
-        context.read<ExpenseProvider>().loadTrends(months);
+        context.read<ExpenseProvider>().loadTrends(value, isDays: isDays);
       },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 300),
@@ -283,25 +285,37 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
           bottomTitles: AxisTitles(
             sideTitles: SideTitles(
               showTitles: true,
-              reservedSize: 32,
+              reservedSize: 42,
               // Dynamic interval based on period
-              interval: _selectedPeriod >= 60
+              interval: _selectedPeriod == 7
                   ? 1
-                  : (_selectedPeriod > 12 ? 6 : (_selectedPeriod > 6 ? 2 : 1))
+                  : (_selectedPeriod == 30
+                          ? 7 // Weekly labels for 1 Month view
+                          : (_selectedPeriod == 90
+                              ? 30 // Monthly labels for 3 Month view
+                              : 1))
                       .toDouble(),
               getTitlesWidget: (val, meta) {
                 if (val.toInt() >= 0 && val.toInt() < trends.length) {
                   final key = trends[val.toInt()]['month_key'] as String;
-                  final date = DateTime.parse('$key-01');
-                  // Show year if period > 1 year
-                  final format = _selectedPeriod >= 60
-                      ? 'yyyy'
-                      : (_selectedPeriod > 12 ? 'MMM yy' : 'MMM');
-                  final monthLabel = DateFormat(format).format(date);
+                  String label = '';
+
+                  if (key.length > 7) {
+                    // Daily key: yyyy-MM-dd
+                    final date = DateTime.parse(key);
+                    label = _selectedPeriod <= 7
+                        ? DateFormat('E').format(date)
+                        : DateFormat('d MMM').format(date);
+                  } else {
+                    // Monthly key: yyyy-MM
+                    final date = DateTime.parse('$key-01');
+                    label = DateFormat('MMM').format(date);
+                  }
+
                   return SideTitleWidget(
                     meta: meta,
                     space: 8,
-                    child: Text(monthLabel,
+                    child: Text(label,
                         style: TextStyle(
                             fontSize: 10,
                             fontWeight: FontWeight.bold,
@@ -427,9 +441,14 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(
-                  DateFormat(_selectedPeriod >= 60 ? 'yyyy' : 'MMMM yyyy')
-                      .format(DateTime.parse('${data['month_key']}-01')),
+              Text(() {
+                final key = data['month_key'] as String;
+                if (key.length > 7) {
+                  return DateFormat('d MMM yyyy').format(DateTime.parse(key));
+                }
+                return DateFormat('MMMM yyyy')
+                    .format(DateTime.parse('$key-01'));
+              }(),
                   style: TextStyle(
                       color: secondaryTextColor,
                       fontSize: 10,
@@ -449,6 +468,15 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
 
   Widget _buildSpendingSummary(
       ExpenseProvider provider, Color textColor, Color secondaryTextColor) {
+    String avgLabel = 'Average';
+    if (_selectedPeriod <= 7) {
+      avgLabel = 'Daily Avg';
+    } else if (_selectedPeriod <= 90) {
+      avgLabel = 'Weekly Avg';
+    } else {
+      avgLabel = 'Monthly Avg';
+    }
+
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
@@ -468,7 +496,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
       ),
       child: Row(
         children: [
-          _buildSummaryItem('Average', '₹${provider.avgMonthlySpent.toInt()}',
+          _buildSummaryItem(avgLabel, '₹${provider.avgMonthlySpent.toInt()}',
               Colors.white, Colors.white70),
           Container(height: 40, width: 1, color: Colors.white24),
           _buildSummaryItem('Highest', '₹${provider.maxMonthlySpent.toInt()}',

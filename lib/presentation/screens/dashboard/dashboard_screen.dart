@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../providers/auth_provider.dart';
@@ -17,6 +19,9 @@ class DashboardScreen extends StatefulWidget {
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
+  String _quoteText = '';
+  String _quoteAuthor = '';
+
   @override
   void initState() {
     super.initState();
@@ -24,6 +29,26 @@ class _DashboardScreenState extends State<DashboardScreen> {
       final provider = Provider.of<ExpenseProvider>(context, listen: false);
       provider.loadMonthData(provider.currentMonthKey);
     });
+    _fetchQuote();
+  }
+
+  Future<void> _fetchQuote() async {
+    try {
+      final response = await http
+          .get(Uri.parse('https://zenquotes.io/api/today'))
+          .timeout(const Duration(seconds: 10));
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body) as List<dynamic>;
+        if (data.isNotEmpty && mounted) {
+          setState(() {
+            _quoteText = data[0]['q'] as String? ?? '';
+            _quoteAuthor = data[0]['a'] as String? ?? '';
+          });
+        }
+      }
+    } catch (_) {
+      // Silently fail — quotes are non-critical
+    }
   }
 
   void _handleMonthChange(int offset) {
@@ -74,10 +99,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
       backgroundColor: Colors.transparent,
       body: Consumer<ExpenseProvider>(
         builder: (context, provider, child) {
-          if (provider.isLoading) {
-            return const Center(child: CircularProgressIndicator());
-          }
-
           final summary = provider.summary;
           final actual = summary['actual'] ?? 0.0;
           final planned = summary['planned'] ?? 0.0;
@@ -87,10 +108,22 @@ class _DashboardScreenState extends State<DashboardScreen> {
           final pctUsed = target > 0 ? (actual / target) : 0.0;
 
           return RefreshIndicator(
-            onRefresh: () => provider.loadMonthData(provider.currentMonthKey),
+            onRefresh: () => provider.resetToCurrentMonth(),
+            displacement: 40,
+            color: AppTheme.primary,
             child: CustomScrollView(
-              physics: const BouncingScrollPhysics(),
+              physics: const AlwaysScrollableScrollPhysics(
+                parent: BouncingScrollPhysics(),
+              ),
               slivers: [
+                if (provider.isLoading)
+                  const SliverToBoxAdapter(
+                    child: LinearProgressIndicator(
+                      minHeight: 3,
+                      color: AppTheme.primary,
+                      backgroundColor: Colors.transparent,
+                    ),
+                  ),
                 SliverAppBar(
                   backgroundColor: Colors.transparent,
                   automaticallyImplyLeading: false,
@@ -129,7 +162,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ),
                 SliverToBoxAdapter(
                   child: Padding(
-                    padding: const EdgeInsets.only(bottom: 20),
+                    padding: const EdgeInsets.only(bottom: 16),
                     child: _buildWalletCard(
                         actual, remaining, pctUsed, provider, summary, planned),
                   ),
@@ -137,6 +170,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 SliverToBoxAdapter(
                   child: _buildQuickActions(context),
                 ),
+                if (_quoteText.isNotEmpty)
+                  SliverToBoxAdapter(
+                    child: _buildQuoteCard(textColor, secondaryTextColor),
+                  ),
                 SliverToBoxAdapter(
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(26, 32, 26, 16),
@@ -222,6 +259,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final statusColor = pctUsed > 0.9
         ? AppTheme.danger
         : (pctUsed > 0.7 ? AppTheme.warning : Colors.white);
+    final budget = summary['limit'] ?? (planned > 0 ? planned : 0.0);
+    final isOverBudget = pctUsed >= 1.0;
 
     return GestureDetector(
       onHorizontalDragEnd: (details) {
@@ -232,8 +271,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         }
       },
       child: Container(
-        margin: const EdgeInsets.all(24),
-        // Removed fixed height to prevent overflow
+        margin: const EdgeInsets.fromLTRB(24, 8, 24, 8),
         decoration: BoxDecoration(
           gradient: const LinearGradient(
             colors: [AppTheme.primary, AppTheme.primaryDark],
@@ -243,109 +281,142 @@ class _DashboardScreenState extends State<DashboardScreen> {
           borderRadius: BorderRadius.circular(32),
           boxShadow: [
             BoxShadow(
-              color: AppTheme.primary.withValues(alpha: 0.3),
-              blurRadius: 25,
-              offset: const Offset(0, 15),
+              color: AppTheme.primary.withValues(alpha: 0.35),
+              blurRadius: 30,
+              offset: const Offset(0, 16),
             ),
           ],
         ),
         child: Stack(
           children: [
+            // Decorative circle
             Positioned(
-              right: -20,
+              right: -30,
+              bottom: -30,
+              child: CircleAvatar(
+                radius: 90,
+                backgroundColor: Colors.white.withValues(alpha: 0.04),
+              ),
+            ),
+            Positioned(
+              left: -20,
               top: -20,
               child: CircleAvatar(
-                radius: 80,
-                backgroundColor: Colors.white.withValues(alpha: 0.05),
+                radius: 50,
+                backgroundColor: Colors.white.withValues(alpha: 0.03),
               ),
             ),
             Padding(
               padding: const EdgeInsets.all(24),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
                 children: [
+                  // Top row — month navigation
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Flexible(
-                        child: Text('Total Spent',
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                                color: Colors.white70,
-                                fontSize: 13,
-                                fontWeight: FontWeight.w500)),
+                      const Text(
+                        'Total Spent',
+                        style: TextStyle(
+                            color: Colors.white70,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                            letterSpacing: 0.5),
                       ),
-                      // Date Selector inside Card
-                      Flexible(
-                        flex: 2,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            IconButton(
-                              icon: const Icon(LucideIcons.chevronLeft,
-                                  color: Colors.white70, size: 18),
-                              onPressed: () => _handleMonthChange(-1),
-                              padding: EdgeInsets.zero,
-                              constraints: const BoxConstraints(),
-                            ),
-                            Flexible(
-                              child: Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 8),
-                                child: Text(
-                                  _formatMonthName(provider.currentMonthKey),
-                                  overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 13,
-                                  ),
-                                ),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            icon: const Icon(LucideIcons.chevronLeft,
+                                color: Colors.white60, size: 18),
+                            onPressed: () => _handleMonthChange(-1),
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints(),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 6),
+                            child: Text(
+                              _formatMonthName(provider.currentMonthKey),
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 13,
                               ),
                             ),
-                            IconButton(
-                              icon: const Icon(LucideIcons.chevronRight,
-                                  color: Colors.white70, size: 18),
-                              onPressed: () => _handleMonthChange(1),
-                              padding: EdgeInsets.zero,
-                              constraints: const BoxConstraints(),
-                            ),
-                          ],
+                          ),
+                          IconButton(
+                            icon: const Icon(LucideIcons.chevronRight,
+                                color: Colors.white60, size: 18),
+                            onPressed: () => _handleMonthChange(1),
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints(),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 6),
+
+                  // Main amount — large and prominent
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      '₹${actual.toLocaleString()}',
+                      style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 44,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: -2),
+                    ),
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  // Divider line
+                  Container(
+                    height: 1,
+                    color: Colors.white.withValues(alpha: 0.12),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Two-column stats row
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _buildStatColumn(
+                          label: 'Remaining',
+                          value: '₹${remaining.abs().toLocaleString()}',
+                          valueColor: statusColor,
+                          icon: isOverBudget
+                              ? LucideIcons.alertTriangle
+                              : LucideIcons.trendingDown,
+                        ),
+                      ),
+                      Container(
+                        width: 1,
+                        height: 48,
+                        color: Colors.white.withValues(alpha: 0.15),
+                      ),
+                      Expanded(
+                        child: _buildStatColumn(
+                          label: 'Monthly Budget',
+                          value: budget > 0
+                              ? '₹${budget.toLocaleString()}'
+                              : 'Not set',
+                          valueColor: Colors.white,
+                          icon: LucideIcons.target,
+                          alignRight: true,
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 4),
-                  FittedBox(
-                    fit: BoxFit.scaleDown,
-                    child: Text(
-                      '₹${actual.toStringAsFixed(0)}',
-                      style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 32,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: -1),
-                    ),
-                  ),
+
                   const SizedBox(height: 16),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                          child: _buildBalanceInfo(
-                              'Remaining', remaining, statusColor)),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: _buildBalanceInfo(
-                            'Monthly Budget',
-                            summary['limit'] ?? (planned > 0 ? planned : 0.0),
-                            Colors.white,
-                            alignment: CrossAxisAlignment.end),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
+
+                  // Progress bar
                   _buildProgressBar(pctUsed, statusColor),
                 ],
               ),
@@ -356,22 +427,55 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  Widget _buildBalanceInfo(String label, double amount, Color color,
-      {CrossAxisAlignment alignment = CrossAxisAlignment.start}) {
-    return Column(
-      crossAxisAlignment: alignment,
-      children: [
-        Text(label,
-            style: const TextStyle(
-                color: Colors.white60,
-                fontSize: 11,
-                fontWeight: FontWeight.w600)),
-        Text(
-          '₹${amount.abs().toLocaleString()}',
-          style: TextStyle(
-              color: color, fontSize: 18, fontWeight: FontWeight.bold),
-        ),
-      ],
+  Widget _buildStatColumn({
+    required String label,
+    required String value,
+    required Color valueColor,
+    required IconData icon,
+    bool alignRight = false,
+  }) {
+    return Padding(
+      padding: EdgeInsets.only(
+          left: alignRight ? 16 : 0, right: alignRight ? 0 : 16),
+      child: Column(
+        crossAxisAlignment:
+            alignRight ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment:
+                alignRight ? MainAxisAlignment.end : MainAxisAlignment.start,
+            children: [
+              if (!alignRight)
+                Padding(
+                  padding: const EdgeInsets.only(right: 4),
+                  child: Icon(icon, size: 11, color: Colors.white54),
+                ),
+              Text(label,
+                  style: const TextStyle(
+                      color: Colors.white60,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 0.3)),
+              if (alignRight)
+                Padding(
+                  padding: const EdgeInsets.only(left: 4),
+                  child: Icon(icon, size: 11, color: Colors.white54),
+                ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment:
+                alignRight ? Alignment.centerRight : Alignment.centerLeft,
+            child: Text(
+              value,
+              style: TextStyle(
+                  color: valueColor, fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -415,6 +519,62 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildQuoteCard(Color textColor, Color secondaryTextColor) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(26, 20, 26, 0),
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: Theme.of(context).cardTheme.color,
+          borderRadius: BorderRadius.circular(24),
+          boxShadow: AppTheme.softShadow,
+          border: Border.all(color: AppTheme.primary.withValues(alpha: 0.08)),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: AppTheme.primary.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Text('✨', style: TextStyle(fontSize: 18)),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '"$_quoteText"',
+                    style: TextStyle(
+                      color: textColor,
+                      fontSize: 13,
+                      fontStyle: FontStyle.italic,
+                      height: 1.5,
+                    ),
+                  ),
+                  if (_quoteAuthor.isNotEmpty) ...[
+                    const SizedBox(height: 6),
+                    Text(
+                      '— $_quoteAuthor',
+                      style: TextStyle(
+                        color: AppTheme.primary,
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 

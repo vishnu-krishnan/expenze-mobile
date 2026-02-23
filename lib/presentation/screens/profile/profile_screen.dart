@@ -119,16 +119,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     child: Column(
                       children: [
                         _buildUserAvatar(user, textColor),
-                        const SizedBox(height: 16),
+                        const SizedBox(height: 20),
                         Text(
                           user['full_name'] ?? 'Guest User',
+                          textAlign: TextAlign.center,
                           style: TextStyle(
-                            fontSize: 28,
+                            fontSize: 32,
                             fontWeight: FontWeight.w900,
                             color: textColor,
                             letterSpacing: -1,
                           ),
                         ),
+                        const SizedBox(height: 4),
                         Text(
                           user['email'] ?? 'No email set',
                           style: TextStyle(
@@ -169,10 +171,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
         children: [
           IconButton(
             onPressed: () => Navigator.pop(context),
-            icon: Icon(LucideIcons.arrowLeft, color: textColor),
+            icon: Icon(LucideIcons.chevronLeft, color: textColor),
           ),
           Text(
-            'User Profile',
+            'Account',
             style: TextStyle(
               color: textColor,
               fontSize: 18,
@@ -194,9 +196,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     }
                   },
                   icon: Icon(
-                    _isEditing ? LucideIcons.check : LucideIcons.edit3,
+                    _isEditing ? LucideIcons.check : LucideIcons.settings,
                     color: _isEditing ? AppTheme.success : textColor,
-                    size: 20,
+                    size: 22,
                   ),
                 ),
         ],
@@ -205,59 +207,70 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _buildUserAvatar(dynamic user, Color textColor) {
-    return Stack(
-      alignment: Alignment.bottomRight,
-      children: [
-        Container(
-          padding: const EdgeInsets.all(4),
+    return Container(
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: LinearGradient(
+          colors: [
+            AppTheme.primary,
+            AppTheme.primary.withValues(alpha: 0.2),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: AppTheme.primary.withValues(alpha: 0.2),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: CircleAvatar(
+        radius: 64,
+        backgroundColor: Theme.of(context).cardColor,
+        child: Container(
+          width: 120,
+          height: 120,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            border: Border.all(
-                color: AppTheme.primary.withValues(alpha: 0.3), width: 2),
+            color: AppTheme.primary.withValues(alpha: 0.05),
           ),
-          child: CircleAvatar(
-            radius: 60,
-            backgroundColor: AppTheme.primary.withValues(alpha: 0.1),
-            child: Text(
-              (user['full_name']?[0] ?? 'U').toUpperCase(),
-              style: const TextStyle(
-                fontSize: 48,
-                fontWeight: FontWeight.w900,
-                color: AppTheme.primary,
-              ),
+          alignment: Alignment.center,
+          child: Text(
+            (user['full_name']?[0] ?? 'U').toUpperCase(),
+            style: const TextStyle(
+              fontSize: 52,
+              fontWeight: FontWeight.w900,
+              color: AppTheme.primary,
             ),
           ),
         ),
-        if (_isEditing)
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: const BoxDecoration(
-              color: AppTheme.primary,
-              shape: BoxShape.circle,
-            ),
-            child:
-                const Icon(LucideIcons.camera, color: Colors.white, size: 20),
-          ),
-      ],
+      ),
     );
   }
 
   Widget _buildAccountSummary(
       BuildContext context, Color textColor, Color secondaryTextColor) {
     return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: AppTheme.glassDecoration(context),
+      padding: const EdgeInsets.symmetric(vertical: 20),
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardTheme.color,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: AppTheme.softShadow,
+      ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
           _buildSummaryItem(
-              'Member Status', 'Active', LucideIcons.shield, AppTheme.success),
+              'Status', 'Verified', LucideIcons.badgeCheck, AppTheme.success),
           Container(
               width: 1,
               height: 40,
               color: secondaryTextColor.withValues(alpha: 0.1)),
           _buildSummaryItem(
-              'Since',
+              'Joined',
               _formatDate(context.read<AuthProvider>().user?['created_at']),
               LucideIcons.calendar,
               AppTheme.primary),
@@ -270,13 +283,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
       String label, String value, IconData icon, Color color) {
     return Column(
       children: [
-        Icon(icon, color: color, size: 20),
+        Icon(icon, color: color, size: 22),
         const SizedBox(height: 8),
         Text(value,
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900)),
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900)),
         Text(label.toUpperCase(),
-            style: const TextStyle(
-                fontSize: 9, fontWeight: FontWeight.bold, color: Colors.grey)),
+            style: TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.w900,
+              color: AppTheme.getTextColor(context, isSecondary: true)
+                  .withValues(alpha: 0.6),
+              letterSpacing: 0.5,
+            )),
       ],
     );
   }
@@ -286,53 +304,39 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Personal Information'.toUpperCase(),
-          style: TextStyle(
-            fontSize: 11,
-            fontWeight: FontWeight.w900,
-            color: secondaryTextColor.withValues(alpha: 0.6),
-            letterSpacing: 1.5,
+        Padding(
+          padding: const EdgeInsets.only(left: 8, bottom: 12),
+          child: Text(
+            'Personal Information'.toUpperCase(),
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w900,
+              color: secondaryTextColor.withValues(alpha: 0.6),
+              letterSpacing: 1.5,
+            ),
           ),
         ),
-        const SizedBox(height: 16),
         Container(
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          decoration: AppTheme.glassDecoration(context),
+          decoration: BoxDecoration(
+            color: Theme.of(context).cardTheme.color,
+            borderRadius: BorderRadius.circular(24),
+            boxShadow: AppTheme.softShadow,
+          ),
           child: Column(
             children: [
-              _buildModernTextField(
-                controller: _nameController,
-                label: 'Name',
-                icon: LucideIcons.user,
-                enabled: _isEditing,
-                textColor: textColor,
-                validator: (v) => v!.isEmpty ? 'Name is required' : null,
-              ),
-              _buildDivider(),
-              _buildModernTextField(
-                controller: _emailController,
-                label: 'Email Address',
-                icon: LucideIcons.mail,
-                enabled: _isEditing,
-                textColor: textColor,
-                validator: (v) => v!.isEmpty || !v.contains('@')
-                    ? 'Valid email required'
-                    : null,
-              ),
-              _buildDivider(),
               _buildModernTextField(
                 controller: _phoneController,
                 label: 'Phone Number',
                 icon: LucideIcons.phone,
                 enabled: _isEditing,
                 textColor: textColor,
+                keyboardType: TextInputType.phone,
               ),
               _buildDivider(),
               _buildModernTextField(
                 controller: _budgetController,
-                label: 'Monthly Budget',
-                icon: LucideIcons.target,
+                label: 'Global Monthly Budget',
+                icon: LucideIcons.indianRupee,
                 enabled: _isEditing,
                 textColor: textColor,
                 keyboardType: TextInputType.number,
@@ -349,30 +353,50 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Security & Preferences'.toUpperCase(),
-          style: TextStyle(
-            fontSize: 11,
-            fontWeight: FontWeight.w900,
-            color: secondaryTextColor.withValues(alpha: 0.6),
-            letterSpacing: 1.5,
+        Padding(
+          padding: const EdgeInsets.only(left: 8, bottom: 12),
+          child: Text(
+            'Preferences & Security'.toUpperCase(),
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w900,
+              color: secondaryTextColor.withValues(alpha: 0.6),
+              letterSpacing: 1.5,
+            ),
           ),
         ),
-        const SizedBox(height: 16),
-        _buildQuickLinkTile(
-          context,
-          icon: LucideIcons.lock,
-          title: 'Security Settings',
-          onTap: () => Navigator.pushNamed(context, '/settings'),
-          color: AppTheme.primary,
-        ),
-        const SizedBox(height: 12),
-        _buildQuickLinkTile(
-          context,
-          icon: LucideIcons.bell,
-          title: 'Manage Notifications',
-          onTap: () {},
-          color: AppTheme.secondary,
+        Container(
+          decoration: BoxDecoration(
+            color: Theme.of(context).cardTheme.color,
+            borderRadius: BorderRadius.circular(24),
+            boxShadow: AppTheme.softShadow,
+          ),
+          child: Column(
+            children: [
+              _buildQuickLinkTile(
+                context,
+                icon: LucideIcons.bell,
+                title: 'Manage Notifications',
+                onTap: () => Navigator.pushNamed(context, '/notifications'),
+                color: AppTheme.secondary,
+              ),
+              _buildDivider(),
+              _buildQuickLinkTile(
+                context,
+                icon: LucideIcons.helpCircle,
+                title: 'Help & Support',
+                onTap: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Support center coming soon!'),
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
+                },
+                color: Colors.orange,
+              ),
+            ],
+          ),
         ),
       ],
     );
@@ -386,11 +410,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(20),
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: AppTheme.glassDecoration(context).copyWith(
-          color: color.withValues(alpha: 0.05),
-        ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
         child: Row(
           children: [
             Container(
@@ -410,7 +431,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
             ),
             Icon(LucideIcons.chevronRight,
-                size: 16, color: color.withValues(alpha: 0.4)),
+                size: 16, color: color.withValues(alpha: 0.3)),
           ],
         ),
       ),
@@ -427,10 +448,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
     String? Function(String?)? validator,
   }) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       child: Row(
         children: [
-          Icon(icon, size: 20, color: AppTheme.primary.withValues(alpha: 0.4)),
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: AppTheme.primary.withValues(alpha: 0.05),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(icon, size: 18, color: AppTheme.primary),
+          ),
           const SizedBox(width: 16),
           Expanded(
             child: Column(
@@ -438,10 +466,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
               children: [
                 Text(
                   label.toUpperCase(),
-                  style: const TextStyle(
+                  style: TextStyle(
                       fontSize: 9,
                       fontWeight: FontWeight.w900,
-                      color: Colors.grey,
+                      color: AppTheme.getTextColor(context, isSecondary: true)
+                          .withValues(alpha: 0.5),
                       letterSpacing: 0.5),
                 ),
                 TextFormField(
@@ -450,10 +479,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   validator: validator,
                   keyboardType: keyboardType,
                   style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
                     color:
-                        enabled ? textColor : textColor.withValues(alpha: 0.7),
+                        enabled ? textColor : textColor.withValues(alpha: 0.8),
                   ),
                   decoration: const InputDecoration(
                     isDense: true,
@@ -464,6 +493,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ],
             ),
           ),
+          if (enabled)
+            Icon(LucideIcons.edit2,
+                size: 14, color: AppTheme.primary.withValues(alpha: 0.5)),
         ],
       ),
     );
@@ -482,28 +514,36 @@ class _ProfileScreenState extends State<ProfileScreen> {
         showDialog(
           context: context,
           builder: (dialogContext) => AlertDialog(
-            title: const Text('Logout'),
+            title: const Text('Sign Out',
+                style: TextStyle(fontWeight: FontWeight.w900)),
             content: const Text(
-                'Are you sure you want to logout? This will clear all local data from this device.'),
+                'Are you sure you want to sign out? This will clear all local synchronized data.'),
             actions: [
               TextButton(
                   onPressed: () => Navigator.pop(dialogContext),
-                  child: const Text('Cancel')),
-              TextButton(
+                  child: const Text('Stay')),
+              ElevatedButton(
                 onPressed: () async {
                   final auth = context.read<AuthProvider>();
                   Navigator.pop(dialogContext);
                   await auth.logout();
                   if (context.mounted) {
                     Navigator.pushNamedAndRemoveUntil(
-                        context, '/onboarding', (route) => false);
+                        context, '/landing', (route) => false);
                   }
                 },
-                child: const Text('Logout',
-                    style: TextStyle(
-                        color: AppTheme.danger, fontWeight: FontWeight.bold)),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppTheme.danger,
+                  foregroundColor: Colors.white,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
+                ),
+                child: const Text('Sign Out'),
               ),
             ],
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
           ),
         );
       },

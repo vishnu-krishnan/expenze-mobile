@@ -1,4 +1,5 @@
 import 'package:sqflite/sqflite.dart';
+import '../../core/utils/logger.dart';
 import 'package:path/path.dart';
 
 class DatabaseHelper {
@@ -19,7 +20,7 @@ class DatabaseHelper {
 
     return await openDatabase(
       path,
-      version: 15,
+      version: 17,
       onCreate: _createDB,
       onUpgrade: _onUpgrade,
     );
@@ -109,7 +110,51 @@ class DatabaseHelper {
               "UPDATE users SET email = username WHERE (email IS NULL OR email = '') AND username IS NOT NULL");
         }
       } catch (e) {
-        print("Database migration error (v15): $e");
+        logger.e("Database migration error (v15)", error: e);
+      }
+    }
+    if (oldVersion < 16) {
+      try {
+        final regPaymentsInfo =
+            await db.rawQuery('PRAGMA table_info(regular_payments)');
+        final hasPriority =
+            regPaymentsInfo.any((col) => col['name'] == 'priority');
+        if (!hasPriority) {
+          await db.execute(
+              "ALTER TABLE regular_payments ADD COLUMN priority TEXT DEFAULT 'MEDIUM'");
+        }
+
+        final expenseInfo = await db.rawQuery('PRAGMA table_info(expenses)');
+        final hasExpPriority =
+            expenseInfo.any((col) => col['name'] == 'priority');
+        if (!hasExpPriority) {
+          await db.execute(
+              "ALTER TABLE expenses ADD COLUMN priority TEXT DEFAULT 'MEDIUM'");
+        }
+      } catch (e) {
+        logger.e("Database migration error (v16)", error: e);
+      }
+    }
+    if (oldVersion < 17) {
+      try {
+        final regPaymentsInfo =
+            await db.rawQuery('PRAGMA table_info(regular_payments)');
+        final hasPriority =
+            regPaymentsInfo.any((col) => col['name'] == 'priority');
+        if (!hasPriority) {
+          await db.execute(
+              "ALTER TABLE regular_payments ADD COLUMN priority TEXT DEFAULT 'MEDIUM'");
+        }
+
+        final expenseInfo = await db.rawQuery('PRAGMA table_info(expenses)');
+        final hasExpPriority =
+            expenseInfo.any((col) => col['name'] == 'priority');
+        if (!hasExpPriority) {
+          await db.execute(
+              "ALTER TABLE expenses ADD COLUMN priority TEXT DEFAULT 'MEDIUM'");
+        }
+      } catch (e) {
+        logger.e("Database migration error (v17)", error: e);
       }
     }
   }

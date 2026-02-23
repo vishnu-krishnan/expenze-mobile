@@ -19,6 +19,9 @@ class ExpenseProvider with ChangeNotifier {
     'limit': 0
   };
   bool _isLoading = false;
+  static String get _liveMonthKey =>
+      DateTime.now().toIso8601String().substring(0, 7);
+
   String _currentMonthKey = DateTime.now().toIso8601String().substring(0, 7);
   List<Map<String, dynamic>> _trends = [];
   List<Map<String, dynamic>> _categoryBreakdown = [];
@@ -39,6 +42,15 @@ class ExpenseProvider with ChangeNotifier {
   void setMonth(String monthKey) {
     _currentMonthKey = monthKey;
     loadMonthData(monthKey);
+  }
+
+  /// Resets the selected month to today's month and reloads data.
+  /// Called whenever the user navigates to a new tab or pulls to refresh.
+  Future<void> resetToCurrentMonth() async {
+    final key = _liveMonthKey;
+    if (_currentMonthKey != key || _expenses.isEmpty) {
+      await loadMonthData(key);
+    }
   }
 
   Future<void> loadMonthData(String monthKey) async {
@@ -91,67 +103,86 @@ class ExpenseProvider with ChangeNotifier {
   List<Map<String, dynamic>> get periodCategoryBreakdown =>
       _periodCategoryBreakdown;
 
-  Future<void> loadTrends(int months) async {
+  Future<void> loadTrends(int value, {bool isDays = false}) async {
     _isLoading = true;
     notifyListeners();
     try {
-      final rawTrends = await _repository.getTrends(months);
-
-      // Load category breakdown for the period
-      final rawBreakdown =
-          await _repository.getCategoryBreakdownForPeriod(months);
-      _periodCategoryBreakdown = List<Map<String, dynamic>>.from(rawBreakdown);
-
-      // Fill missing months to ensure the chart shows the full selected period
+      List<Map<String, dynamic>> rawTrends;
+      List<Map<String, dynamic>> rawBreakdown;
       final List<Map<String, dynamic>> filledTrends = [];
       final now = DateTime.now();
 
-      for (int i = months - 1; i >= 0; i--) {
-        // Calculate date for this month index (going back from now)
-        final date = DateTime(now.year, now.month - i, 1);
-        final key = DateFormat('yyyy-MM').format(date);
+      if (isDays) {
+        rawTrends = await _repository.getDailyTrends(value);
+        rawBreakdown = await _repository.getCategoryBreakdownForDays(value);
 
-        // Find existing data for this month
-        final existing = rawTrends.firstWhere(
-          (e) => e['month_key'] == key,
-          orElse: () => {},
-        );
-
-        if (existing.isNotEmpty) {
-          filledTrends.add(existing);
-        } else {
+        for (int i = value - 1; i >= 0; i--) {
+          final date = now.subtract(Duration(days: i));
+          final key = DateFormat('yyyy-MM-dd').format(date);
+          final existing = rawTrends.firstWhere(
+            (e) => e['date_key'] == key,
+            orElse: () => {},
+          );
           filledTrends.add({
-            'month_key': key,
-            'total_planned': 0.0,
-            'total_actual': 0.0,
+            'month_key': key, // Keep key name for chart compatibility
+            'total_planned': existing.isNotEmpty
+                ? (existing['total_planned'] as num).toDouble()
+                : 0.0,
+            'total_actual': existing.isNotEmpty
+                ? (existing['total_actual'] as num).toDouble()
+                : 0.0,
           });
         }
-      }
-
-      if (months == 60) {
-        // Aggregate into 5 yearly values to avoid cluttering the chart
-        final Map<String, Map<String, dynamic>> yearlyAggregation = {};
-        for (var m in filledTrends) {
-          final year = m['month_key'].split('-')[0];
-          if (!yearlyAggregation.containsKey(year)) {
-            yearlyAggregation[year] = {
-              'month_key': '$year-01', // Standardize to 1st Jan of that year
-              'total_planned': 0.0,
-              'total_actual': 0.0,
-            };
-          }
-          yearlyAggregation[year]!['total_planned'] +=
-              (m['total_planned'] as num).toDouble();
-          yearlyAggregation[year]!['total_actual'] +=
-              (m['total_actual'] as num).toDouble();
-        }
-        _trends = yearlyAggregation.values.toList()
-          ..sort((a, b) => a['month_key'].compareTo(b['month_key']));
-      } else {
         _trends = filledTrends;
+      } else {
+        rawTrends = await _repository.getTrends(value);
+        rawBreakdown = await _repository.getCategoryBreakdownForPeriod(value);
+
+        for (int i = value - 1; i >= 0; i--) {
+          final date = DateTime(now.year, now.month - i, 1);
+          final key = DateFormat('yyyy-MM').format(date);
+          final existing = rawTrends.firstWhere(
+            (e) => e['month_key'] == key,
+            orElse: () => {},
+          );
+          filledTrends.add({
+            'month_key': key,
+            'total_planned': existing.isNotEmpty
+                ? (existing['total_planned'] as num).toDouble()
+                : 0.0,
+            'total_actual': existing.isNotEmpty
+                ? (existing['total_actual'] as num).toDouble()
+                : 0.0,
+          });
+        }
+
+        if (value == 60) {
+          final Map<String, Map<String, dynamic>> yearlyAggregation = {};
+          for (var m in filledTrends) {
+            final year = m['month_key'].split('-')[0];
+            if (!yearlyAggregation.containsKey(year)) {
+              yearlyAggregation[year] = {
+                'month_key': '$year-01',
+                'total_planned': 0.0,
+                'total_actual': 0.0,
+              };
+            }
+            yearlyAggregation[year]!['total_planned'] += m['total_planned'];
+            yearlyAggregation[year]!['total_actual'] += m['total_actual'];
+          }
+          _trends = yearlyAggregation.values.toList()
+            ..sort((a, b) => a['month_key'].compareTo(b['month_key']));
+        } else {
+          _trends = filledTrends;
+        }
       }
 
-      final summary = await _repository.getAnalyticsSummary(months);
+      _periodCategoryBreakdown = List<Map<String, dynamic>>.from(rawBreakdown);
+
+      final summary = isDays
+          ? await _repository
+              .getAnalyticsSummary((value / 30).ceil()) // Fallback for summary
+          : await _repository.getAnalyticsSummary(value);
       _avgMonthlySpent = summary['avg_spent'] ?? 0;
       _maxMonthlySpent = summary['max_spent'] ?? 0;
     } catch (e) {
@@ -187,6 +218,19 @@ class ExpenseProvider with ChangeNotifier {
 
   Future<void> updateMonthlyLimit(double limit) async {
     await _repository.updateMonthlyLimit(_currentMonthKey, limit);
+    await loadMonthData(_currentMonthKey);
+  }
+
+  /// Sets the budget limit for ONLY the currently viewed month.
+  Future<void> updateMonthlyLimitThisMonthOnly(double limit) async {
+    await _repository.updateMonthlyLimit(_currentMonthKey, limit);
+    await loadMonthData(_currentMonthKey);
+  }
+
+  /// Sets the budget limit for the currently viewed month AND all future months.
+  /// Past months remain unchanged.
+  Future<void> updateMonthlyLimitFuture(double limit) async {
+    await _repository.updateMonthlyLimitForFuture(_currentMonthKey, limit);
     await loadMonthData(_currentMonthKey);
   }
 

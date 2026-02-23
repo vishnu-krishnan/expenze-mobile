@@ -25,7 +25,7 @@ class NotificationService {
     );
 
     await flutterLocalNotificationsPlugin.initialize(
-      initializationSettings,
+      settings: initializationSettings,
       onDidReceiveNotificationResponse:
           (fln.NotificationResponse details) async {
         // Handle notification tap
@@ -40,11 +40,11 @@ class NotificationService {
     required DateTime scheduledDate,
   }) async {
     await flutterLocalNotificationsPlugin.zonedSchedule(
-      id,
-      title,
-      body,
-      tz.TZDateTime.from(scheduledDate, tz.local),
-      const fln.NotificationDetails(
+      id: id,
+      title: title,
+      body: body,
+      scheduledDate: tz.TZDateTime.from(scheduledDate, tz.local),
+      notificationDetails: const fln.NotificationDetails(
         android: fln.AndroidNotificationDetails(
           'expenze_notes_channel',
           'Note Reminders',
@@ -58,6 +58,6 @@ class NotificationService {
   }
 
   Future<void> cancelNotification(int id) async {
-    await flutterLocalNotificationsPlugin.cancel(id);
+    await flutterLocalNotificationsPlugin.cancel(id: id);
   }
 }

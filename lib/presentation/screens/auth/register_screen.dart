@@ -104,7 +104,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ),
                       const SizedBox(height: 12),
                       Text(
-                        'Start your journey towards financial freedom with a secure, offline-first experience.',
+                        'Take charge of your finances — one smart step at a time. It only takes a minute to get started!',
                         style: GoogleFonts.inter(
                           fontSize: 16,
                           color:
@@ -112,7 +112,35 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           height: 1.5,
                         ),
                       ),
-                      const SizedBox(height: 48),
+                      const SizedBox(height: 20),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 14),
+                        decoration: BoxDecoration(
+                          color: AppTheme.primary.withValues(alpha: 0.08),
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                              color: AppTheme.primary.withValues(alpha: 0.15)),
+                        ),
+                        child: Row(
+                          children: [
+                            const Text('💡', style: TextStyle(fontSize: 20)),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                'After signing up, set a budget to stay on track and never overspend again!',
+                                style: GoogleFonts.inter(
+                                  fontSize: 13,
+                                  color: AppTheme.getTextColor(context),
+                                  fontWeight: FontWeight.w500,
+                                  height: 1.4,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 28),
 
                       if (_errorMessage != null)
                         _buildErrorBanner(_errorMessage!),

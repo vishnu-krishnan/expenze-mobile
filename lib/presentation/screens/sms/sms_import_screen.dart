@@ -124,34 +124,6 @@ class _SmsImportScreenState extends State<SmsImportScreen>
     }
   }
 
-  void _parseManualSms() {
-    final text = _rawTextController.text;
-    if (text.isEmpty) return;
-
-    setState(() => _isLoading = true);
-
-    final lines = text.split('\n').where((l) => l.trim().length > 10).toList();
-    final List<DetectedExpense> results = [];
-
-    for (var line in lines) {
-      final parsed = _smsService.parseExpenseFromSms(line);
-      if (parsed != null) {
-        results.add(DetectedExpense(
-          id: 'manual-${DateTime.now().millisecondsSinceEpoch}',
-          raw: parsed['raw'],
-          name: parsed['merchant'],
-          amount: parsed['amount'],
-          paymentMode: parsed['payment_mode'] ?? 'Other',
-        ));
-      }
-    }
-
-    setState(() {
-      _detectedExpenses = results;
-      _isLoading = false;
-    });
-  }
-
   Future<void> _aiParse() async {
     final text = _rawTextController.text;
     if (text.isEmpty) {
@@ -465,34 +437,26 @@ class _SmsImportScreenState extends State<SmsImportScreen>
                   style: TextStyle(color: textColor, fontSize: 13),
                 ),
                 const SizedBox(height: 16),
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton.icon(
-                        onPressed: _isLoading ? null : _parseManualSms,
-                        icon: const Icon(LucideIcons.search, size: 18),
-                        label: const Text('Lite Scan'),
-                        style: OutlinedButton.styleFrom(
-                          side: BorderSide(
-                              color: AppTheme.primary.withValues(alpha: 0.5)),
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                        ),
-                      ),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    onPressed: _isLoading ? null : _aiParse,
+                    icon: _isLoading
+                        ? const SizedBox(
+                            width: 18,
+                            height: 18,
+                            child: CircularProgressIndicator(
+                                strokeWidth: 2, color: Colors.white))
+                        : const Icon(LucideIcons.sparkles, size: 18),
+                    label: Text(_isLoading ? 'Analysing...' : 'AI Analysis'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppTheme.primary,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16)),
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: ElevatedButton.icon(
-                        onPressed: _isLoading ? null : _aiParse,
-                        icon: const Icon(LucideIcons.sparkles, size: 18),
-                        label: const Text('AI Analysis'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppTheme.primary,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                        ),
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
               ],
             ),
@@ -614,6 +578,17 @@ class _SmsImportScreenState extends State<SmsImportScreen>
                           fontSize: 11,
                           fontStyle: FontStyle.italic),
                     ),
+                    if (expense.date != null)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 4),
+                        child: Text(
+                          '${expense.date!.day}/${expense.date!.month}/${expense.date!.year}',
+                          style: TextStyle(
+                              color: AppTheme.primary.withValues(alpha: 0.7),
+                              fontSize: 10,
+                              fontWeight: FontWeight.w600),
+                        ),
+                      ),
                   ],
                 ),
               ),

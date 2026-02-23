@@ -20,6 +20,8 @@ import 'presentation/providers/theme_provider.dart';
 import 'presentation/providers/note_provider.dart';
 import 'presentation/screens/notes/notes_screen.dart';
 import 'data/services/notification_service.dart';
+import 'presentation/screens/settings/settings_screen.dart';
+import 'presentation/screens/settings/notifications_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -125,6 +127,8 @@ class MyApp extends StatelessWidget {
               '/import': (context) => const SmsImportScreen(),
               '/profile': (context) => const ProfileScreen(),
               '/notes': (context) => const NotesScreen(),
+              '/settings': (context) => const SettingsScreen(),
+              '/notifications': (context) => const NotificationSettingsScreen(),
               '/analytics': (context) =>
                   const MainNavigationWrapper(initialIndex: 1),
             },

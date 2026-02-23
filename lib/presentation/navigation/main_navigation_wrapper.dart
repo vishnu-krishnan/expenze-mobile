@@ -1,7 +1,9 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:provider/provider.dart';
 import '../../core/theme/app_theme.dart';
+import '../providers/expense_provider.dart';
 import '../screens/dashboard/dashboard_screen.dart';
 import '../screens/analytics/analytics_screen.dart';
 import '../screens/month/month_plan_screen.dart';
@@ -108,7 +110,13 @@ class _MainNavigationWrapperState extends State<MainNavigationWrapper> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return GestureDetector(
-      onTap: () => setState(() => _selectedIndex = index),
+      onTap: () {
+        // Always reset data to the current real-time month when switching tabs.
+        // This prevents stale month navigation from dashboard carrying over.
+        Provider.of<ExpenseProvider>(context, listen: false)
+            .resetToCurrentMonth();
+        setState(() => _selectedIndex = index);
+      },
       behavior: HitTestBehavior.opaque,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 300),

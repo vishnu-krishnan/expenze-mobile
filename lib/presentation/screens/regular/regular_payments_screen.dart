@@ -43,7 +43,9 @@ class _RegularPaymentsScreenState extends State<RegularPaymentsScreen> {
             ? AppTheme.darkBackgroundDecoration
             : AppTheme.backgroundDecoration,
         child: CustomScrollView(
-          physics: const BouncingScrollPhysics(),
+          physics: const AlwaysScrollableScrollPhysics(
+            parent: BouncingScrollPhysics(),
+          ),
           slivers: [
             SliverAppBar(
               backgroundColor: Colors.transparent,
@@ -70,19 +72,22 @@ class _RegularPaymentsScreenState extends State<RegularPaymentsScreen> {
                 ),
               ),
             ),
+            if (context.watch<RegularPaymentProvider>().isLoading)
+              const SliverToBoxAdapter(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 26),
+                  child: LinearProgressIndicator(minHeight: 2),
+                ),
+              ),
             SliverPadding(
-              padding: const EdgeInsets.symmetric(horizontal: 26),
+              padding: const EdgeInsets.symmetric(horizontal: 26, vertical: 20),
               sliver: Consumer3<RegularPaymentProvider, CategoryProvider,
                   ExpenseProvider>(
                 builder: (context, provider, categoryProvider, expenseProvider,
                     child) {
-                  if (provider.isLoading) {
-                    return const SliverFillRemaining(
-                        child: Center(child: CircularProgressIndicator()));
-                  }
-
-                  if (provider.payments.isEmpty) {
+                  if (provider.payments.isEmpty && !provider.isLoading) {
                     return SliverFillRemaining(
+                        hasScrollBody: false,
                         child: _buildEmptyState(secondaryTextColor));
                   }
 

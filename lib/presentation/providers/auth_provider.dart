@@ -18,11 +18,19 @@ class AuthProvider with ChangeNotifier {
   bool _useBiometrics = false;
   bool _isAuthenticated = false; // Internal session state (locked/unlocked)
 
+  // Notification Preferences
+  bool _notificationsEnabled = true;
+  bool _dailyReminderEnabled = true;
+  bool _smsScraperEnabled = true;
+
   // Getters
   bool get isAuthenticated => _isAuthenticated;
   bool get isOnboarded => _isOnboarded;
   bool get isLockEnabled => _isLockEnabled;
   bool get useBiometrics => _useBiometrics;
+  bool get notificationsEnabled => _notificationsEnabled;
+  bool get dailyReminderEnabled => _dailyReminderEnabled;
+  bool get smsScraperEnabled => _smsScraperEnabled;
   Map<String, dynamic>? get user => _user;
   bool get isLoading => _isLoading;
   String? get error => _error;
@@ -37,21 +45,61 @@ class AuthProvider with ChangeNotifier {
       _isLockEnabled = prefs.getBool('is_lock_enabled') ?? false;
       _useBiometrics = prefs.getBool('use_biometrics') ?? false;
 
+      // Notifications
+      _notificationsEnabled = prefs.getBool('notifications_enabled') ?? true;
+      _dailyReminderEnabled = prefs.getBool('daily_reminder_enabled') ?? true;
+      _smsScraperEnabled = prefs.getBool('sms_scraper_enabled') ?? true;
+
       // If lock is disabled, user is automatically "authenticated" for the session
       if (!_isLockEnabled) {
         _isAuthenticated = true;
       }
 
       // Load local user profile if exists
-      final email = prefs.getString('user_email');
+      String? email = prefs.getString('user_email');
       if (email != null) {
         _user = await _dbHelper.getUser(email);
+      }
+
+      // Fallback: If onboarded but no user loaded (e.g. email mismatch after migration)
+      if (_user == null && _isOnboarded) {
+        final db = await _dbHelper.database;
+        final res = await db.query('users', limit: 1);
+        if (res.isNotEmpty) {
+          _user = res.first;
+          email = _user!['email'];
+          if (email != null) {
+            await prefs.setString('user_email', email);
+          }
+        }
       }
     } catch (e) {
       logger.e('Auth initialization failed', error: e);
     }
 
     _isLoading = false;
+    notifyListeners();
+  }
+
+  // Settings Toggles
+  Future<void> updateNotificationSettings({
+    bool? alerts,
+    bool? reminders,
+    bool? smsScraper,
+  }) async {
+    final prefs = await SharedPreferences.getInstance();
+    if (alerts != null) {
+      _notificationsEnabled = alerts;
+      await prefs.setBool('notifications_enabled', alerts);
+    }
+    if (reminders != null) {
+      _dailyReminderEnabled = reminders;
+      await prefs.setBool('daily_reminder_enabled', reminders);
+    }
+    if (smsScraper != null) {
+      _smsScraperEnabled = smsScraper;
+      await prefs.setBool('sms_scraper_enabled', smsScraper);
+    }
     notifyListeners();
   }
 
@@ -159,10 +207,9 @@ class AuthProvider with ChangeNotifier {
 
       final bool didAuthenticate = await _localAuth.authenticate(
         localizedReason: 'Please authenticate to unlock Expenze',
-        options: const AuthenticationOptions(
-          stickyAuth: true,
-          biometricOnly: true,
-        ),
+        authMessages: const [],
+        biometricOnly: true,
+        persistAcrossBackgrounding: true,
       );
 
       if (didAuthenticate) {

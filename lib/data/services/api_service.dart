@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:logger/logger.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -272,11 +273,27 @@ Output ONLY valid JSON. Do not include markdown or explanations.
     };
 
     try {
-      final response = await dio.post(
+      final rawResponse = await dio.post(
         '/chat/completions',
         data: payload,
       );
-      return response;
+
+      // Groq returns JSON inside choices[0].message.content as a string.
+      // Parse that string and return a new Response with the decoded data.
+      final choices = rawResponse.data['choices'] as List<dynamic>?;
+      if (choices == null || choices.isEmpty) {
+        throw Exception('Empty response from Groq API');
+      }
+
+      final content = choices[0]['message']['content'] as String? ?? '{}';
+      final Map<String, dynamic> parsedData = json.decode(content);
+
+      // Return a synthetic response with the decoded JSON as data
+      return Response(
+        requestOptions: rawResponse.requestOptions,
+        statusCode: 200,
+        data: parsedData,
+      );
     } catch (e) {
       rethrow;
     }

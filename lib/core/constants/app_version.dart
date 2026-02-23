@@ -11,11 +11,31 @@ class ReleaseInfo {
 }
 
 class AppVersion {
-  static const String current = '1.0.6';
-  static const String buildNumber = '7';
-  static const String releaseName = 'Stability & UI Polish';
+  static const String current = '1.2.0';
+  static const String buildNumber = '8';
+  static const String releaseName = 'Smart Budget & Calculation Fixes';
 
   static const List<ReleaseInfo> history = [
+    ReleaseInfo(
+      version: '1.2.0',
+      date: '2026-02-23',
+      changes: [
+        'Fixed SMS duplicate imports — deduplication now correctly parses the SMS ID from notes',
+        'Fixed AI Analysis — Groq API response was not being decoded correctly; now extracts expenses from choices[0].message.content',
+        'Calculation fix — all trend and summary queries now filter by is_paid=1 (debit only)',
+        'Date accuracy fix — daily trend queries now use actual paid_date, not created_at fallback',
+        'Removed Lite Scan — manual SMS tab now uses a single AI Analysis button',
+        'Dashboard card revamped to vertical layout — large Total Spent, two-column stats row, progress bar',
+        'Motivational quote of the day on dashboard via ZenQuotes API (no account needed)',
+        'Register screen updated with friendlier onboarding text and budget tip card',
+        'Budget scoping — setting a budget now asks: This Month only, or This & All Future months',
+        'Past month budget protection — editing a past month\'s budget never affects current or future months',
+        'Navigation reset — switching tabs always reloads the current month, no stale data',
+        'Pull-to-refresh always snaps back to current month',
+        'Loading indicator now uses the primary app colour instead of system green',
+        'Budget scope dialog redesigned — clean Lucide icon tiles, no emoji, professional layout',
+      ],
+    ),
     ReleaseInfo(
       version: '1.0.6',
       date: '2026-02-18',
