@@ -1,0 +1,48 @@
+# Business Overview: UX Refinement & Smart Match Patch (v1.4.1)
+
+Problem
+-------
+The previous version of the SMS import system successfully detected expenses but failed to link them to existing budget plans. This resulted in every imported transaction appearing as an "unplanned expense" on the dashboard, even if the user had already budgeted for it. Additionally, promotional SMS noise (marketing offers and recharge suggestions) was being incorrectly categorized as spending, and the dashboard provided limited engagement on refresh.
+
+Objective
+---------
+To improve financial accuracy by automatically matching imports to budget plans, eliminate marketing noise from the transaction feed, and provide a more dynamic landing experience.
+
+Feature Summary
+---------------
+- Smart Plan Matching: Automatically links detected SMS transactions to existing planned expenses or regular payments based on amount matching.
+- Anti-Noise Engine: Proactive filtering of promotional SMS content (offers, recharge packs, marketing slogans).
+- UI Cleanup: Dynamic labels ("Spent" instead of "Unplanned") and conditional visibility for empty budget fields.
+- Interactive Dashboard: Real-time random quote generation on pull-to-refresh.
+
+High-Level Workflow
+-------------------
+1. User initiates an SMS scan on the Dashboard or Import Screen.
+2. System fetches SMS and pre-loads the last 6 months of budget items.
+3. Matching Engine compares transaction amounts against plan amounts.
+4. If a match is found, the transaction inherits the budget identity (Planned Match).
+5. If no match is found, the transaction is categorized as a general "Spent" item.
+6. Promotional messages are discarded instantly based on a comprehensive keyword registry.
+
+Business Value
+--------------
+- Accuracy: Users see their real budget progress instead of inflated "unplanned" costs.
+- Trust: Highly reduced rate of "false positive" expenses from marketing noise.
+- Engagement: A fresher interface that rewards interaction with inspiring content.
+- Efficiency: Faster data import by matching merchants to existing plans.
+
+Risks
+-----
+- Collateral Matches: Two different monthly bills with the exact same amount might be misattributed. (Mitigated by adopting plan names during import).
+- Evolving Spam: New marketing SMS formats may bypass current filters (Addressable via keyword updates).
+
+Cost Implications
+-----------------
+- Reduced AI Overhead: Local pre-filtering of promotional noise significantly reduces the volume of text sent to AI providers, lowering token costs.
+
+Timeline
+--------
+- Refinement Period: 1 Day
+- Release Date: 2026-02-24
+
+Date: 2026-02-24

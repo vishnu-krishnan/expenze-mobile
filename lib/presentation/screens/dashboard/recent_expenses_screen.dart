@@ -168,16 +168,11 @@ class RecentExpensesScreen extends StatelessWidget {
                           fontWeight: FontWeight.w900,
                           fontSize: 16,
                           color: textColor)),
-                  Text(
-                      (planned == 0 && actual > 0)
-                          ? 'Unplanned'
-                          : (actual > 0 ? 'Spent' : 'Planned'),
+                  Text(actual > 0 ? 'Spent' : 'Planned',
                       style: TextStyle(
-                          color: (planned == 0 && actual > 0)
-                              ? AppTheme.warning
-                              : (actual > 0
-                                  ? AppTheme.primary
-                                  : secondaryTextColor),
+                          color: actual > 0
+                              ? AppTheme.primary
+                              : secondaryTextColor,
                           fontSize: 10,
                           fontWeight: FontWeight.bold)),
                 ],

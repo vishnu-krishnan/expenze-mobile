@@ -73,6 +73,11 @@ class SmsService {
       if (lowerBody.contains(word)) return null;
     }
 
+    // 5. Promotional & Marketing Filter
+    for (final word in SmsExclusionKeywords.promotional) {
+      if (lowerBody.contains(word)) return null;
+    }
+
     // 5. Broad Intent Detection (Is it actually a financial activity?)
     final isDebit = lowerBody.contains('spent') ||
         lowerBody.contains('debited') ||

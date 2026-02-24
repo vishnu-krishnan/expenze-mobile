@@ -66,6 +66,28 @@ class SmsExclusionKeywords {
     'download app',
   ];
 
+  // 7. Promotional & Marketing (Offers, Recharges, Suggestions)
+  static const List<String> promotional = [
+    'recharge with',
+    'packs starting',
+    'exclusive offer',
+    'talktime',
+    'valid till',
+    'offer expires',
+    'recharge now',
+    'data pack',
+    'unlimited data',
+    'enjoy',
+    'congratulations',
+    'won',
+    'cash prize',
+    'claim',
+    'lowest price',
+    'starting at Rs',
+    'starting Rs',
+    'subscription expires',
+  ];
+
   // Helper method to get all exclusion keywords for AI Context
   static String getAIExclusionSummary() {
     return '''
@@ -75,6 +97,7 @@ class SmsExclusionKeywords {
 4. Alerts: ${securityAlerts.join(", ")}
 5. Failed: ${failed.join(", ")}
 6. Generic Noise: ${noise.join(", ")}
+7. Promotional: ${promotional.join(", ")}
 ''';
   }
 }

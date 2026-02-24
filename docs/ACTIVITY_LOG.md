@@ -1364,6 +1364,42 @@ Implemented a robust, multi-provider AI infrastructure and centralized SMS parsi
 - **Reliability**: Scan success rate significantly improved via multi-provider failover.
 - **Accuracy**: Eliminated duplicate expense entries from credit card payments.
 - **Cost**: Local pre-filtering reduced AI token consumption.
-- **UX**: Clearer UI with professional maintainability tools.
+Date: 2026-02-24
+
+--------------------------------------------------------------------------------
+
+## [2026-02-24] Version 1.4.1 - UX Refinement & Smart Match Patch
+
+**Change Type:** Patch
+
+**Decision Made:**
+Implemented intelligent budget plan matching and aggressive promotional SMS filtering to clean up the transaction feed and ensure budget alignment.
+
+**Context:**
+- Transactions imported via SMS were appearing with "Planned: ₹0", cluttering the dashboard with "Unplanned" items even when they matched intended expenses.
+- Marketing noise and recharge offers (e.g., "packs starting at Rs 22") were being detected as expenses.
+- Dashboard quotes were static, providing a stale user experience on refresh.
+
+**Changes:**
+- **Dashboard Interface:**
+    - Switched quote fetching to `api/random` for a fresh experience on every pull-to-refresh.
+- **Smart Plan Matching:**
+    - **Logic**: Implemented amount-based matching against historical data (6-month lookback).
+    - **UI**: Added "PLANNED MATCH" badges and automatic name adoption from budget plans.
+    - **Consistency**: Matches now correctly populate `plannedAmount`, preventing items from being marked as unplanned.
+- **UI & Labeling:**
+    - **Clutter Reduction**: Conditionally hide "Planned Amount" labels in detail views when the value is 0.
+    - **Standardization**: Replaced the "Unplanned" label with "Spent" for a cleaner, status-based overview across all screens.
+- **Anti-Noise Engine:**
+    - **Exclusions**: Added comprehensive marketing/recharge exclusion patterns.
+    - **Multi-Layer Defense**: Implemented local pre-filtering in `SmsService` and reinforced AI prompts to ignore promotional offers.
+
+**Impact:**
+- **Accuracy**: Budget charts now reflect real intent by linking SMS to plans.
+- **Cleanliness**: Significant reduction in "junk" expenses from marketing SMS.
+- **UX**: Fresh, responsive feel on the dashboard and clearer transaction details.
+
+**Rollback Strategy:**
+- Revert logic in `sms_import_screen.dart` and `sms_service.dart`. Restore `api/today` in `dashboard_screen.dart`.
 
 Date: 2026-02-24

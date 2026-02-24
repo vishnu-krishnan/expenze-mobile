@@ -8,7 +8,8 @@ class AiPrompts {
     final exclusionStr = SmsExclusionKeywords.getAIExclusionSummary();
 
     return '''
-Act as a financial AI. Extract completed debit/expense transactions from Indian banking/wallet SMS.
+Act as a financial AI. Extract ONLY completed debit/expense transactions from Indian banking/wallet SMS. 
+IGNORE promotional recharges, marketing offers, and pricing "starting at". Only process actual money spent.
 $userContext
 Output JSON: {"expenses": [objects]}. Fields:
 - "rawText": original SMS line.

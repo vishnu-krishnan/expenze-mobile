@@ -275,7 +275,7 @@ Shared via Expenze App
             secondaryTextColor,
             color: _getPriorityColor(expense.priority),
           ),
-          if (expense.plannedAmount > 0 && expense.actualAmount > 0) ...[
+          if (expense.plannedAmount > 0) ...[
             _buildDivider(context),
             _buildDetailTile(
               LucideIcons.target,

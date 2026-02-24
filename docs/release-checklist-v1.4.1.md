@@ -1,0 +1,28 @@
+# Release Checklist: UX Refinement & Smart Match Patch (v1.4.1)
+
+## Code Quality
+- [x] Version bumped to 1.4.1+12 in `pubspec.yaml`.
+- [x] Lint issues resolved in `SmsImportScreen` (import fixes).
+- [x] Conditional UI logic verified for 0-value fields.
+
+## Security & Privacy
+- [x] No sensitive SMS data leaked to logs.
+- [x] Promotional keyword list includes only marketing-related tokens.
+
+## Testing
+- [x] Verified "Planned Match" badge appears for correct amounts.
+- [x] Verified promotional recharge SMS (Rs 22, Rs 155) are ignored.
+- [x] Verified "Unplanned" items now display as "Spent".
+- [x] Verified Dashboard pull-to-refresh fetches random quotes.
+
+## Performance
+- [x] Cross-month repository matching tested (6 months window).
+- [x] Local keyword filtering reduces AI call frequency.
+
+## Documentation
+- [x] ACTIVITY_LOG.md updated with Patch entry.
+- [x] Business Overview (Dual Format) created.
+- [x] Technical Specification (Dual Format) created.
+
+Release Class: Patch
+Date: 2026-02-24

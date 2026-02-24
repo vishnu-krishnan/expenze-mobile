@@ -11,12 +11,14 @@ import '../../../data/models/expense.dart';
 import '../../../data/services/sms_service.dart';
 import '../../../data/services/api_service.dart';
 import 'package:dio/dio.dart';
+import '../../../data/repositories/expense_repository.dart';
 
 class DetectedExpense {
   final String id;
   final String raw;
   String name;
   double amount;
+  double plannedAmount;
   int? categoryId;
   String priority;
   String paymentMode;
@@ -29,6 +31,7 @@ class DetectedExpense {
     required this.raw,
     required this.name,
     required this.amount,
+    this.plannedAmount = 0.0,
     this.categoryId,
     this.priority = 'MEDIUM',
     this.paymentMode = 'Other',
@@ -98,6 +101,16 @@ class _SmsImportScreenState extends State<SmsImportScreen>
       final importedIds = await provider.getImportedSmsIds();
       final importedBodies = await provider.getImportedSmsSignatures();
       final messages = await _smsService.getRecentSms(months: 6);
+
+      // Pre-fetch expenses for matching across the scan window (6 months)
+      final List<Expense> matchPool = [];
+      final repo = ExpenseRepository();
+      final now = DateTime.now();
+      for (int i = 0; i < 6; i++) {
+        final d = DateTime(now.year, now.month - i, 1);
+        final k = DateFormat('yyyy-MM').format(d);
+        matchPool.addAll(await repo.getExpensesByMonth(k));
+      }
 
       final onScreenIds = _detectedExpenses.map((e) => e.id).toSet();
       final onScreenBodies = _detectedExpenses.map((e) => e.raw).toSet();
@@ -174,7 +187,7 @@ class _SmsImportScreenState extends State<SmsImportScreen>
         for (var entry in expensesJson.asMap().entries) {
           final json = entry.value;
           final index = entry.key;
-          final merchantName = json['name']?.toString() ?? 'Unknown';
+          String merchantName = json['name']?.toString() ?? 'Unknown';
 
           final suggestion =
               json['categorySuggestion']?.toString().toLowerCase() ?? '';
@@ -223,6 +236,29 @@ class _SmsImportScreenState extends State<SmsImportScreen>
           final amount = (json['amount'] as num?)?.toDouble() ?? 0.0;
           if (amount <= 0) continue;
 
+          // Planned Match Logic: Look for planned expenses with same amount
+          double matchingPlannedAmount = 0.0;
+          final monthKey =
+              "${finalDate.year}-${finalDate.month.toString().padLeft(2, '0')}";
+
+          final match = matchPool.firstWhere(
+            (e) =>
+                e.monthKey == monthKey &&
+                e.plannedAmount == amount &&
+                e.actualAmount == 0 &&
+                !e.isPaid,
+            orElse: () => Expense(monthKey: '', name: ''),
+          );
+
+          if (match.monthKey.isNotEmpty) {
+            matchingPlannedAmount = amount;
+            // Optionally update the name to match the plan if AI name is generic
+            if (merchantName.toLowerCase() == 'payment' ||
+                merchantName.toLowerCase() == 'transaction') {
+              merchantName = match.name;
+            }
+          }
+
           // Override AI priority with user rules for consistency
           String finalPriority = json['priority'] ?? 'MEDIUM';
           if (amount <= 500) {
@@ -236,6 +272,7 @@ class _SmsImportScreenState extends State<SmsImportScreen>
             raw: json['rawText'] ?? 'AI parsed',
             name: merchantName,
             amount: amount,
+            plannedAmount: matchingPlannedAmount,
             categoryId: matchedId,
             priority: finalPriority,
             paymentMode: 'Other',
@@ -433,7 +470,7 @@ class _SmsImportScreenState extends State<SmsImportScreen>
         monthKey: monthKey,
         categoryId: item.categoryId,
         name: item.name,
-        plannedAmount: 0.0,
+        plannedAmount: item.plannedAmount,
         actualAmount: item.amount,
         priority: item.priority,
         paymentMode: item.paymentMode,
@@ -1121,14 +1158,46 @@ class _SmsImportScreenState extends State<SmsImportScreen>
                         ],
                       ),
                     ),
-                    Text(
-                      '₹${expense.amount.toStringAsFixed(0)}',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w900,
-                        fontSize: 22,
-                        color: textColor,
-                        letterSpacing: -1,
-                      ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          '₹${expense.amount.toStringAsFixed(0)}',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w900,
+                            fontSize: 22,
+                            color: textColor,
+                            letterSpacing: -1,
+                          ),
+                        ),
+                        if (expense.plannedAmount > 0)
+                          Container(
+                            margin: const EdgeInsets.only(top: 4),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: AppTheme.success.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(LucideIcons.checkCircle2,
+                                    size: 8, color: AppTheme.success),
+                                const SizedBox(width: 4),
+                                Text(
+                                  'PLANNED MATCH',
+                                  style: TextStyle(
+                                    color: AppTheme.success,
+                                    fontSize: 8,
+                                    fontWeight: FontWeight.w900,
+                                    letterSpacing: 0.5,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                      ],
                     ),
                   ],
                 ),

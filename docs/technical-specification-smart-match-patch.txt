@@ -1,0 +1,60 @@
+Technical Specification: UX Refinement & Smart Match Patch (v1.4.1)
+
+System Overview
+---------------
+This patch enhances the SmsImportScreen logic and the global transaction display components to provide accurate budget attribution and noise reduction.
+
+Architecture Diagram
+--------------------
+[ SMS Inbox ] -> [ SmsService ] --(Keyword Filter)--> [ ApiService (AI) ]
+                                                            |
+                                                   [ Matching Engine ]
+                                                            |
+                                             <-- (Loads 6 Month Plans)
+                                                            |
+                                                   [ Identified Expense ]
+                                                            |
+                                                   [ Dashboard / Planner ]
+
+Component Breakdown
+-------------------
+1. SmsService Enhancement:
+   - Added Promotional keyword registry in SmsExclusionKeywords.
+   - Local validation logic to discard marketing noise before AI dispatch.
+2. Smart Match Engine (SmsImportScreen):
+   - Pre-loads 6 months of historical data using ExpenseRepository.
+   - Implements amount-based lookup (plannedAmount == amount).
+   - Conditional name adoption from Expense model if matching.
+3. UI Display Components:
+   - MonthPlanScreen: Modified _buildExpenseCard to remove "Unplanned" terminology.
+   - ExpenseDetailScreen: Conditional rendering of "Planned Amount" field.
+   - CategoryTransactionsScreen: Standardized "Spent" label for confirmed items.
+
+Data Flow
+---------
+- SMS Body --(Regex/Keyword)--> Filtered --(AI Parse)--> Json Data --(Match Check)--> Final Expense Object.
+
+API Contracts
+-------------
+- ZenQuotes API: Endpoint transitioned from /today to /random for refresh-based fetching.
+
+Validation Rules
+----------------
+- Match logic: e.monthKey == targetKey && e.plannedAmount == smsAmount && !e.isPaid.
+- Promotional filter: Broad string contains check against 20+ marketing tokens.
+
+Error Handling
+--------------
+- If historical data fails to load, matching defaults to standard "Spent" categorization without crashing.
+
+Deployment Plan
+---------------
+- Version bump to 1.4.1 via pubspec.yaml.
+- Atomic update across model, service, and UI layers.
+
+Rollback Plan
+-------------
+- Revert repository fetch logic in _syncFromInbox.
+- Restore original terminology in _buildExpenseCard.
+
+Date: 2026-02-24

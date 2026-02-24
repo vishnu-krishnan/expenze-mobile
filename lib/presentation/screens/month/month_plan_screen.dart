@@ -509,15 +509,15 @@ class _MonthPlanScreenState extends State<MonthPlanScreen> {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Unplanned',
+                        const Text('Spent',
                             style: TextStyle(
-                                color: Colors.grey.withValues(alpha: 0.7),
+                                color: Color(0xFF66BB6A),
                                 fontWeight: FontWeight.w600,
                                 fontSize: 12)),
                         Text('₹${expense.actualAmount.toInt()}',
-                            style: TextStyle(
+                            style: const TextStyle(
                                 fontWeight: FontWeight.bold,
-                                color: secondaryTextColor)),
+                                color: Color(0xFF66BB6A))),
                       ],
                     )
                   else ...[
@@ -649,9 +649,11 @@ class _MonthPlanScreenState extends State<MonthPlanScreen> {
             _buildDetailRow('Status', expense.isPaid ? 'Paid' : 'Pending',
                 valueColor:
                     expense.isPaid ? AppTheme.success : AppTheme.warning),
-            const SizedBox(height: 16),
-            _buildDetailRow(
-                'Planned Amount', '₹${expense.plannedAmount.toInt()}'),
+            if (expense.plannedAmount > 0) ...[
+              const SizedBox(height: 16),
+              _buildDetailRow(
+                  'Planned Amount', '₹${expense.plannedAmount.toInt()}'),
+            ],
             if (expense.isPaid) ...[
               const SizedBox(height: 16),
               _buildDetailRow(

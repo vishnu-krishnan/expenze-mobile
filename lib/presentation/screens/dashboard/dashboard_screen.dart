@@ -35,7 +35,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Future<void> _fetchQuote() async {
     try {
       final response = await http
-          .get(Uri.parse('https://zenquotes.io/api/today'))
+          .get(Uri.parse('https://zenquotes.io/api/random'))
           .timeout(const Duration(seconds: 10));
       if (response.statusCode == 200) {
         final data = json.decode(response.body) as List<dynamic>;

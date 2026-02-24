@@ -160,15 +160,11 @@ class _CategoryTransactionsScreenState
     // If actual > 0 -> Actual
     // Else -> Planned
 
-    final isUnplanned = expense.plannedAmount == 0 && expense.actualAmount > 0;
     final isActual = expense.actualAmount > 0;
 
-    final statusText =
-        isUnplanned ? 'Unplanned' : (isActual ? 'Spent' : 'Planned');
+    final statusText = isActual ? 'Spent' : 'Planned';
 
-    final statusColor = isUnplanned
-        ? AppTheme.warning
-        : (isActual ? AppTheme.primary : secondaryTextColor);
+    final statusColor = isActual ? AppTheme.primary : secondaryTextColor;
 
     final amount = isActual ? expense.actualAmount : expense.plannedAmount;
 
