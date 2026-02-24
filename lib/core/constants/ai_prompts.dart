@@ -9,7 +9,8 @@ class AiPrompts {
 
     return '''
 Act as a financial AI. Extract ONLY completed debit/expense transactions from Indian banking/wallet SMS. 
-IGNORE promotional recharges, marketing offers, and pricing "starting at". Only process actual money spent.
+IGNORE promotional recharges, marketing offers, pricing "starting at", and ESTIMATED/APPROXIMATE cost notifications.
+CRITICAL: IGNORE "Self Transfers". If the transaction recipient name (e.g., "Sent to VISHNU") matches the Account holder name, skip it. Only process actual money spent that has been confirmed as a past debit.
 $userContext
 Output JSON: {"expenses": [objects]}. Fields:
 - "rawText": original SMS line.

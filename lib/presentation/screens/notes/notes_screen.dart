@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:intl/intl.dart';
-import 'package:expenze_mobile/presentation/providers/note_provider.dart';
-import 'package:expenze_mobile/core/theme/app_theme.dart';
-import 'package:expenze_mobile/data/models/note.dart';
+import 'package:provider/provider.dart';
+import '../../../core/theme/app_theme.dart';
+import '../../../data/models/note.dart';
+import '../../../presentation/providers/note_provider.dart';
 
 class NotesScreen extends StatefulWidget {
   const NotesScreen({super.key});

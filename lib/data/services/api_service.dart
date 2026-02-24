@@ -19,7 +19,7 @@ class ApiService {
     AiProvider.openai: [],
   };
 
-  Map<AiProvider, int> _poolIndices = {
+  final Map<AiProvider, int> _poolIndices = {
     AiProvider.groq: 0,
     AiProvider.claude: 0,
     AiProvider.openai: 0,

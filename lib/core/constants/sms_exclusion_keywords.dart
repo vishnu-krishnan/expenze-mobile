@@ -88,6 +88,30 @@ class SmsExclusionKeywords {
     'subscription expires',
   ];
 
+  // 8. Informational & Estimates (Not actual expenditures)
+  static const List<String> informational = [
+    'estimated cost',
+    'estimated approx',
+    'premium rs',
+    'approx rs',
+    'approximate',
+    'potential',
+    'likely cost',
+    'interest rate',
+    'due date',
+    'will be debited on',
+  ];
+
+  // 9. Self-Transfers (Internal account movement)
+  static const List<String> selfTransfers = [
+    'self transfer',
+    'transfer to self',
+    'own account',
+    'internal transfer',
+    'transfer within bank',
+    'transfer to your own',
+  ];
+
   // Helper method to get all exclusion keywords for AI Context
   static String getAIExclusionSummary() {
     return '''
@@ -98,6 +122,8 @@ class SmsExclusionKeywords {
 5. Failed: ${failed.join(", ")}
 6. Generic Noise: ${noise.join(", ")}
 7. Promotional: ${promotional.join(", ")}
+8. Informational: ${informational.join(", ")}
+9. Self-Transfers: ${selfTransfers.join(", ")}
 ''';
   }
 }

@@ -1,5 +1,14 @@
 # Expenze Application Changelog
 
+## Version 1.4.2+13 - 2026-02-24
+
+### Changed
+- Refined UI/UX in Analytics Screen with a new TransactionsDialog to view daily expenses on tap.
+- Updated `sms_import_screen` to clearly display "Plan Match" on tracked UI elements when recognizing an expense.
+- Tweaked `ExpenseProvider.processImportedExpenses` to perform updates on existing matched transactions from SMS.
+- Altered SMS scan behavior to unconditionally show the AI use limit notice on refresh.
+- Fixed duplicated package imports in `notes_screen.dart` causing lint errors.
+
 ## Version 1.0.0 - 2025-12-08
 
 ### Added

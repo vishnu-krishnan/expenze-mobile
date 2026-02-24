@@ -18,6 +18,18 @@ class ExpenseRepository {
     return List.generate(maps.length, (i) => Expense.fromMap(maps[i]));
   }
 
+  // Get all paid expenses for a specific date (YYYY-MM-DD)
+  Future<List<Expense>> getExpensesByDate(String dateStr) async {
+    final db = await _dbHelper.database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'expenses',
+      where: 'is_paid = 1 AND SUBSTR(paid_date, 1, 10) = ?',
+      whereArgs: [dateStr],
+      orderBy: 'paid_date DESC',
+    );
+    return List.generate(maps.length, (i) => Expense.fromMap(maps[i]));
+  }
+
   Future<List<Expense>> getExpensesByCategory(
       String monthKey, int? categoryId) async {
     final db = await _dbHelper.database;
@@ -539,7 +551,9 @@ class ExpenseRepository {
       String merchantName, int categoryId) async {
     if (merchantName.isEmpty ||
         merchantName == 'Unknown' ||
-        merchantName == 'Transaction') return;
+        merchantName == 'Transaction') {
+      return;
+    }
 
     final db = await _dbHelper.database;
     await db.insert(

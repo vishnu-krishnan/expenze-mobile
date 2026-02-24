@@ -10,6 +10,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../data/models/expense.dart';
 import 'recent_expenses_screen.dart' hide RecentDoubleExtension;
 import 'category_transactions_screen.dart';
+import 'package:custom_refresh_indicator/custom_refresh_indicator.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -105,15 +106,70 @@ class _DashboardScreenState extends State<DashboardScreen> {
           final remaining = summary['remaining'] ?? 0.0;
           final limit = summary['limit'] ?? 0.0;
           final target = limit > 0 ? limit : planned;
-          final pctUsed = target > 0 ? (actual / target) : 0.0;
+          // If actual > 0 and no target (budget) is set, we are effectively over budget
+          final pctUsed =
+              target > 0 ? (actual / target) : (actual > 0 ? 1.01 : 0.0);
 
-          return RefreshIndicator(
+          return CustomRefreshIndicator(
             onRefresh: () => Future.wait([
               provider.resetToCurrentMonth(),
               _fetchQuote(),
             ]),
-            displacement: 40,
-            color: AppTheme.primary,
+            builder: (context, child, controller) {
+              return Stack(
+                alignment: Alignment.topCenter,
+                children: [
+                  AnimatedBuilder(
+                    animation: controller,
+                    builder: (context, _) {
+                      final double dy = controller.value.clamp(0.0, 1.0) * 80.0;
+                      return Transform.translate(
+                        offset: Offset(0, dy - 40),
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: AppTheme.primary.withValues(alpha: 0.1),
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                                color: AppTheme.primary.withValues(alpha: 0.2)),
+                            boxShadow: [
+                              BoxShadow(
+                                color: AppTheme.primary.withValues(alpha: 0.1),
+                                blurRadius: 20,
+                                spreadRadius: -5,
+                              )
+                            ],
+                          ),
+                          child: controller.state.isLoading
+                              ? SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                        AppTheme.primary),
+                                  ),
+                                )
+                              : Transform.rotate(
+                                  angle: controller.value * 2 * 3.1415,
+                                  child: Icon(
+                                    LucideIcons.sparkles,
+                                    color: AppTheme.primary,
+                                    size: 20,
+                                  ),
+                                ),
+                        ),
+                      );
+                    },
+                  ),
+                  Transform.translate(
+                    offset: Offset(0, controller.value.clamp(0.0, 1.0) * 80.0),
+                    child: child,
+                  ),
+                ],
+              );
+            },
             child: CustomScrollView(
               physics: const AlwaysScrollableScrollPhysics(
                 parent: BouncingScrollPhysics(),
@@ -259,11 +315,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   Widget _buildWalletCard(double actual, double remaining, double pctUsed,
       ExpenseProvider provider, Map<String, double> summary, double planned) {
-    final statusColor = pctUsed > 0.9
-        ? AppTheme.danger
-        : (pctUsed > 0.7 ? AppTheme.warning : Colors.white);
-    final budget = summary['limit'] ?? (planned > 0 ? planned : 0.0);
     final isOverBudget = pctUsed >= 1.0;
+    final statusColor = pctUsed >= 0.9
+        ? AppTheme.danger
+        : (pctUsed >= 0.7 ? AppTheme.warning : Colors.white);
+
+    // Correctly determine budget display: Prioritize limit, fallback to planned sum
+    final budgetLimit = summary['limit'] ?? 0.0;
+    final budget =
+        budgetLimit > 0 ? budgetLimit : (planned > 0 ? planned : 0.0);
 
     return GestureDetector(
       onHorizontalDragEnd: (details) {
@@ -390,7 +450,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     children: [
                       Expanded(
                         child: _buildStatColumn(
-                          label: 'Remaining',
+                          label: isOverBudget ? 'Overspent' : 'Remaining',
                           value: '₹${remaining.abs().toLocaleString()}',
                           valueColor: statusColor,
                           icon: isOverBudget
@@ -488,13 +548,27 @@ class _DashboardScreenState extends State<DashboardScreen> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text('${(pct * 100).toInt()}% used',
-                style: const TextStyle(
-                    color: Colors.white70,
+            Text(
+                pct >= 1.0
+                    ? 'Budget Exceeded'
+                    : (pct >= 0.9
+                        ? 'Critical Level'
+                        : (pct >= 0.8
+                            ? 'High Alert'
+                            : (pct >= 0.7 ? 'Approaching Limit' : 'On track'))),
+                style: TextStyle(
+                    color: pct >= 0.9
+                        ? Colors.white
+                        : (pct >= 0.7 ? Colors.orange[200] : Colors.white70),
                     fontSize: 10,
-                    fontWeight: FontWeight.bold)),
-            Text(pct >= 1.0 ? 'Over limit' : 'On track',
-                style: const TextStyle(color: Colors.white70, fontSize: 10)),
+                    fontWeight:
+                        pct >= 0.8 ? FontWeight.bold : FontWeight.normal)),
+            Text('${(pct * 100).toInt()}% used',
+                style: TextStyle(
+                    color: pct >= 0.9 ? Colors.white : Colors.white70,
+                    fontSize: 10,
+                    fontWeight:
+                        pct >= 0.8 ? FontWeight.bold : FontWeight.normal)),
           ],
         ),
         const SizedBox(height: 8),

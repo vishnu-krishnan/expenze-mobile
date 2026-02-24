@@ -1383,6 +1383,10 @@ Implemented intelligent budget plan matching and aggressive promotional SMS filt
 **Changes:**
 - **Dashboard Interface:**
     - Switched quote fetching to `api/random` for a fresh experience on every pull-to-refresh.
+    - **REFRESH UPGRADE**: Replaced standard `RefreshIndicator` with a premium `CustomRefreshIndicator` featuring a glassmorphic pulsing spark icon with rotation and scale animations.
+    - **FIX**: Corrected "Monthly Budget", "Total Spent", and "Remaining" calculation logic. Budget now correctly prioritizes the set Limit over the planned sum.
+    - **UX**: Implemented strictly tiered status labels: "Approaching Limit" (>70%), "High Alert" (>80%), "Critical Level" (>90% + Red UI), and "Budget Exceeded" (>100% + Overspent label).
+    - **STATUS LABELS**: Added "Overspent" label instead of "Remaining" when budget is exceeded for better clarity.
 - **Smart Plan Matching:**
     - **Logic**: Implemented amount-based matching against historical data (6-month lookback).
     - **UI**: Added "PLANNED MATCH" badges and automatic name adoption from budget plans.
@@ -1391,8 +1395,11 @@ Implemented intelligent budget plan matching and aggressive promotional SMS filt
     - **Clutter Reduction**: Conditionally hide "Planned Amount" labels in detail views when the value is 0.
     - **Standardization**: Replaced the "Unplanned" label with "Spent" for a cleaner, status-based overview across all screens.
 - **Anti-Noise Engine:**
-    - **Exclusions**: Added comprehensive marketing/recharge exclusion patterns.
-    - **Multi-Layer Defense**: Implemented local pre-filtering in `SmsService` and reinforced AI prompts to ignore promotional offers.
+    - **PROMOTIONAL PROTECTION**: Implemented a new exclusion category for marketing recharges and offers (e.g., "packs starting Rs 22").
+    - **ESTIMATE FILTERING**: Added logic to discard "estimated cost" or "approximate Rs" messages unless they contain explicit debit confirmation.
+    - **SELF-TRANSFER DETECTION**: Configured the AI engine to ignore internal transfers by comparing transaction recipients against the user's name. Added local keyword filtering for "own account" and "internal transfer" patterns.
+    - **LOCAL DISCARD**: Updated `SmsService` to drop promotional and self-transfer noise locally before sending to AI, saving tokens and costs.
+    - **PROMPT REINFORCEMENT**: Added explicit instructions to the AI prompt to ignore future-dated plans, marketing suggestions, approximate cost alerts, and self-transfers.
 
 **Impact:**
 - **Accuracy**: Budget charts now reflect real intent by linking SMS to plans.
@@ -1403,3 +1410,9 @@ Implemented intelligent budget plan matching and aggressive promotional SMS filt
 - Revert logic in `sms_import_screen.dart` and `sms_service.dart`. Restore `api/today` in `dashboard_screen.dart`.
 
 Date: 2026-02-24
+[2026-02-24] [UI/Expense Match & Analytics]
+Change Type: Minor
+- Added TransactionsDialog to show lists of daily expenses from the Analytics Screen.
+- Extended _buildDetectedCard to display matched plan references clearly on tracked UI elements.
+- Improved ExpenseProvider.processImportedExpenses to update existing transactions when matched from SMS.
+- Updated sms_import_screen to show the AI limit info message unconditionally on the screen, particularly after full refreshes that yield no immediate transaction hits.

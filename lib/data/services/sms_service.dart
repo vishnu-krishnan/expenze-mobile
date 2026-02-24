@@ -78,15 +78,32 @@ class SmsService {
       if (lowerBody.contains(word)) return null;
     }
 
-    // 5. Broad Intent Detection (Is it actually a financial activity?)
-    final isDebit = lowerBody.contains('spent') ||
-        lowerBody.contains('debited') ||
-        lowerBody.contains('paid') ||
-        lowerBody.contains('txn') ||
-        lowerBody.contains('transaction') ||
-        lowerBody.contains('payment') ||
-        lowerBody.contains('transfer') ||
-        lowerBody.contains('sent to');
+    // 6. Self-Transfers Filter
+    for (final word in SmsExclusionKeywords.selfTransfers) {
+      if (lowerBody.contains(word)) return null;
+    }
+
+    // 7. Broad Intent Detection & Informational Filter
+    final debitWords = [
+      'spent',
+      'debited',
+      'paid',
+      'txn',
+      'transaction',
+      'payment',
+      'transfer',
+      'sent to',
+      'charity',
+      'purchase'
+    ];
+    final isDebit = debitWords.any((w) => lowerBody.contains(w));
+
+    // Special check for Estimations/Notifications
+    final isInformational =
+        SmsExclusionKeywords.informational.any((w) => lowerBody.contains(w));
+
+    // If it's an informational/estimate message AND lacks explicit debit confirmation, drop it
+    if (isInformational && !isDebit) return null;
 
     final hasCurrency = lowerBody.contains('rs') ||
         lowerBody.contains('inr') ||

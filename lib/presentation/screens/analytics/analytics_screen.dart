@@ -4,6 +4,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../providers/expense_provider.dart';
+import 'transactions_dialog.dart';
 
 class AnalyticsScreen extends StatefulWidget {
   const AnalyticsScreen({super.key});
@@ -432,43 +433,55 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
         final data = trends[trends.length - 1 - index];
         final actual = (data['total_actual'] as num).toDouble();
 
-        return Container(
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: Theme.of(context).cardTheme.color,
-            borderRadius: BorderRadius.circular(24),
-            boxShadow: AppTheme.softShadow,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(() {
-                final key = data['month_key'] as String;
-                if (key.length > 7) {
-                  return DateFormat('d MMM yyyy').format(DateTime.parse(key));
-                }
-                return DateFormat('MMMM yyyy')
-                    .format(DateTime.parse('$key-01'));
-              }(),
-                  style: TextStyle(
-                      color: secondaryTextColor,
-                      fontSize: 10,
-                      fontWeight: FontWeight.bold)),
-              const SizedBox(height: 4),
-              // Show 'Saved!' when actual is zero — zero spending is a win
-              actual == 0
-                  ? Text('Saved!',
-                      style: TextStyle(
-                          color: AppTheme.success,
-                          fontSize: 15,
-                          fontWeight: FontWeight.bold))
-                  : Text('₹${actual.toStringAsFixed(0)}',
-                      style: TextStyle(
-                          color: textColor,
-                          fontSize: 18,
-                          fontWeight: FontWeight.w900)),
-            ],
+        final key = data['month_key'] as String;
+        final isDay = key.length > 7;
+
+        return GestureDetector(
+          onTap: () {
+            if (isDay && actual > 0) {
+              showDialog(
+                context: context,
+                builder: (context) => TransactionsDialog(dateStr: key),
+              );
+            }
+          },
+          child: Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Theme.of(context).cardTheme.color,
+              borderRadius: BorderRadius.circular(24),
+              boxShadow: AppTheme.softShadow,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(() {
+                  if (isDay) {
+                    return DateFormat('d MMM yyyy').format(DateTime.parse(key));
+                  }
+                  return DateFormat('MMMM yyyy')
+                      .format(DateTime.parse('$key-01'));
+                }(),
+                    style: TextStyle(
+                        color: secondaryTextColor,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold)),
+                const SizedBox(height: 4),
+                // Show 'Saved!' when actual is zero — zero spending is a win
+                actual == 0
+                    ? Text('Saved!',
+                        style: TextStyle(
+                            color: AppTheme.success,
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold))
+                    : Text('₹${actual.toStringAsFixed(0)}',
+                        style: TextStyle(
+                            color: textColor,
+                            fontSize: 18,
+                            fontWeight: FontWeight.w900)),
+              ],
+            ),
           ),
         );
       },

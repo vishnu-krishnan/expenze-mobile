@@ -240,7 +240,7 @@ class NotificationSettingsScreen extends StatelessWidget {
           Switch.adaptive(
             value: value,
             onChanged: onChanged,
-            activeColor: AppTheme.primary,
+            activeTrackColor: AppTheme.primary,
           ),
         ],
       ),

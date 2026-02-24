@@ -25,6 +25,7 @@ class DetectedExpense {
   final DateTime? date;
   bool isSaving;
   bool isSuccess;
+  int? matchedExpenseId;
 
   DetectedExpense({
     required this.id,
@@ -38,6 +39,7 @@ class DetectedExpense {
     this.date,
     this.isSaving = false,
     this.isSuccess = false,
+    this.matchedExpenseId,
   });
 }
 
@@ -92,6 +94,17 @@ class _SmsImportScreenState extends State<SmsImportScreen>
         }
         return;
       }
+    }
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('AI is scanning for new transactions...'),
+          backgroundColor: AppTheme.primary,
+          behavior: SnackBarBehavior.floating,
+          duration: Duration(seconds: 2),
+        ),
+      );
     }
 
     setState(() => _isLoading = true);
@@ -277,6 +290,7 @@ class _SmsImportScreenState extends State<SmsImportScreen>
             priority: finalPriority,
             paymentMode: 'Other',
             date: finalDate,
+            matchedExpenseId: match.id,
           ));
         }
 
@@ -456,8 +470,10 @@ class _SmsImportScreenState extends State<SmsImportScreen>
 
   Future<void> _importAll() async {
     final provider = context.read<ExpenseProvider>();
-    final List<Expense> toImport = [];
+    final List<Expense> toInsert = [];
+    final List<Expense> toUpdate = [];
     final List<int> indices = [];
+    final repo = ExpenseRepository();
 
     for (var i = 0; i < _detectedExpenses.length; i++) {
       final item = _detectedExpenses[i];
@@ -466,30 +482,48 @@ class _SmsImportScreenState extends State<SmsImportScreen>
       final date = item.date ?? DateTime.now();
       final monthKey = "${date.year}-${date.month.toString().padLeft(2, '0')}";
 
-      toImport.add(Expense(
-        monthKey: monthKey,
-        categoryId: item.categoryId,
-        name: item.name,
-        plannedAmount: item.plannedAmount,
-        actualAmount: item.amount,
-        priority: item.priority,
-        paymentMode: item.paymentMode,
-        isPaid: true,
-        paidDate: date.toIso8601String(),
-        createdAt: date.toIso8601String(),
-        notes: 'SMS_ID:${item.id} | MSG:${item.raw}',
-      ));
+      bool matched = false;
+      if (item.matchedExpenseId != null) {
+        final existing = await repo.getExpenseById(item.matchedExpenseId!);
+        if (existing != null && !existing.isPaid) {
+          toUpdate.add(existing.copyWith(
+            actualAmount: item.amount,
+            isPaid: true,
+            paidDate: date.toIso8601String(),
+            notes:
+                '${existing.notes != null ? '${existing.notes}\n' : ''}SMS_ID:${item.id} | MSG:${item.raw}',
+          ));
+          matched = true;
+        }
+      }
+
+      if (!matched) {
+        toInsert.add(Expense(
+          monthKey: monthKey,
+          categoryId: item.categoryId,
+          name: item.name,
+          plannedAmount: item.plannedAmount,
+          actualAmount: item.amount,
+          priority: item.priority,
+          paymentMode: item.paymentMode,
+          isPaid: true,
+          paidDate: date.toIso8601String(),
+          createdAt: date.toIso8601String(),
+          notes: 'SMS_ID:${item.id} | MSG:${item.raw}',
+        ));
+      }
+
       indices.add(i);
       setState(() => _detectedExpenses[i].isSaving = true);
     }
 
-    if (toImport.isEmpty) return;
+    if (toInsert.isEmpty && toUpdate.isEmpty) return;
 
     try {
-      await provider.addExpenses(toImport);
+      await provider.processImportedExpenses(toInsert, toUpdate);
 
       // LEARNING PHASE: Save merchant-to-category mappings
-      for (var item in toImport) {
+      for (var item in [...toInsert, ...toUpdate]) {
         if (item.categoryId != null) {
           await provider.upsertMerchantMapping(item.name, item.categoryId!);
         }
@@ -509,8 +543,8 @@ class _SmsImportScreenState extends State<SmsImportScreen>
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content:
-                Text('Successfully imported ${toImport.length} transactions'),
+            content: Text(
+                'Successfully imported ${toInsert.length + toUpdate.length} transactions'),
             backgroundColor: AppTheme.success,
             behavior: SnackBarBehavior.floating,
           ),
@@ -808,23 +842,21 @@ class _SmsImportScreenState extends State<SmsImportScreen>
                         ),
                       ],
                     ),
-                    if (_detectedExpenses.isNotEmpty) ...[
-                      const SizedBox(height: 12),
-                      Row(
-                        children: [
-                          Icon(LucideIcons.info,
-                              size: 14, color: secondaryTextColor),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              'AI use is limited per scan for stability. Please rescan after importing to process more messages.',
-                              style: TextStyle(
-                                  fontSize: 10, color: secondaryTextColor),
-                            ),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Icon(LucideIcons.info,
+                            size: 14, color: secondaryTextColor),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            'AI use is limited per scan for stability. Please rescan after importing to process more messages.',
+                            style: TextStyle(
+                                fontSize: 10, color: secondaryTextColor),
                           ),
-                        ],
-                      ),
-                    ],
+                        ),
+                      ],
+                    ),
                   ],
                 ),
               ),
@@ -1025,26 +1057,36 @@ class _SmsImportScreenState extends State<SmsImportScreen>
         borderRadius: BorderRadius.circular(24),
         boxShadow: AppTheme.softShadow,
         border: Border.all(
-          color: expense.isSuccess
+          color: expense.matchedExpenseId != null
               ? AppTheme.success.withValues(alpha: 0.3)
-              : AppTheme.primary.withValues(alpha: 0.1),
+              : (expense.isSuccess
+                  ? AppTheme.primary.withValues(alpha: 0.1)
+                  : Colors.transparent),
+          width: 1.5,
         ),
       ),
       clipBehavior: Clip.antiAlias,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header: Date and Payment Mode
+          // Header: Date and Status
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-            color: AppTheme.primary.withValues(alpha: 0.05),
+            color: expense.matchedExpenseId != null
+                ? AppTheme.success.withValues(alpha: 0.08)
+                : AppTheme.primary.withValues(alpha: 0.05),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Row(
                   children: [
-                    const Icon(LucideIcons.calendar,
-                        size: 14, color: AppTheme.primary),
+                    Icon(
+                      LucideIcons.calendar,
+                      size: 14,
+                      color: expense.matchedExpenseId != null
+                          ? AppTheme.success
+                          : AppTheme.primary,
+                    ),
                     const SizedBox(width: 8),
                     Text(
                       expense.date != null
@@ -1061,22 +1103,43 @@ class _SmsImportScreenState extends State<SmsImportScreen>
                 ),
                 Row(
                   children: [
-                    if (expense.isSuccess)
+                    if (expense.matchedExpenseId != null)
                       Container(
                         padding: const EdgeInsets.symmetric(
                             horizontal: 8, vertical: 2),
                         decoration: BoxDecoration(
-                          color: AppTheme.success.withValues(alpha: 0.1),
+                          color: AppTheme.success.withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: const Row(
+                          children: [
+                            Icon(LucideIcons.link,
+                                size: 10, color: AppTheme.success),
+                            SizedBox(width: 4),
+                            Text('PLAN MATCH',
+                                style: TextStyle(
+                                    color: AppTheme.success,
+                                    fontSize: 9,
+                                    fontWeight: FontWeight.bold)),
+                          ],
+                        ),
+                      )
+                    else if (expense.isSuccess)
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: AppTheme.primary.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: const Row(
                           children: [
                             Icon(LucideIcons.check,
-                                size: 12, color: AppTheme.success),
+                                size: 12, color: AppTheme.primary),
                             SizedBox(width: 4),
                             Text('IMPORTED',
                                 style: TextStyle(
-                                    color: AppTheme.success,
+                                    color: AppTheme.primary,
                                     fontSize: 9,
                                     fontWeight: FontWeight.bold)),
                           ],
@@ -1125,35 +1188,32 @@ class _SmsImportScreenState extends State<SmsImportScreen>
                                 color: textColor,
                                 letterSpacing: -0.5,
                               )),
-                          const SizedBox(height: 4),
-                          Row(
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 6, vertical: 2),
-                                decoration: BoxDecoration(
-                                  color: (expense.priority == 'HIGH'
-                                          ? AppTheme.danger
-                                          : expense.priority == 'MEDIUM'
-                                              ? AppTheme.warning
-                                              : AppTheme.success)
-                                      .withValues(alpha: 0.1),
-                                  borderRadius: BorderRadius.circular(4),
-                                ),
-                                child: Text(
-                                  expense.priority,
-                                  style: TextStyle(
-                                    color: expense.priority == 'HIGH'
-                                        ? AppTheme.danger
-                                        : expense.priority == 'MEDIUM'
-                                            ? AppTheme.warning
-                                            : AppTheme.success,
-                                    fontSize: 9,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
+                          const SizedBox(height: 6),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 3),
+                            decoration: BoxDecoration(
+                              color: (expense.priority == 'HIGH'
+                                      ? AppTheme.danger
+                                      : expense.priority == 'MEDIUM'
+                                          ? AppTheme.warning
+                                          : AppTheme.success)
+                                  .withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Text(
+                              '${expense.priority} PRIORITY',
+                              style: TextStyle(
+                                color: expense.priority == 'HIGH'
+                                    ? AppTheme.danger
+                                    : expense.priority == 'MEDIUM'
+                                        ? AppTheme.warning
+                                        : AppTheme.success,
+                                fontSize: 9,
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: 0.5,
                               ),
-                            ],
+                            ),
                           ),
                         ],
                       ),
@@ -1165,38 +1225,11 @@ class _SmsImportScreenState extends State<SmsImportScreen>
                           '₹${expense.amount.toStringAsFixed(0)}',
                           style: TextStyle(
                             fontWeight: FontWeight.w900,
-                            fontSize: 22,
+                            fontSize: 24,
                             color: textColor,
                             letterSpacing: -1,
                           ),
                         ),
-                        if (expense.plannedAmount > 0)
-                          Container(
-                            margin: const EdgeInsets.only(top: 4),
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 6, vertical: 2),
-                            decoration: BoxDecoration(
-                              color: AppTheme.success.withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                const Icon(LucideIcons.checkCircle2,
-                                    size: 8, color: AppTheme.success),
-                                const SizedBox(width: 4),
-                                Text(
-                                  'PLANNED MATCH',
-                                  style: TextStyle(
-                                    color: AppTheme.success,
-                                    fontSize: 8,
-                                    fontWeight: FontWeight.w900,
-                                    letterSpacing: 0.5,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
                       ],
                     ),
                   ],
@@ -1204,35 +1237,34 @@ class _SmsImportScreenState extends State<SmsImportScreen>
 
                 const SizedBox(height: 20),
 
-                // Original Message Box - Professional Look
-                Text(
-                  'SOURCE MESSAGE',
-                  style: TextStyle(
-                    fontSize: 9,
-                    fontWeight: FontWeight.w800,
-                    color: secondaryTextColor.withValues(alpha: 0.6),
-                    letterSpacing: 1,
-                  ),
-                ),
-                const SizedBox(height: 8),
+                // Source Message (subdued design)
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: isDark ? Colors.black26 : Colors.grey[50],
+                    color: isDark
+                        ? Colors.white.withValues(alpha: 0.03)
+                        : Colors.black.withValues(alpha: 0.02),
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: isDark ? Colors.white10 : Colors.grey[200]!,
-                    ),
                   ),
-                  child: Text(
-                    expense.raw,
-                    style: TextStyle(
-                      color: secondaryTextColor,
-                      fontSize: 12,
-                      height: 1.5,
-                      fontFamily: 'Roboto', // Modern standard font
-                    ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Icon(LucideIcons.messageSquare,
+                          size: 14,
+                          color: secondaryTextColor.withValues(alpha: 0.5)),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          expense.raw,
+                          style: TextStyle(
+                            color: secondaryTextColor.withValues(alpha: 0.8),
+                            fontSize: 11,
+                            height: 1.4,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
 
@@ -1242,23 +1274,36 @@ class _SmsImportScreenState extends State<SmsImportScreen>
                 Row(
                   children: [
                     Expanded(
+                      flex: 3,
                       child: DropdownButtonFormField<int>(
                         initialValue: expense.categoryId,
                         isExpanded: true,
                         dropdownColor: Theme.of(context).cardTheme.color,
+                        icon: const Icon(LucideIcons.chevronDown, size: 16),
                         items: categories
                             .map((c) => DropdownMenuItem(
                                 value: c.id,
                                 child: Row(
                                   children: [
-                                    Text(c.icon ?? '❓',
-                                        style: const TextStyle(fontSize: 14)),
-                                    const SizedBox(width: 8),
+                                    Container(
+                                      padding: const EdgeInsets.all(6),
+                                      decoration: BoxDecoration(
+                                        color: isDark
+                                            ? Colors.white12
+                                            : Colors.black12,
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: Text(c.icon ?? '❓',
+                                          style: const TextStyle(fontSize: 12)),
+                                    ),
+                                    const SizedBox(width: 10),
                                     Expanded(
                                       child: Text(c.name,
                                           overflow: TextOverflow.ellipsis,
                                           style: TextStyle(
-                                              fontSize: 13, color: textColor)),
+                                              fontSize: 13,
+                                              fontWeight: FontWeight.w600,
+                                              color: textColor)),
                                     ),
                                   ],
                                 )))
@@ -1268,33 +1313,42 @@ class _SmsImportScreenState extends State<SmsImportScreen>
                             : (val) => setState(() =>
                                 _detectedExpenses[index].categoryId = val),
                         decoration: AppTheme.inputDecoration(
-                          'Category',
-                          LucideIcons.tag,
-                          context: context,
-                        ).copyWith(
+                                'Category', LucideIcons.tag,
+                                context: context)
+                            .copyWith(
                           contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 12, vertical: 10),
+                              horizontal: 16, vertical: 12),
+                          filled: true,
+                          fillColor: Theme.of(context).scaffoldBackgroundColor,
                         ),
                       ),
                     ),
                     if (expense.isSaving) ...[
-                      const SizedBox(width: 12),
+                      const SizedBox(width: 16),
                       const SizedBox(
-                        width: 48,
-                        height: 48,
+                        width: 44,
+                        height: 44,
                         child: Center(
                             child: CircularProgressIndicator(strokeWidth: 2)),
                       ),
-                    ] else if (!expense.isSuccess) ...[
-                      TextButton(
-                        onPressed: () =>
-                            setState(() => _detectedExpenses.removeAt(index)),
-                        child: const Text('Dismiss',
-                            style: TextStyle(
-                              color: AppTheme.danger,
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
-                            )),
+                    ] else if (!expense.isSuccess &&
+                        expense.matchedExpenseId == null) ...[
+                      const SizedBox(width: 12),
+                      Expanded(
+                        flex: 1,
+                        child: TextButton(
+                          onPressed: () =>
+                              setState(() => _detectedExpenses.removeAt(index)),
+                          style: TextButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            backgroundColor:
+                                AppTheme.danger.withValues(alpha: 0.1),
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12)),
+                          ),
+                          child: const Icon(LucideIcons.x,
+                              size: 18, color: AppTheme.danger),
+                        ),
                       ),
                     ],
                   ],

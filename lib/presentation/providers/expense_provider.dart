@@ -106,6 +106,10 @@ class ExpenseProvider with ChangeNotifier {
   double _periodTotalSpent = 0;
   double get periodTotalSpent => _periodTotalSpent;
 
+  Future<List<Expense>> getExpensesByDate(String dateStr) async {
+    return await _repository.getExpensesByDate(dateStr);
+  }
+
   Future<void> loadTrends(int value, {bool isDays = false}) async {
     _isLoading = true;
     notifyListeners();
@@ -212,6 +216,17 @@ class ExpenseProvider with ChangeNotifier {
     if (expenses.isEmpty) return;
     for (var expense in expenses) {
       await _repository.insertExpense(expense);
+    }
+    await loadMonthData(_currentMonthKey);
+  }
+
+  Future<void> processImportedExpenses(
+      List<Expense> toInsert, List<Expense> toUpdate) async {
+    for (var expense in toInsert) {
+      await _repository.insertExpense(expense);
+    }
+    for (var expense in toUpdate) {
+      await _repository.updateExpense(expense);
     }
     await loadMonthData(_currentMonthKey);
   }

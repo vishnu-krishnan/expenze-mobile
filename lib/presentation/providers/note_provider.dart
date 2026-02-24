@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:expenze_mobile/data/repositories/note_repository.dart';
-import 'package:expenze_mobile/data/models/note.dart';
+import 'package:expenze/data/repositories/note_repository.dart';
+import 'package:expenze/data/models/note.dart';
 
-import 'package:expenze_mobile/data/services/notification_service.dart';
+import 'package:expenze/data/services/notification_service.dart';
 
 class NoteProvider with ChangeNotifier {
   final NoteRepository _repository = NoteRepository();

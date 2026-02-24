@@ -193,6 +193,7 @@ class SettingsScreen extends StatelessWidget {
                           subtitle: 'Reload keys from local pool',
                           onTap: () async {
                             await context.read<ApiService>().reloadKeys();
+                            if (!context.mounted) return;
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
                                 content: Text('AI Key Pool Reloaded'),
