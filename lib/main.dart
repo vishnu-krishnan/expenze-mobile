@@ -20,6 +20,7 @@ import 'presentation/providers/theme_provider.dart';
 import 'presentation/providers/note_provider.dart';
 import 'presentation/screens/notes/notes_screen.dart';
 import 'data/services/notification_service.dart';
+import 'data/services/api_service.dart';
 import 'presentation/screens/settings/settings_screen.dart';
 import 'presentation/screens/settings/notifications_screen.dart';
 
@@ -83,6 +84,10 @@ class MyApp extends StatelessWidget {
         // Theme Provider
         ChangeNotifierProvider<ThemeProvider>(
           create: (context) => ThemeProvider(),
+        ),
+        // API Service
+        Provider<ApiService>(
+          create: (context) => ApiService(),
         ),
         // Auth Provider
         ChangeNotifierProvider<AuthProvider>(

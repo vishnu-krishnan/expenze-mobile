@@ -6,6 +6,7 @@ import '../../providers/theme_provider.dart';
 import '../../providers/expense_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../../core/constants/app_version.dart';
+import '../../../data/services/api_service.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -157,6 +158,50 @@ class SettingsScreen extends StatelessWidget {
                           textColor: textColor.withValues(alpha: 0.5),
                           secondaryTextColor:
                               secondaryTextColor.withValues(alpha: 0.5),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 32),
+                  _buildSectionTitle('AI Configuration', textColor),
+                  const SizedBox(height: 12),
+                  _buildSettingsCard(
+                    context,
+                    child: Column(
+                      children: [
+                        _buildSettingsItem(
+                          icon: authProvider.aiProvider == 'claude'
+                              ? LucideIcons.sparkles
+                              : LucideIcons.zap,
+                          label: 'AI Engine',
+                          subtitle: authProvider.aiProvider == 'claude'
+                              ? 'Claude 3.5 Sonnet'
+                              : authProvider.aiProvider == 'openai'
+                                  ? 'OpenAI (GPT-4o mini)'
+                                  : 'Groq (Llama 3)',
+                          onTap: () =>
+                              _showAiProviderDialog(context, authProvider),
+                          textColor: textColor,
+                          secondaryTextColor: secondaryTextColor,
+                        ),
+                        Divider(
+                            height: 32,
+                            color: secondaryTextColor.withValues(alpha: 0.1)),
+                        _buildSettingsItem(
+                          icon: LucideIcons.refreshCw,
+                          label: 'Refresh AI Keys',
+                          subtitle: 'Reload keys from local pool',
+                          onTap: () async {
+                            await context.read<ApiService>().reloadKeys();
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('AI Key Pool Reloaded'),
+                                behavior: SnackBarBehavior.floating,
+                              ),
+                            );
+                          },
+                          textColor: textColor,
+                          secondaryTextColor: secondaryTextColor,
                         ),
                       ],
                     ),
@@ -763,6 +808,55 @@ class SettingsScreen extends StatelessWidget {
           : null,
       onTap: () {
         themeProvider.setThemeMode(mode);
+        Navigator.pop(context);
+      },
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+    );
+  }
+
+  void _showAiProviderDialog(BuildContext context, AuthProvider authProvider) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: Theme.of(context).cardColor,
+        title: const Text('Choose AI Engine',
+            style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: -0.5)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _buildAiProviderOption(context, authProvider, 'groq',
+                'Groq (Llama 3 8B)', LucideIcons.zap),
+            _buildAiProviderOption(context, authProvider, 'claude',
+                'Claude 3.5 Sonnet', LucideIcons.sparkles),
+            _buildAiProviderOption(context, authProvider, 'openai',
+                'OpenAI (GPT-4o mini)', LucideIcons.bot),
+          ],
+        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+      ),
+    );
+  }
+
+  Widget _buildAiProviderOption(BuildContext context, AuthProvider authProvider,
+      String provider, String label, IconData icon) {
+    final isSelected = authProvider.aiProvider == provider;
+    final textColor = AppTheme.getTextColor(context);
+
+    return ListTile(
+      leading: Icon(icon,
+          color: isSelected
+              ? AppTheme.primary
+              : AppTheme.getTextColor(context, isSecondary: true)),
+      title: Text(label,
+          style: TextStyle(
+              color: textColor,
+              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal)),
+      trailing: isSelected
+          ? const Icon(LucideIcons.check, color: AppTheme.primary, size: 20)
+          : null,
+      onTap: () {
+        authProvider.updateAiProvider(provider);
         Navigator.pop(context);
       },
       contentPadding: const EdgeInsets.symmetric(horizontal: 16),

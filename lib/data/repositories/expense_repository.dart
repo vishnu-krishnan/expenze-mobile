@@ -505,4 +505,51 @@ class ExpenseRepository {
           : smsIdPart;
     }).toList();
   }
+
+  // Get list of unique SMS message bodies already imported
+  Future<Set<String>> getImportedSmsSignatures() async {
+    final db = await _dbHelper.database;
+    final result = await db.query(
+      'expenses',
+      columns: ['notes'],
+      where: "notes LIKE 'SMS_ID:%'",
+    );
+    return result
+        .map((e) {
+          final notes = e['notes'] as String;
+          final msgIdx = notes.indexOf(' | MSG:');
+          return msgIdx >= 0 ? notes.substring(msgIdx + 7) : '';
+        })
+        .where((s) => s.isNotEmpty)
+        .toSet();
+  }
+
+  // Get all merchant-to-category mappings
+  Future<Map<String, int>> getMerchantMappings() async {
+    final db = await _dbHelper.database;
+    final result = await db.query('merchant_mappings');
+    return {
+      for (var row in result)
+        row['merchant_name'] as String: row['category_id'] as int
+    };
+  }
+
+  // Save or update a merchant-to-category mapping
+  Future<void> upsertMerchantMapping(
+      String merchantName, int categoryId) async {
+    if (merchantName.isEmpty ||
+        merchantName == 'Unknown' ||
+        merchantName == 'Transaction') return;
+
+    final db = await _dbHelper.database;
+    await db.insert(
+      'merchant_mappings',
+      {
+        'merchant_name': merchantName,
+        'category_id': categoryId,
+        'updated_at': DateTime.now().toIso8601String(),
+      },
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
 }

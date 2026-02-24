@@ -22,6 +22,7 @@ class AuthProvider with ChangeNotifier {
   bool _notificationsEnabled = true;
   bool _dailyReminderEnabled = true;
   bool _smsScraperEnabled = true;
+  String _aiProvider = 'groq';
 
   // Getters
   bool get isAuthenticated => _isAuthenticated;
@@ -31,6 +32,7 @@ class AuthProvider with ChangeNotifier {
   bool get notificationsEnabled => _notificationsEnabled;
   bool get dailyReminderEnabled => _dailyReminderEnabled;
   bool get smsScraperEnabled => _smsScraperEnabled;
+  String get aiProvider => _aiProvider;
   Map<String, dynamic>? get user => _user;
   bool get isLoading => _isLoading;
   String? get error => _error;
@@ -49,6 +51,7 @@ class AuthProvider with ChangeNotifier {
       _notificationsEnabled = prefs.getBool('notifications_enabled') ?? true;
       _dailyReminderEnabled = prefs.getBool('daily_reminder_enabled') ?? true;
       _smsScraperEnabled = prefs.getBool('sms_scraper_enabled') ?? true;
+      _aiProvider = prefs.getString('ai_provider') ?? 'groq';
 
       // If lock is disabled, user is automatically "authenticated" for the session
       if (!_isLockEnabled) {
@@ -100,6 +103,13 @@ class AuthProvider with ChangeNotifier {
       _smsScraperEnabled = smsScraper;
       await prefs.setBool('sms_scraper_enabled', smsScraper);
     }
+    notifyListeners();
+  }
+
+  Future<void> updateAiProvider(String provider) async {
+    final prefs = await SharedPreferences.getInstance();
+    _aiProvider = provider;
+    await prefs.setString('ai_provider', provider);
     notifyListeners();
   }
 

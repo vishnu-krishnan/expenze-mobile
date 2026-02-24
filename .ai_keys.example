@@ -1,0 +1,13 @@
+# =================================================================
+# EXPENDZE AI KEY POOL (EXAMPLE)
+# =================================================================
+
+# --- GROQ KEYS ---
+# GROQ_PRIMARY=gsk_...
+
+# --- CLAUDE KEYS ---
+# CLAUDE_PRIMARY=sk-ant-api03-...
+
+# --- OPENAI / GENERIC KEY POOL ---
+# OPENAI_KEY_1=sk-...
+# OPENAI_KEY_2=sk-...

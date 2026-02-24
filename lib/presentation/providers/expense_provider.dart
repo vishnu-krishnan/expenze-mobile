@@ -263,6 +263,9 @@ class ExpenseProvider with ChangeNotifier {
 
   Future<List<String>> getImportedSmsIds() => _repository.getImportedSmsIds();
 
+  Future<Set<String>> getImportedSmsSignatures() =>
+      _repository.getImportedSmsSignatures();
+
   void setSortOption(SortOption option) {
     if (_currentSortOption == option) return;
     _currentSortOption = option;
@@ -305,5 +308,13 @@ class ExpenseProvider with ChangeNotifier {
   Future<void> clearImportedExpenses(String monthKey) async {
     await _repository.deleteImportedExpenses(monthKey);
     await loadMonthData(monthKey);
+  }
+
+  Future<Map<String, int>> getMerchantMappings() async {
+    return await _repository.getMerchantMappings();
+  }
+
+  Future<void> upsertMerchantMapping(String merchant, int categoryId) async {
+    await _repository.upsertMerchantMapping(merchant, categoryId);
   }
 }

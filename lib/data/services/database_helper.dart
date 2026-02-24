@@ -20,7 +20,7 @@ class DatabaseHelper {
 
     return await openDatabase(
       path,
-      version: 18,
+      version: 20,
       onCreate: _createDB,
       onUpgrade: _onUpgrade,
     );
@@ -179,6 +179,25 @@ class DatabaseHelper {
         logger.e("Database migration error (v18)", error: e);
       }
     }
+    if (oldVersion < 20) {
+      try {
+        // Double-check if the table already exists to avoid errors
+        final tables = await db.rawQuery(
+            "SELECT name FROM sqlite_master WHERE type='table' AND name='merchant_mappings'");
+        if (tables.isEmpty) {
+          await db.execute('''
+            CREATE TABLE merchant_mappings (
+              merchant_name TEXT PRIMARY KEY,
+              category_id INTEGER NOT NULL,
+              updated_at TEXT,
+              FOREIGN KEY (category_id) REFERENCES categories (id)
+            )
+          ''');
+        }
+      } catch (e) {
+        logger.e("Database migration error (v20)", error: e);
+      }
+    }
   }
 
   Future<void> _createDB(Database db, int version) async {
@@ -296,6 +315,16 @@ class DatabaseHelper {
         data TEXT,
         created_at TEXT,
         synced INTEGER DEFAULT 0
+      )
+    ''');
+
+    // Merchant mappings table
+    await db.execute('''
+      CREATE TABLE merchant_mappings (
+        merchant_name TEXT PRIMARY KEY,
+        category_id INTEGER NOT NULL,
+        updated_at TEXT,
+        FOREIGN KEY (category_id) REFERENCES categories (id)
       )
     ''');
 

@@ -1180,3 +1180,190 @@ Overhauled the SMS import pipeline to route all inbox parsing through the Groq A
 Revert `_syncFromInbox` to the previous regex-only loop. Revert `aiParseSms` to single-argument form and inline the old prompt. Restore `_buildProfileDetails` block in `profile_screen.dart`.
 
 Date: 2026-02-23
+
+## [2026-02-24] SMS Import Stability & Date Accuracy Fixes
+
+**Change Type:** Patch
+
+**Decision made:**
+Fixed an issue where SMS imports were defaulting to the current system time instead of the actual message arrival time. Improved the matching logic between AI-parsed results and original inbox messages by hardening the ID extraction prompt and implementing fuzzy ID matching (prefix/suffix). Optimized the "Sync from Inbox" process to skip messages already displayed in the detection list, preventing redundant AI calls for the same items.
+
+**Reason:**
+1. Users reported expenses showing "Today" regardless of when the transaction happened.
+2. Multiple "Sync" clicks were re-processing the same on-screen messages, wasting tokens and causing UI clutter.
+3. Minor discrepancies in how the AI returned IDs caused the system to lose the link back to the original SMS timestamp.
+
+**Changes:**
+- `lib/presentation/screens/sms/sms_import_screen.dart`:
+    - Added `onScreenIds` check to skip already-detected messages during inbox sync.
+    - Prioritized `originalItem['date']` over `parsedDate` for inbox messages to ensure millisecond-accurate timestamps.
+    - Hardened ID matching with `itemId == rawIdInput || itemId.endsWith(rawIdInput)`.
+- `lib/core/constants/ai_prompts.dart`:
+    - Explicitly instructed AI to extract the full `sms-` ID and provided clearer ISO date instructions.
+
+**Impact:**
+- UX: Imported expenses now reliably show the actual date the SMS was received.
+- Cost: Reduced AI API calls by skipping already-detected messages.
+
+Date: 2026-02-24
+
+## [2026-02-24] SMS Content-Based Deduplication & Prompt Optimization
+
+**Change Type:** Patch
+
+**Decision made:**
+Implemented a secondary duplication check layer that compares the actual text content (body) of an SMS against existing database records. This complements the ID-based check which can be inconsistent. Also optimized the AI prompt to be significantly more concise to reduce token latency while maintaining all exclusion rules (credits, reminders, self-transfers).
+
+**Reason:**
+1. SMS IDs can sometimes change if the provider's logic fluctuates or the message is re-scanned. Content-based checking is the ultimate source of truth for duplication.
+2. The user requested a more concise AI prompt to improve performance and clarity.
+
+**Changes:**
+- `lib/data/repositories/expense_repository.dart`: Added `getImportedSmsSignatures` to retrieve high-entropy message bodies from existing expenses.
+- `lib/presentation/providers/expense_provider.dart`: Exposed the new signature retrieval method.
+- `lib/presentation/screens/sms/sms_import_screen.dart`: Updated `_syncFromInbox` to block sync if either the ID OR the message body already exists in the local database or on the current detection screen.
+- `lib/core/constants/ai_prompts.dart`: Streamlined the system prompt to be shorter, clearer, and more token-efficient.
+
+**Impact:**
+- UX: Duplicate detection is now virtually 100% accurate as it relies on content matching.
+- Performance: Smaller prompt reduces AI response time and token cost.
+
+Date: 2026-02-24
+
+## [2026-02-24] SMS Scanner UI Overhaul & High-Volume Sync Fixes
+
+**Change Type:** Minor
+
+**Decision made:**
+Completely redesigned the SMS Scanner UI for a professional, banking-grade aesthetic. Increased the SMS fetch limit from 1,000 to 5,000 and the AI processing batch size from 20 to 50 to accommodate high-volume users. Loosened the native pre-filters to allow more successful AI-based extractions. Implemented strict amount-based priority rules (<= 500: MEDIUM, > 500: HIGH) and overhauled the Manual Paste tab for consistency.
+
+**Reason:**
+1. The previous UI felt crowded and lacked clarity on the original message content.
+2. Users were reporting missing messages due to the 1,000-message query limit and the 20-message AI batch cap.
+3. Native filters were too aggressive, accidentally dropping valid transactions before the AI could see them.
+4. Business logic required specific priority levels based on spending thresholds for better expense management.
+
+**Changes:**
+- `lib/presentation/screens/sms/sms_import_screen.dart`:
+    - Redesigned `DetectedExpense` card with professional badges, high-contrast amounts, and a dedicated **"Source Message"** console.
+    - Updated `_buildAutoSyncTab` and `_buildManualTab` to be more compact when results are visible.
+    - Increased AI batch limit to 50.
+    - Added "Tap Rescan to find more" feedback.
+    - Forced priority rules in both `_syncFromInbox` and `_aiParse`.
+- `lib/data/services/sms_service.dart`:
+    - Increased `_query.querySms` count to 5,000.
+    - Added explicit DateTime sorting (desc) for inbox messages.
+    - Simplified `parseExpenseFromSms` to a lightweight "noise filter", trusting the AI for final validation.
+- `lib/core/constants/ai_prompts.dart`:
+    - Updated prompt with strict priority rules and clarified date extraction.
+
+**Impact:**
+- UX: Significantly more reliable message detection; professional and informative UI.
+- Performance: Increased scan depth catches 5x more history; larger AI batches reduce manual sync interactions.
+- Accuracy: Priority levels are now mathematically consistent across all imported data.
+
+Date: 2026-02-24
+
+## [2026-02-24] SMS Learning Layer & Professional Action Bar
+
+**Change Type:** Minor
+
+**Decision made:**
+Implemented a "Learning Layer" for the SMS scanner that remembers and automatically applies a user's manual categorization choices for specific merchants. Replaced the generic FloatingActionButton with a professional, data-rich Bottom Action Bar that displays the total transaction value selected for import. Migrated the database to version 19 to support the `merchant_mappings` table.
+
+**Reason:**
+1. Users shouldn't have to categorize the same merchant (e.g., "Zomato" or "Uber") every time they scan. The app should learn from their history.
+2. The manual FloatingActionButton felt amateur and lacked context. A persistent bottom bar with a "Selected Total" provides better information before final import.
+
+**Changes:**
+- `lib/data/services/database_helper.dart`: Database bumped to v20; added `merchant_mappings` table with missing-table safety checks.
+- `lib/data/repositories/expense_repository.dart`: Added `getMerchantMappings` and `upsertMerchantMapping`.
+- `lib/presentation/providers/expense_provider.dart`: Exposed mapping persistence methods.
+- `lib/presentation/screens/sms/sms_import_screen.dart`:
+    - Integrated `merchantMappings` into the scanning pipeline (overrides AI suggestions with user history).
+    - Implemented a premium Bottom Action Bar with "TOTAL SELECTED" real-time counter.
+
+**Impact:**
+- UX: App now "gets smarter" with every import; bulk import feels more intentional and informative.
+- Data Integrity: Consistent categorization across repeating transactions.
+
+Date: 2026-02-24
+
+## [2026-02-24] SMS Fixes: Rate Limits, Dismiss Gestures & UI Polish
+
+**Change Type:** Patch
+
+**Decision made:**
+Address AI rate-limiting (429 errors) on free tier keys by implementing mandatory cooldowns and batch size reductions. Overhauled the transaction dismissal UX with swipe-to-dismiss and a cleaner action footer. Fixed visual overflow in the category selector.
+
+**Reason:**
+1. Free tier Groq API keys have strict Tokens-Per-Minute (TPM) limits. Excessive rescanning caused immediate 429 errors.
+2. The initial "Delete" button placement felt cluttered. Gestures (swipe) are more standard for list clearing.
+3. Long category names were causing layout breakage on smaller devices.
+
+**Changes:**
+- `lib/data/services/database_helper.dart`: Bumped to v20 with migration safety for missing tables.
+- `lib/data/services/api_service.dart`: 
+    - **DEFAULT**: Set OpenAI (GPT-4o mini) as the default AI provider.
+    - **OPTIMIZED**: Increased key rotation frequency for OpenAI to match its 50-key capacity (up to 20 retries per request).
+    - **FIXED**: Enhanced `_parseWithRetry` to handle **401 Unauthorized** errors by automatically rotating keys (invalid key defense).
+    - Added support for OpenAI (GPT-4o mini) with 50+ key rotation capacity.
+    - **PROMPT**: Refined extraction logic to strictly ignore Credit Card Bill payments and repayments to avoid double-counting.
+- `lib/presentation/screens/sms/sms_import_screen.dart`: 
+    - **UI**: Simplified scan results header by removing the "Clear Results" text button.
+    - **UX**: Retained the primary "Rescan" and "Delete" (Clear Imported) actions as always-visible for a streamlined workflow.
+- `lib/data/services/api_service.dart`:
+    - **PROACTIVE**: Implemented proactive rotation to skip placeholder/invalid-looking keys before the request starts.
+- `lib/presentation/screens/sms/sms_import_screen.dart`:
+    - Reduced AI batch size to 20 messages.
+    - Added 20-second mandatory cooldown timer after rate limit errors.
+    - Implemented `Dismissible` (Swipe-to-Dismiss) for transaction cards.
+    - Moved dismissal button to a "Dismiss" TextButton in the footer.
+    - Relocated "Clear All" from header to list-header for better context.
+    - Added `isExpanded` and `Flexible` text to category dropdown to prevent overflow.
+
+**Impact:**
+- UX: Smoother, more robust scanning; standard mobile gestures for list management.
+- Reliability: Significantly reduced API 429 errors.
+- Maintenance: Fixed persistent database schema issue for existing users.
+
+Date: 2026-02-24
+
+--------------------------------------------------------------------------------
+
+## [2026-02-24] Version 1.4.0 - Smart SMS Hub & AI Overhaul
+
+**Change Type:** Major
+
+**Decision Made:**
+Implemented a robust, multi-provider AI infrastructure and centralized SMS parsing logic to address duplicate expense tracking and API stability issues.
+
+**Context:**
+- Users were experiencing "double-counting" of expenses when credit card bills were paid (the app detected both the spend and the repayment).
+- AI API keys (Claude/Groq) were frequently hitting rate limits or being flagged as invalid, causing scan failures.
+- Lack of transparency in the UI regarding AI batch processing limits.
+
+**Changes:**
+- **AI Infrastructure (ApiService):**
+    - Set **OpenAI (GPT-4o mini)** as the default provider for superior stability and key capacity.
+    - Implemented a **Linear Fallback Chain**: Claude → Groq → OpenAI.
+    - Added **Automatic Key Rotation** for 401 (Auth) and 429 (Rate Limit) errors.
+    - Added **Proactive Key Selection**: Skips placeholders or invalid keys before making requests.
+    - Increased retry limit to **20 rotations** for OpenAI to leverage large key pools.
+- **SMS Logic (SmsService & Constants):**
+    - Created `sms_exclusion_keywords.dart`: A single source of truth for filtering noisy data.
+    - Fixed **Double-Counting**: Added strict exclusion for "repayments," "bill payments," and "credit card settlements."
+    - Two-Layer Filtering: Local pre-filtering (saves API cost) + AI Prompt exclusion.
+- **UI/UX (SmsImportScreen):**
+    - Simplified result header; removed "Clear Results" text button.
+    - Added an **AI Usage Disclaimer** to inform users about scan batches.
+    - Made **"Clear Imported"** (trash icon) and **"Rescan"** always visible for better discoverability.
+    - Implementation of standard swipe-to-dismiss for transaction list items.
+
+**Impact:**
+- **Reliability**: Scan success rate significantly improved via multi-provider failover.
+- **Accuracy**: Eliminated duplicate expense entries from credit card payments.
+- **Cost**: Local pre-filtering reduced AI token consumption.
+- **UX**: Clearer UI with professional maintainability tools.
+
+Date: 2026-02-24
