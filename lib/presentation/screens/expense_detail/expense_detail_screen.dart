@@ -384,15 +384,6 @@ Shared via Expenze App
                       fontSize: 15,
                       fontWeight: FontWeight.w900,
                       color: textColor)),
-              const Spacer(),
-              IconButton(
-                onPressed: () {
-                  final text =
-                      '${expense.name} - ₹${expense.actualAmount.toLocaleString()} on ${DateFormat('dd MMM yyyy').format(DateTime.parse(expense.paidDate!))} via ${expense.paymentMode}. Notes: ${expense.notes}';
-                  SharePlus.instance.share(ShareParams(text: text));
-                },
-                icon: Icon(LucideIcons.share2, color: textColor, size: 20),
-              ),
             ],
           ),
           const SizedBox(height: 16),

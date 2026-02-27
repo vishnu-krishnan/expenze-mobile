@@ -80,7 +80,7 @@ class LandingPage extends StatelessWidget {
 
                       // Professional & Friendly Copy
                       Text(
-                        'Take control of your money with confidence.',
+                        'Stop guessing where your money went.',
                         style: GoogleFonts.outfit(
                           fontSize: 40,
                           fontWeight: FontWeight.bold,
@@ -93,7 +93,7 @@ class LandingPage extends StatelessWidget {
                       const SizedBox(height: 20),
 
                       Text(
-                        'EXPENZE helps you understand your spending in a simple and stress-free way. No complicated setup. No unnecessary accounts. Just clear insights and full control from day one.',
+                        'EXPENZE tracks your spending so you can actually afford nice things. No complicated setup, no unnecessary accounts — just clarity from day one.',
                         style: GoogleFonts.inter(
                           fontSize: 16,
                           color:
@@ -109,25 +109,25 @@ class LandingPage extends StatelessWidget {
                       _buildFeatureRow(
                         context: context,
                         icon: LucideIcons.shieldCheck,
-                        title: 'Your Data, Your Choice',
+                        title: 'Your Data, Your Rules',
                         desc:
-                            'Your expenses are stored on your device by default. Optional Google Drive backup will be available, always under your control.',
+                            'Everything lives on your device. No cloud, no strangers, no drama. Optional backup — always your call.',
                       ),
                       const SizedBox(height: 24),
                       _buildFeatureRow(
                         context: context,
                         icon: LucideIcons.lock,
-                        title: 'Secure and Protected',
+                        title: 'Fort Knox Mode',
                         desc:
-                            'Lock your app with a PIN or biometric security to keep your financial information safe.',
+                            'PIN or fingerprint lock keeps your finances away from prying eyes — and curious siblings.',
                       ),
                       const SizedBox(height: 24),
                       _buildFeatureRow(
                         context: context,
                         icon: LucideIcons.zap,
-                        title: 'Start Instantly',
+                        title: 'Zero Waiting, All Tracking',
                         desc:
-                            'No sign-up process. No waiting. Open the app and begin tracking right away.',
+                            'Open the app. Start tracking. That\'s the entire tutorial.',
                       ),
 
                       const SizedBox(height: 80),
@@ -226,7 +226,7 @@ class LandingPage extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              'Take Control Now',
+              'Yes, I\'m Ready',
               style: GoogleFonts.outfit(
                 fontSize: 18,
                 fontWeight: FontWeight.w800,

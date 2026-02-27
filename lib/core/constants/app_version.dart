@@ -11,11 +11,66 @@ class ReleaseInfo {
 }
 
 class AppVersion {
-  static const String current = '1.3.0';
-  static const String buildNumber = '10';
-  static const String releaseName = 'AI-Powered SMS Import';
+  static const String current = '1.4.4';
+  static const String buildNumber = '15';
+  static const String releaseName = 'Dynamic Spectrum UI';
+
+  static const String website = 'https://expenze-elite.netlify.app/';
+  static const String supportEmail = 'expenzehelp@gmail.com';
 
   static const List<ReleaseInfo> history = [
+    ReleaseInfo(
+      version: '1.4.4',
+      date: '2026-02-24',
+      changes: [
+        'Dynamic Spectrum Cards: Dashboard & Planner cards now shift colors (Green -> Yellow -> Red) based on budget health',
+        'Visual Feedback: Card shadows now glow with matching semantic colors for instant status recognition',
+        'UI Cleanup: Progress bars modernized with neutral white shades for better compatibility with dynamic backgrounds',
+        'Theme Expansion: Added richer warning and danger shades for high-impact visual feedback',
+      ],
+    ),
+    ReleaseInfo(
+      version: '1.4.3',
+      date: '2026-02-24',
+      changes: [
+        'Copy Rebrand: Updated app tone to be professional, friendly, and humorous across all modules',
+        'Onboarding Flow: Enhanced landing and setup screens with personality-driven copy and animations',
+        'Entrance Animations: Added smooth fade-in and slide-up transitions for a more premium app feel',
+        'AI Provider: Default parse engine shifted to Groq for faster, cost-effective SMS parsing',
+        'Bug Fix: Resolved profile update stability issue when updating email addresses',
+        'Security Polish: Friendlier copy for App Lock and password reset screens',
+      ],
+    ),
+    ReleaseInfo(
+      version: '1.4.2',
+      date: '2026-02-24',
+      changes: [
+        'Analytics Taps: Added TransactionsDialog to view daily expenses directly from the chart tiles',
+        'Plan Match UI: SMS Import screen now displays "Plan Match" overlays for tracked expenses',
+        'Data Sync: Enhanced logic to perform updates on existing matched transactions from SMS',
+        'Code Quality: Resolved duplicated package imports causing lint errors in Notes module',
+      ],
+    ),
+    ReleaseInfo(
+      version: '1.4.1',
+      date: '2026-02-24',
+      changes: [
+        'Intelligent Matching: SMS transactions now auto-link to budget plans by matching category/amount',
+        'Smart Filtering: Added aggressive exclusion for promotional SMS and marketing noise',
+        'Dynamic Quotes: Integrated ZenQuotes API for fresh daily inspiration on the dashboard',
+        'Scan Transparency: Improved scan status visibility and simplified SMS hub headers',
+      ],
+    ),
+    ReleaseInfo(
+      version: '1.4.0',
+      date: '2026-02-24',
+      changes: [
+        'Smart SMS Hub: Centralized exclusion system to eliminate double-counting of credit card bills',
+        'AI Overhaul: Rebuilt ApiService with multi-provider failover and automatic key rotation',
+        'Optimized Scanning: Capped SMS scans to 20 messages per batch for speed and cost-efficiency',
+        'Batch Disclaimer: Added UI transparency regarding AI processing limits and scan groups',
+      ],
+    ),
     ReleaseInfo(
       version: '1.3.0',
       date: '2026-02-23',

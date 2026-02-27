@@ -18,6 +18,14 @@ class _LoginScreenState extends State<LoginScreen> {
   final _passwordController = TextEditingController();
   bool _showPassword = false;
   bool _isLoading = false;
+  bool _visible = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance
+        .addPostFrameCallback((_) => setState(() => _visible = true));
+  }
 
   @override
   void dispose() {
@@ -116,22 +124,38 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       ),
                       const SizedBox(height: 60),
-                      Text(
-                        'Welcome Back',
-                        style: GoogleFonts.outfit(
-                          fontSize: 34,
-                          fontWeight: FontWeight.bold,
-                          color: AppTheme.getTextColor(context),
-                          letterSpacing: -1,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Sign in to continue your secure financial tracking.',
-                        style: GoogleFonts.inter(
-                          fontSize: 16,
-                          color:
-                              AppTheme.getTextColor(context, isSecondary: true),
+                      AnimatedOpacity(
+                        opacity: _visible ? 1.0 : 0.0,
+                        duration: const Duration(milliseconds: 500),
+                        curve: Curves.easeOut,
+                        child: AnimatedSlide(
+                          offset:
+                              _visible ? Offset.zero : const Offset(0, 0.08),
+                          duration: const Duration(milliseconds: 500),
+                          curve: Curves.easeOut,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Good to see you again!',
+                                style: GoogleFonts.outfit(
+                                  fontSize: 34,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppTheme.getTextColor(context),
+                                  letterSpacing: -1,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                'Your money missed you. Let\'s pick up where you left off.',
+                                style: GoogleFonts.inter(
+                                  fontSize: 16,
+                                  color: AppTheme.getTextColor(context,
+                                      isSecondary: true),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                       const SizedBox(height: 48),
@@ -145,8 +169,8 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       _buildPremiumField(
                         controller: _usernameController,
-                        label: 'FULL NAME / USERNAME',
-                        hint: 'Your identity',
+                        label: 'EMAIL / USERNAME',
+                        hint: 'The one you definitely remember',
                         icon: LucideIcons.user,
                         isDark: isDark,
                         validator: (v) => v!.isEmpty ? 'Required' : null,
@@ -155,7 +179,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       _buildPremiumField(
                         controller: _passwordController,
                         label: 'PASSCODE',
-                        hint: 'Your security code',
+                        hint: 'Not "password123", hopefully',
                         icon: LucideIcons.lock,
                         isDark: isDark,
                         obscureText: !_showPassword,
@@ -197,7 +221,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
-                              "New to Expenze? ",
+                              "New here? Your wallet is waiting. ",
                               style: GoogleFonts.inter(
                                 fontSize: 14,
                                 color: AppTheme.getTextColor(context,
@@ -352,7 +376,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 child: CircularProgressIndicator(
                     strokeWidth: 3, color: Colors.white))
             : Text(
-                'Unlock Account',
+                'Let Me In',
                 style: GoogleFonts.outfit(
                   fontSize: 18,
                   fontWeight: FontWeight.w800,

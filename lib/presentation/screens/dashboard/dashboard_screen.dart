@@ -62,9 +62,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   String _getTimeBasedGreeting() {
     final hour = DateTime.now().hour;
-    if (hour < 12) return 'Good Morning,';
-    if (hour < 17) return 'Good Afternoon,';
-    return 'Good Evening,';
+    if (hour < 6) return 'Burning midnight oil,';
+    if (hour < 12) return 'Good morning,';
+    if (hour < 17) return 'Good afternoon,';
+    if (hour < 21) return 'Good evening,';
+    return 'Up late?';
   }
 
   String _formatMonthName(String key) {
@@ -240,7 +242,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          'Recent Expense Category',
+                          'Where your money ran off to',
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
@@ -315,10 +317,33 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   Widget _buildWalletCard(double actual, double remaining, double pctUsed,
       ExpenseProvider provider, Map<String, double> summary, double planned) {
-    final isOverBudget = pctUsed >= 1.0;
-    final statusColor = pctUsed >= 0.9
-        ? AppTheme.danger
-        : (pctUsed >= 0.7 ? AppTheme.warning : Colors.white);
+    List<Color> cardColors;
+    Color shadowBase;
+
+    if (pctUsed < 0.5) {
+      // 0-50%: Safe (Teal/Green)
+      cardColors = [AppTheme.primary, AppTheme.primaryDark];
+      shadowBase = AppTheme.primary;
+    } else if (pctUsed < 0.7) {
+      // 50-70%: Caution (Lime-Yellow)
+      cardColors = [const Color(0xFF84CC16), const Color(0xFF65A30D)];
+      shadowBase = const Color(0xFF84CC16);
+    } else if (pctUsed < 0.85) {
+      // 70-85%: Warning (Amber/Yellow)
+      cardColors = [AppTheme.warning, AppTheme.warningDark];
+      shadowBase = AppTheme.warning;
+    } else if (pctUsed < 1.1) {
+      // 85-110%: Danger (Red)
+      cardColors = [AppTheme.danger, AppTheme.dangerDark];
+      shadowBase = AppTheme.danger;
+    } else {
+      // >110%: Critical (Dark Red)
+      cardColors = [const Color(0xFF991B1B), const Color(0xFF7F1D1D)];
+      shadowBase = const Color(0xFF991B1B);
+    }
+
+    final cardShadowColor = shadowBase.withValues(alpha: 0.3);
+    final statusColor = Colors.white;
 
     // Correctly determine budget display: Prioritize limit, fallback to planned sum
     final budgetLimit = summary['limit'] ?? 0.0;
@@ -336,15 +361,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
       child: Container(
         margin: const EdgeInsets.fromLTRB(24, 8, 24, 8),
         decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            colors: [AppTheme.primary, AppTheme.primaryDark],
+          gradient: LinearGradient(
+            colors: cardColors,
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
           borderRadius: BorderRadius.circular(32),
           boxShadow: [
             BoxShadow(
-              color: AppTheme.primary.withValues(alpha: 0.35),
+              color: cardShadowColor,
               blurRadius: 30,
               offset: const Offset(0, 16),
             ),
@@ -450,10 +475,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     children: [
                       Expanded(
                         child: _buildStatColumn(
-                          label: isOverBudget ? 'Overspent' : 'Remaining',
+                          label: pctUsed >= 1.0 ? 'Overspent' : 'Remaining',
                           value: '₹${remaining.abs().toLocaleString()}',
                           valueColor: statusColor,
-                          icon: isOverBudget
+                          icon: pctUsed >= 1.0
                               ? LucideIcons.alertTriangle
                               : LucideIcons.trendingDown,
                         ),
@@ -550,16 +575,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
           children: [
             Text(
                 pct >= 1.0
-                    ? 'Budget Exceeded'
+                    ? '🔴 Oops, over budget!'
                     : (pct >= 0.9
-                        ? 'Critical Level'
+                        ? '🚨 Almost maxed out'
                         : (pct >= 0.8
-                            ? 'High Alert'
-                            : (pct >= 0.7 ? 'Approaching Limit' : 'On track'))),
+                            ? '⚠️ Getting close'
+                            : (pct >= 0.7
+                                ? 'Mind the spending'
+                                : '✅ Looking good'))),
                 style: TextStyle(
-                    color: pct >= 0.9
-                        ? Colors.white
-                        : (pct >= 0.7 ? Colors.orange[200] : Colors.white70),
+                    color: Colors.white,
                     fontSize: 10,
                     fontWeight:
                         pct >= 0.8 ? FontWeight.bold : FontWeight.normal)),

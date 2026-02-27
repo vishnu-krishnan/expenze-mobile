@@ -128,11 +128,16 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                 size: 64, color: AppTheme.primary.withValues(alpha: 0.4)),
           ),
           const SizedBox(height: 24),
-          Text('No categories found',
+          Text('Where\'s the structure?',
               style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                   color: secondaryTextColor)),
+          const SizedBox(height: 8),
+          Text('Add categories to keep your money in check.',
+              style: TextStyle(
+                  fontSize: 13,
+                  color: secondaryTextColor.withValues(alpha: 0.7))),
         ],
       ),
     );
@@ -248,9 +253,10 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Category',
+        title: const Text('Wait, really?',
             style: TextStyle(fontWeight: FontWeight.w900)),
-        content: Text('Are you sure you want to delete "${cat.name}"?'),
+        content: Text(
+            'Once "${cat.name}" is gone, it\'s gone. Still want to proceed?'),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
         actions: [
           TextButton(

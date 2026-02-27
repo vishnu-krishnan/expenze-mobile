@@ -1,7 +1,7 @@
 name: expenze
 description: "Expenze - Smart Expense Tracking Mobile App"
 publish_to: 'none'
-version: 1.4.2+13
+version: 1.4.4+15
 
 environment:
   sdk: ^3.6.0
@@ -19,6 +19,7 @@ dependencies:
   # HTTP Client
   dio: ^5.4.0
   http: ^1.2.0
+  mailer: ^6.1.0
   flutter_dotenv: ^6.0.0
   
   # Secure Storage (temporarily disabled due to namespace issue)
@@ -53,6 +54,7 @@ dependencies:
   flutter_local_notifications: ^20.1.0
   timezone: ^0.10.1
   custom_refresh_indicator: ^4.0.1
+  url_launcher: ^6.3.2
 
 dev_dependencies:
   flutter_test:

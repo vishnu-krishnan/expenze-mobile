@@ -1,5 +1,30 @@
 # Expenze Application Changelog
 
+## Version 1.4.4+15 - 2026-02-24
+
+### Added
+- **Dynamic Spectrum Cards**: Implemented a color-shifting background system for main financial cards (Dashboard & Planner). Card colors now transition from Teal (Healthy) to Lime (Attention), Amber (Warning), Red (Danger), and Dark Red (Critical) based on real-time budget usage.
+- **Spectrum Shadows**: Added color-matched shadows that shift with card state for a "glow" feedback effect.
+
+### Changed
+- **Progress Bar Refresh**: Unified progress bars to use white semantic shades for a cleaner, high-contrast look on top of dynamic card backgrounds.
+- **Theme Palette Expansion**: Added `warningDark` and `dangerDark` constants to `AppTheme` for expanded visual feedback.
+
+## Version 1.4.3+14 - 2026-02-24
+
+### Added
+- **Entrance Animations**: Implemented smooth Fade + Slide entrance animations for Landing, Login, Register, and Profile Setup screens.
+- **Visual Polish**: Added TweenAnimationBuilder for refined bottom sheet transitions in the Profile Screen.
+
+### Changed
+- **App Voice & Tone**: Rebranded all user-facing copy to a professional and friendly tone across all major screens (Dashboard, Analytics, SMS Import, Notes, and Categories).
+- **AI Infrastructure**: Switched default SMS parsing engine to **Groq (Llama 3.1)** for sub-second latency and improved cost profile.
+- **Empty States**: Redesigned empty state messaging in Notes and Regular Payments with engaging, helpful copy.
+
+### Fixed
+- **Auth Persistence**: Resolved a critical bug in `AuthProvider.updateProfile` where email updates caused session instability; now correctly synchronizes with SharedPreferences and SQLite.
+- **Lint Corrections**: Fixed missing curly braces in flow control and resolved duplicated imports in the Note module.
+
 ## Version 1.4.2+13 - 2026-02-24
 
 ### Changed

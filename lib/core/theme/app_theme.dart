@@ -12,7 +12,9 @@ class AppTheme {
 
   static const Color success = Color(0xFF10B981);
   static const Color warning = Color(0xFFF59E0B);
+  static const Color warningDark = Color(0xFFD97706);
   static const Color danger = Color(0xFFEF4444);
+  static const Color dangerDark = Color(0xFFB91C1C);
 
   // Background colors - cleaner neutrals
   static const Color bgPrimary = Color(0xFFF8FAFC); // Slate 50

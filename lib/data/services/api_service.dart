@@ -345,9 +345,9 @@ class ApiService {
     final preferredProvider = provider ??
         (envProvider == 'claude'
             ? AiProvider.claude
-            : envProvider == 'groq'
-                ? AiProvider.groq
-                : AiProvider.openai); // Default to OpenAI
+            : envProvider == 'openai'
+                ? AiProvider.openai
+                : AiProvider.groq); // Default to Groq
 
     // Determine retry limit based on key pool size
     int retryLimit = 3; // Baseline

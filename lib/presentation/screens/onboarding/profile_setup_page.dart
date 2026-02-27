@@ -19,10 +19,15 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
 
   String? _nameError;
   String? _emailError;
+  bool _visible = false;
 
   @override
   void initState() {
     super.initState();
+    // Trigger entrance animation after first frame
+    WidgetsBinding.instance
+        .addPostFrameCallback((_) => setState(() => _visible = true));
+
     _nameController.addListener(() {
       if (_nameError != null && _nameController.text.trim().isNotEmpty) {
         setState(() => _nameError = null);
@@ -132,29 +137,45 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const SizedBox(height: 20),
-                      Text(
-                        'Create Your Profile',
-                        style: GoogleFonts.outfit(
-                          fontSize: 34,
-                          fontWeight: FontWeight.bold,
-                          color: AppTheme.getTextColor(context),
-                          letterSpacing: -1,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      Text(
-                        'Help us personalize your experience. This data stays on your device.',
-                        style: GoogleFonts.inter(
-                          fontSize: 16,
-                          color:
-                              AppTheme.getTextColor(context, isSecondary: true),
-                          height: 1.5,
+                      AnimatedOpacity(
+                        opacity: _visible ? 1.0 : 0.0,
+                        duration: const Duration(milliseconds: 500),
+                        curve: Curves.easeOut,
+                        child: AnimatedSlide(
+                          offset:
+                              _visible ? Offset.zero : const Offset(0, 0.08),
+                          duration: const Duration(milliseconds: 500),
+                          curve: Curves.easeOut,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Almost in — tell us who\'s boss.',
+                                style: GoogleFonts.outfit(
+                                  fontSize: 34,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppTheme.getTextColor(context),
+                                  letterSpacing: -1,
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                              Text(
+                                'Quick setup. No forms that ask for your blood type.',
+                                style: GoogleFonts.inter(
+                                  fontSize: 16,
+                                  color: AppTheme.getTextColor(context,
+                                      isSecondary: true),
+                                  height: 1.5,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                       const SizedBox(height: 48),
                       _buildInputField(
                         label: 'YOUR NAME',
-                        hint: 'How should we call you?',
+                        hint: 'The name your wallet answers to',
                         controller: _nameController,
                         icon: LucideIcons.user,
                         isDark: isDark,
@@ -163,7 +184,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
                       const SizedBox(height: 28),
                       _buildInputField(
                         label: 'EMAIL',
-                        hint: 'your.email@example.com',
+                        hint: 'something@thatactuallymakessense.com',
                         controller: _emailController,
                         icon: LucideIcons.mail,
                         keyboardType: TextInputType.emailAddress,
@@ -173,7 +194,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
                       const SizedBox(height: 28),
                       _buildInputField(
                         label: 'MONTHLY BUDGET (OPTIONAL)',
-                        hint: '0.00',
+                        hint: 'How much until panic sets in?',
                         controller: _budgetController,
                         icon: LucideIcons.indianRupee,
                         keyboardType: TextInputType.number,
@@ -297,7 +318,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
           elevation: 0,
         ),
         child: Text(
-          'Get Started',
+          'Lock In & Get Started',
           style: GoogleFonts.outfit(
             fontSize: 18,
             fontWeight: FontWeight.w800,

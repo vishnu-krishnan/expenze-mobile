@@ -1,4 +1,29 @@
 # Activity Log
+
+[2026-02-24] Dynamic Spectrum Cards & Layout Standard
+Change Type: Patch
+Decision made:
+- Implemented a "Spectrum" color logic for financial cards that shifts from Teal/Green to Lime, Amber, Red, and Dark Red based on budget usage.
+- Standardized progress bar visuals to use translucent white shades for better compatibility with dynamic backgrounds.
+- Unified spectrum logic across Dashboard and Monthly Planner modules.
+- Bumped version to 1.4.4+15.
+Reason: Provide immediate, high-impact visual feedback on spending status without cluttering the UI.
+Impact: UX | Visual Design
+Rollback Strategy: Revert card decoration commits in dashboard_screen.dart and month_plan_screen.dart.
+
+[2026-02-24] UI Polish & UX Optimization
+Change Type: Minor
+Decision made: 
+- Rebranded app copy with a professional and friendly tone across all screens (Profile, Auth, Dashboard, Analytics, SMS Import, etc.).
+- Implemented entrance animations (Fade + Slide) for authentication and profile setup flows.
+- Fixed a critical bug in `AuthProvider.updateProfile` where email updates caused session instability.
+- Changed default AI parse provider from OpenAI to Groq for better latency/cost profile.
+- Resolved UI lints and standardized empty states.
+- Updated root and docs changelogs to version **1.4.3+14**.
+Reason: Improve user engagement, reliability, and establish a distinct app personality for release readiness.
+Impact: UX | Maintainability | Reliability
+Rollback Strategy: Revert specific screen commits.
+
 ================================================================================
 
 ## [2026-02-12] Flutter Mobile Development Migration Planning

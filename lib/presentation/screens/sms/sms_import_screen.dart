@@ -162,7 +162,7 @@ class _SmsImportScreenState extends State<SmsImportScreen>
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-                content: Text('No new transaction SMS found'),
+                content: Text('Your inbox is clean as a whistle! 🧼'),
                 behavior: SnackBarBehavior.floating),
           );
         }
@@ -239,8 +239,8 @@ class _SmsImportScreenState extends State<SmsImportScreen>
 
           final DateTime? fallbackDate = originalItem['date'] as DateTime?;
           // CRITICAL: Prioritize message arrival time (fallbackDate) over AI-parsed date
-          // to ensure accuracy, unless AI found a very specific valid date.
-          final finalDate = parsedDate ?? fallbackDate ?? DateTime.now();
+          // because it contains the exact timestamp of discovery.
+          final finalDate = fallbackDate ?? parsedDate ?? DateTime.now();
 
           final finalId = originalItem.containsKey('id')
               ? (originalItem['id'] as String)
@@ -254,18 +254,49 @@ class _SmsImportScreenState extends State<SmsImportScreen>
           final monthKey =
               "${finalDate.year}-${finalDate.month.toString().padLeft(2, '0')}";
 
-          final match = matchPool.firstWhere(
-            (e) =>
+          // Multi-stage matching to prevent duplicates
+          Expense? match;
+
+          // Stage 1: Check pending expenses for Exact Amount + Name Match
+          final nameMatchedPending = matchPool.where((e) {
+            if (e.monthKey != monthKey || e.plannedAmount != amount || e.isPaid) {
+              return false;
+            }
+            final expenseName = e.name.toLowerCase();
+            final merchant = merchantName.toLowerCase();
+            return expenseName.contains(merchant) ||
+                merchant.contains(expenseName);
+          }).toList();
+
+          if (nameMatchedPending.isNotEmpty) {
+            match = nameMatchedPending.first;
+          } else {
+            // Stage 2: Check pending expenses for Exact Amount (Fallback)
+            final amountMatchedPending = matchPool.where((e) =>
                 e.monthKey == monthKey &&
                 e.plannedAmount == amount &&
-                e.actualAmount == 0 &&
-                !e.isPaid,
-            orElse: () => Expense(monthKey: '', name: ''),
-          );
+                !e.isPaid);
+            if (amountMatchedPending.isNotEmpty) {
+              match = amountMatchedPending.first;
+            } else {
+              // Stage 3: CRITICAL prevention of duplicates
+              // Check if an expense for this amount is ALREADY PAID but has NO SMS reference
+              // (User might have manually marked it as paid just before syncing)
+              final alreadyPaidUnlinked = matchPool.where((e) =>
+                  e.monthKey == monthKey &&
+                  e.actualAmount == amount &&
+                  e.isPaid &&
+                  (e.notes == null || !e.notes!.contains('SMS_ID:')));
 
-          if (match.monthKey.isNotEmpty) {
-            matchingPlannedAmount = amount;
-            // Optionally update the name to match the plan if AI name is generic
+              if (alreadyPaidUnlinked.isNotEmpty) {
+                match = alreadyPaidUnlinked.first;
+              }
+            }
+          }
+
+          if (match != null) {
+            matchingPlannedAmount = match.plannedAmount;
+            // Link name if AI name is too generic
             if (merchantName.toLowerCase() == 'payment' ||
                 merchantName.toLowerCase() == 'transaction') {
               merchantName = match.name;
@@ -290,7 +321,7 @@ class _SmsImportScreenState extends State<SmsImportScreen>
             priority: finalPriority,
             paymentMode: 'Other',
             date: finalDate,
-            matchedExpenseId: match.id,
+            matchedExpenseId: match?.id,
           ));
         }
 
@@ -346,8 +377,8 @@ class _SmsImportScreenState extends State<SmsImportScreen>
   Future<void> _aiParse() async {
     final text = _rawTextController.text;
     if (text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please paste some SMS content first')));
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('Don\'t leave me hanging! Paste some SMS first. 📋')));
       return;
     }
 
@@ -358,7 +389,7 @@ class _SmsImportScreenState extends State<SmsImportScreen>
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
-                  'AI is cooling down. Please wait ${20 - diff.inSeconds}s...'),
+                  'AI is currently daydreaming. Give it ${20 - diff.inSeconds}s...'),
               backgroundColor: AppTheme.warning,
               behavior: SnackBarBehavior.floating,
               duration: const Duration(seconds: 2),
@@ -485,11 +516,15 @@ class _SmsImportScreenState extends State<SmsImportScreen>
       bool matched = false;
       if (item.matchedExpenseId != null) {
         final existing = await repo.getExpenseById(item.matchedExpenseId!);
-        if (existing != null && !existing.isPaid) {
+        if (existing != null) {
           toUpdate.add(existing.copyWith(
             actualAmount: item.amount,
             isPaid: true,
-            paidDate: date.toIso8601String(),
+            // If it's a real SMS (id starts with 'sms-'), prioritize its date
+            // over whatever placeholder date was used during manual confirmation.
+            paidDate: item.id.startsWith('sms-')
+                ? date.toIso8601String()
+                : (existing.paidDate ?? date.toIso8601String()),
             notes:
                 '${existing.notes != null ? '${existing.notes}\n' : ''}SMS_ID:${item.id} | MSG:${item.raw}',
           ));
@@ -596,7 +631,7 @@ class _SmsImportScreenState extends State<SmsImportScreen>
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Smart Import',
+                        Text('Your inbox, decoded.',
                             style: TextStyle(
                                 color: secondaryTextColor,
                                 fontSize: 13,
@@ -674,7 +709,7 @@ class _SmsImportScreenState extends State<SmsImportScreen>
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'TOTAL SELECTED',
+                          'TRANSACTIONS FOUND',
                           style: TextStyle(
                             fontSize: 10,
                             fontWeight: FontWeight.w800,
@@ -756,7 +791,7 @@ class _SmsImportScreenState extends State<SmsImportScreen>
                       ),
                       const SizedBox(height: 6),
                       Text(
-                        'We scan locally to find bank transaction alerts.',
+                        'AI scans your bank SMS locally — nothing leaves your phone.',
                         textAlign: TextAlign.center,
                         style:
                             TextStyle(color: secondaryTextColor, fontSize: 13),

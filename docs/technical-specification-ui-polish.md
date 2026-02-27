@@ -1,0 +1,48 @@
+# Technical Specification - UI Polish & UX Optimization
+
+## System Overview
+Comprehensive update to the presentation and service layers to improve interaction design, copy consistency, and bug fixes in authentication state management.
+
+## Architecture Diagram (ASCII)
+```
+[ Presentation Layer ]
+       |
+       |-- [ EntranceAnimation (StatefulWidget + WidgetsBinding) ]
+       |-- [ Witty Copy System (Direct UI Strings) ]
+       v
+[ State Management (Provider) ]
+       |
+       |-- [ AuthProvider (Synchronized Email/Profile Update) ]
+       v
+[ Data Layer (Services) ]
+       |
+       |-- [ ApiService (Default: Groq AI Provider) ]
+       |-- [ DatabaseHelper (SQLite Profile Persistence) ]
+```
+
+## Component Breakdown
+1.  **Entrance Animations**: Implemented using `AnimatedOpacity` and `AnimatedSlide` with `WidgetsBinding.instance.addPostFrameCallback` to trigger on mount.
+2.  **AuthProvider Refactor**:
+    *   `updateProfile`: Now updates `SharedPreferences` keys (`full_name`, `email`) in addition to SQLite.
+    *   Fix: Removed the re-query by email which failed when the email itself was being changed.
+3.  **ApiService Refactor**:
+    *   Changed `aiParseSms` default fallback to `AiProvider.groq`.
+    *   Simplified provider selection logic in `ApiService`.
+
+## Data Flow
+Auth Actions -> AuthProvider -> SharedPreferences/SQLite -> UI Update
+
+## API Contracts
+- No changes to external API contracts.
+
+## Security Model
+- Ensures the same security standards for profile updates by using existing user IDs.
+
+## Performance Analysis
+- Groq Llama 3.1 8B provides sub-second latency compared to 2-3s for Claude/OpenAI mini models.
+
+## Rollback Plan
+- Revert commits to `auth_provider.dart` and `api_service.dart`.
+- UI strings can be reverted via git revert on specific screen files.
+
+Date: 2026-02-24

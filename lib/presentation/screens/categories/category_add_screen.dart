@@ -62,7 +62,7 @@ class _CategoryAddScreenState extends State<CategoryAddScreen> {
         child: Column(
           children: [
             AppBar(
-              title: Text('Add Category',
+              title: Text('New Squad Member',
                   style: TextStyle(color: AppTheme.getTextColor(context))),
               backgroundColor: Colors.transparent,
               elevation: 0,
@@ -77,13 +77,13 @@ class _CategoryAddScreenState extends State<CategoryAddScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _buildSectionHeader(context, 'Quick Suggestions',
-                            'Pick from common categories'),
+                        _buildSectionHeader(context, 'The Usual Suspects',
+                            'Pick from our common categories'),
                         const SizedBox(height: 16),
                         _buildQuickAddGrid(provider),
                         const SizedBox(height: 40),
-                        _buildSectionHeader(context, 'Custom Category',
-                            'Create your own identification'),
+                        _buildSectionHeader(context, 'Custom Personality',
+                            'Give this category a unique name & icon'),
                         const SizedBox(height: 16),
                         _buildCustomForm(provider, isDark),
                       ],
@@ -315,7 +315,7 @@ class _CategoryAddScreenState extends State<CategoryAddScreen> {
               ),
               backgroundColor: WidgetStateProperty.all(AppTheme.primary),
             ),
-            child: const Text('Add Category',
+            child: const Text('Bring it to life',
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
           ),
         ],

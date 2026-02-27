@@ -49,7 +49,7 @@ class _CategoryEditScreenState extends State<CategoryEditScreen> {
         child: Column(
           children: [
             AppBar(
-              title: Text('Edit Category',
+              title: Text('Refining the Vibes',
                   style: TextStyle(color: AppTheme.getTextColor(context))),
               backgroundColor: Colors.transparent,
               elevation: 0,
@@ -70,8 +70,8 @@ class _CategoryEditScreenState extends State<CategoryEditScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _buildSectionHeader(context, 'Modify Identity',
-                            'Update how this category appears'),
+                        _buildSectionHeader(context, 'Appearance Overhaul',
+                            'Update how this category feels'),
                         const SizedBox(height: 24),
                         _buildEditForm(provider, isDark),
                       ],
@@ -260,9 +260,9 @@ class _CategoryEditScreenState extends State<CategoryEditScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Category?'),
+        title: const Text('The Nuclear Option'),
         content: Text(
-            'Are you sure you want to delete "${widget.category.name}"? This action cannot be undone.'),
+            'Once you delete "${widget.category.name}", all related transactions will feel lost. Ready to let go?'),
         actions: [
           TextButton(
               onPressed: () => Navigator.pop(context),

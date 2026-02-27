@@ -98,9 +98,19 @@ class _NotesScreenState extends State<NotesScreen> {
               size: 64, color: secondaryTextColor.withValues(alpha: 0.5)),
           const SizedBox(height: 16),
           Text(
-            'Keep track of your thoughts\nand important reminders',
+            'Your brain called — it wants backup.',
             textAlign: TextAlign.center,
-            style: TextStyle(color: secondaryTextColor, fontSize: 16),
+            style: TextStyle(
+                color: secondaryTextColor,
+                fontSize: 17,
+                fontWeight: FontWeight.w700),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Jot down thoughts, reminders, or\nwhy you spent ₹2,000 on that thing.',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+                color: secondaryTextColor.withValues(alpha: 0.6), fontSize: 13),
           ),
         ],
       ),
@@ -252,7 +262,7 @@ class _NotesScreenState extends State<NotesScreen> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(note == null ? 'New Note' : 'Edit Note',
+                  Text(note == null ? 'New Note 📝' : 'Edit Note',
                       style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
@@ -342,8 +352,7 @@ class _NotesScreenState extends State<NotesScreen> {
                           Navigator.pop(context);
                         }
                       },
-                      child:
-                          Text(note == null ? 'Create Note' : 'Save Changes'),
+                      child: Text(note == null ? 'Save Note' : 'Save Changes'),
                     ),
                   ),
                   const SizedBox(height: 48), // Bottom safe area

@@ -1,19 +1,42 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
-+
-+## [1.0.5] - 2026-02-18
-+### Added
-+- **Payment Mode Tracking**: Automatically detects UPI, Card, Wallet, and Net Banking from SMS messages.
-+- **Manual Entry**: Added payment mode selector to manual expense creation and editing.
-+- **Bulk Import**: Refactored SMS import to use bulk insertion for improved stability and performance.
-+
-+### Changed
-+- **Planner Polish**: Imported SMS transactions now have their planned amount set to the actual amount, preventing them from showing up with "zero planned amount" in the Monthly Planner.
-+- **Analytics UI**: Pie chart segments now show the category name and percentage when selected for better readability.
-+
-+### Fixed
-+- **Database Schema**: Fixed a critical issue where the `payment_mode` column was occasionally missing during migrations (Database v13).
+
+## [1.4.4+15] - 2026-02-24
+### Added
+- **Dynamic Spectrum Cards**: Main wallet and summary cards now change color through a "Spectrum" (Green -> Yellow -> Red -> Dark Red) based on budget consumption.
+- **Visual Feedback**: Synchronized card shadows and layout elements to the new spectrum logic.
+
+### Changed
+- **Cleaner UI**: Standardized progress bars to use white semantic shades for better legibility on colored cards.
+- **Theme Updates**: Enhanced `AppTheme` with darker variants for warning and danger states.
+
+## [1.4.3+14] - 2026-02-24
+### Added
+- **Entrance Animations**: Implemented smooth Fade + Slide entrance animations for the Landing, Login, Register, and Profile Setup screens.
+- **Visual Polish**: Refined bottom sheet transitions in the Profile Screen for a more premium experience.
+
+### Changed
+- **Branding & Tone**: Rebranded app copy with a professional and friendly voice across all screens (Dashboard, Analytics, SMS Import, etc.).
+- **AI Performance**: Switched default SMS parsing provider to **Groq** for significantly faster transaction processing.
+- **Improved UX**: New engaging empty states and field hints to guide users more effectively.
+
+### Fixed
+- **Profile Updates**: Fixed an issue where updating your email could lead to logout or synchronization errors.
+- **System Stability**: Resolved various UI lints and logic edge cases.
+
+## [1.0.5] - 2026-02-18
+### Added
+- **Payment Mode Tracking**: Automatically detects UPI, Card, Wallet, and Net Banking from SMS messages.
+- **Manual Entry**: Added payment mode selector to manual expense creation and editing.
+- **Bulk Import**: Refactored SMS import to use bulk insertion for improved stability and performance.
+
+### Changed
+- **Planner Polish**: Imported SMS transactions now have their planned amount set to the actual amount, preventing them from showing up with "zero planned amount" in the Monthly Planner.
+- **Analytics UI**: Pie chart segments now show the category name and percentage when selected for better readability.
+
+### Fixed
+- **Database Schema**: Fixed a critical issue where the `payment_mode` column was occasionally missing during migrations (Database v13).
 +
 
 ## [1.0.4] - 2026-02-18

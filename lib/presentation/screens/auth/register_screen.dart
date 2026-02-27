@@ -20,6 +20,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   bool _isLoading = false;
   String? _errorMessage;
+  bool _visible = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance
+        .addPostFrameCallback((_) => setState(() => _visible = true));
+  }
 
   @override
   void dispose() {
@@ -93,23 +101,39 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         alignment: Alignment.centerLeft,
                       ),
                       const SizedBox(height: 24),
-                      Text(
-                        'Join Expenze',
-                        style: GoogleFonts.outfit(
-                          fontSize: 42,
-                          fontWeight: FontWeight.w900,
-                          color: AppTheme.getTextColor(context),
-                          letterSpacing: -1.5,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      Text(
-                        'Take charge of your finances — one smart step at a time. It only takes a minute to get started!',
-                        style: GoogleFonts.inter(
-                          fontSize: 16,
-                          color:
-                              AppTheme.getTextColor(context, isSecondary: true),
-                          height: 1.5,
+                      AnimatedOpacity(
+                        opacity: _visible ? 1.0 : 0.0,
+                        duration: const Duration(milliseconds: 500),
+                        curve: Curves.easeOut,
+                        child: AnimatedSlide(
+                          offset:
+                              _visible ? Offset.zero : const Offset(0, 0.08),
+                          duration: const Duration(milliseconds: 500),
+                          curve: Curves.easeOut,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Let\'s get you sorted.',
+                                style: GoogleFonts.outfit(
+                                  fontSize: 42,
+                                  fontWeight: FontWeight.w900,
+                                  color: AppTheme.getTextColor(context),
+                                  letterSpacing: -1.5,
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                              Text(
+                                'No credit card. No spam. Just you and your money — finally on speaking terms.',
+                                style: GoogleFonts.inter(
+                                  fontSize: 16,
+                                  color: AppTheme.getTextColor(context,
+                                      isSecondary: true),
+                                  height: 1.5,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                       const SizedBox(height: 20),
@@ -128,7 +152,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             const SizedBox(width: 12),
                             Expanded(
                               child: Text(
-                                'After signing up, set a budget to stay on track and never overspend again!',
+                                'Pro tip: set a monthly budget right after signup. Future-you will be very thankful.',
                                 style: GoogleFonts.inter(
                                   fontSize: 13,
                                   color: AppTheme.getTextColor(context),
@@ -148,7 +172,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       _buildPremiumField(
                         controller: _fullNameController,
                         label: 'FULL NAME',
-                        hint: 'How should we call you?',
+                        hint: 'The name on your unofficial rich-person card',
                         icon: LucideIcons.user,
                         isDark: isDark,
                         validator: (v) =>
@@ -159,7 +183,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       _buildPremiumField(
                         controller: _emailController,
                         label: 'EMAIL ADDRESS',
-                        hint: 'For identification (optional)',
+                        hint: 'For identification — we won\'t spam, promise',
                         icon: LucideIcons.mail,
                         isDark: isDark,
                         keyboardType: TextInputType.emailAddress,
@@ -169,7 +193,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       _buildPremiumField(
                         controller: _passwordController,
                         label: 'SECURITY PIN / PASSCODE',
-                        hint: 'Minimum 4 characters',
+                        hint: 'Something only you know (and remember)',
                         icon: LucideIcons.lock,
                         isDark: isDark,
                         obscureText: true,
@@ -344,7 +368,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 child: CircularProgressIndicator(
                     strokeWidth: 3, color: Colors.white))
             : Text(
-                'Create Secure Account',
+                'I\'m Ready — Let\'s Go!',
                 style: GoogleFonts.outfit(
                   fontSize: 18,
                   fontWeight: FontWeight.w800,

@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:local_auth/local_auth.dart';
 import '../../data/services/database_helper.dart';
 import '../../core/utils/logger.dart';
+import '../../data/services/email_service.dart';
 
 class AuthProvider with ChangeNotifier {
   final LocalAuthentication _localAuth = LocalAuthentication();
@@ -36,6 +37,8 @@ class AuthProvider with ChangeNotifier {
   Map<String, dynamic>? get user => _user;
   bool get isLoading => _isLoading;
   String? get error => _error;
+  bool get isVerified =>
+      (_user?['is_verified'] == 1 || _user?['is_verified'] == true);
 
   Future<void> initialize() async {
     _isLoading = true;
@@ -245,31 +248,134 @@ class AuthProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  String? _currentOtp;
+  DateTime? _otpExpiry;
+
+  DateTime? _lastCodeSentAt;
+
   Future<void> updateProfile({
     String? fullName,
     String? email,
     String? phone,
     double? defaultBudget,
+    bool? isVerified,
   }) async {
     if (_user?['id'] == null) return;
 
-    try {
-      await _dbHelper.updateUserProfile(_user!['id'], {
-        if (fullName != null) 'full_name': fullName,
-        if (phone != null) 'phone': phone,
-        if (email != null) 'email': email,
-        if (defaultBudget != null) 'default_budget': defaultBudget,
-      });
+    final int userId = _user!['id'] as int;
+    final payload = {
+      if (fullName != null) 'full_name': fullName,
+      if (phone != null) 'phone': phone,
+      if (email != null) 'email': email,
+      if (defaultBudget != null) 'default_budget': defaultBudget,
+      if (isVerified != null) 'is_verified': isVerified ? 1 : 0,
+    };
 
-      final updatedUser = await _dbHelper.getUser(_user!['email']);
-      if (updatedUser != null) {
-        _user = updatedUser;
+    try {
+      try {
+        await _dbHelper.updateUserProfile(userId, payload);
+      } catch (e) {
+        if (e.toString().contains('no such column: is_verified')) {
+          final db = await _dbHelper.database;
+          await db.execute(
+              'ALTER TABLE users ADD COLUMN is_verified INTEGER DEFAULT 0');
+          await _dbHelper.updateUserProfile(userId, payload);
+        } else {
+          rethrow;
+        }
+      }
+
+      // Re-fetch by ID so email/verification changes don't break the lookup
+      final db = await _dbHelper.database;
+      final res = await db.query('users',
+          where: 'id = ?', whereArgs: [userId], limit: 1);
+      if (res.isNotEmpty) {
+        _user = res.first;
+
+        // Keep SharedPreferences in sync when email changes
+        if (email != null) {
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setString('user_email', email);
+        }
+
         notifyListeners();
       }
     } catch (e) {
-      _error = 'Update failed';
+      _error = 'Update failed: $e';
       notifyListeners();
+      rethrow;
     }
+  }
+
+  Future<bool> sendVerificationCode({bool force = false}) async {
+    if (_user == null || _user!['email'] == null) {
+      _error = "No email associated with this account.";
+      notifyListeners();
+      return false;
+    }
+
+    // Prevent spamming and invalidating OTP if they reopen the sheet quickly
+    if (!force &&
+        _lastCodeSentAt != null &&
+        DateTime.now().difference(_lastCodeSentAt!).inSeconds < 60) {
+      if (_currentOtp != null &&
+          _otpExpiry != null &&
+          DateTime.now().isBefore(_otpExpiry!)) {
+        return true; // Use existing active OTP
+      }
+    }
+
+    try {
+      final emailService = EmailService();
+      final String email = _user!['email'];
+      final String name = _user!['full_name'] ?? 'User';
+
+      final otp = await emailService.sendVerificationCode(email, name);
+      if (otp != null) {
+        _currentOtp = otp;
+        _otpExpiry = DateTime.now().add(const Duration(minutes: 5));
+        _lastCodeSentAt = DateTime.now();
+        return true;
+      }
+      return false;
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+      return false;
+    }
+  }
+
+  Future<bool> verifyAccount(String otp) async {
+    if (_currentOtp == null || _otpExpiry == null) {
+      _error = "No active verification request. Please resend the code.";
+      notifyListeners();
+      return false;
+    }
+
+    if (DateTime.now().isAfter(_otpExpiry!)) {
+      _error = "Verification code expired. Please request a new one.";
+      _currentOtp = null;
+      _otpExpiry = null;
+      notifyListeners();
+      return false;
+    }
+
+    final cleanOtp = otp.replaceAll(RegExp(r'\D'), '');
+    if (cleanOtp == _currentOtp) {
+      _currentOtp = null;
+      _otpExpiry = null;
+
+      if (_user?['id'] == null) {
+        logger.e('Cannot update profile: _user id is null');
+      } else {
+        await updateProfile(isVerified: true);
+      }
+      return true;
+    }
+
+    _error = "Invalid code. Please try again.";
+    notifyListeners();
+    return false;
   }
 
   Future<bool> login(String email, String password) async {

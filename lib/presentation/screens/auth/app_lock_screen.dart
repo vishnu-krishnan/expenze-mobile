@@ -150,7 +150,7 @@ class _AppLockScreenState extends State<AppLockScreen> {
                   const SizedBox(height: 8),
 
                   Text(
-                    'Enter 4-digit PIN to unlock',
+                    'Your money\'s behind this door. Prove it\'s yours.',
                     style: GoogleFonts.inter(
                       fontSize: 16,
                       color: AppTheme.getTextColor(context, isSecondary: true),
@@ -205,7 +205,7 @@ class _AppLockScreenState extends State<AppLockScreen> {
                     height: 20,
                     child: _isError
                         ? Text(
-                            'Incorrect PIN. Please try again.',
+                            'Nope, that\'s not it. Try again!',
                             style: GoogleFonts.inter(
                               color: Colors.redAccent,
                               fontSize: 14,

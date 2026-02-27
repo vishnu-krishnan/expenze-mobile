@@ -44,7 +44,7 @@ class NotificationSettingsScreen extends StatelessWidget {
                           context: context,
                           icon: LucideIcons.bell,
                           label: 'App Alerts',
-                          subtitle: 'Enable push notifications for activity',
+                          subtitle: 'Because silent apps don\'t save money.',
                           value: authProvider.notificationsEnabled,
                           onChanged: (val) => authProvider
                               .updateNotificationSettings(alerts: val),
@@ -63,7 +63,8 @@ class NotificationSettingsScreen extends StatelessWidget {
                               context: context,
                               icon: LucideIcons.mailCheck,
                               label: 'SMS Auto-Import',
-                              subtitle: 'Automatically process expense SMS',
+                              subtitle:
+                                  'We read your bank SMS so you don\'t have to.',
                               value: authProvider.smsScraperEnabled,
                               onChanged: (val) => authProvider
                                   .updateNotificationSettings(smsScraper: val),
@@ -75,7 +76,8 @@ class NotificationSettingsScreen extends StatelessWidget {
                               context: context,
                               icon: LucideIcons.alarmClock,
                               label: 'Daily Reminders',
-                              subtitle: 'Morning summary of your budget',
+                              subtitle:
+                                  'A gentle nudge before the month sneaks by.',
                               value: authProvider.dailyReminderEnabled,
                               onChanged: (val) => authProvider
                                   .updateNotificationSettings(reminders: val),
@@ -94,7 +96,8 @@ class NotificationSettingsScreen extends StatelessWidget {
                           context: context,
                           icon: LucideIcons.trendingUp,
                           label: 'Budget Thresholds',
-                          subtitle: 'Notify when reaching 80% and 100%',
+                          subtitle:
+                              'Alerts at 80% and 100% — before it\'s too late.',
                           value: true, // Mocked for now
                           onChanged: (val) {},
                           textColor: textColor,
@@ -151,7 +154,7 @@ class NotificationSettingsScreen extends StatelessWidget {
           const SizedBox(width: 16),
           Expanded(
             child: Text(
-              'Customize how Expenze keeps you updated on your financial goals.',
+              'Stay in the loop without being overwhelmed. You\'re in full control of what buzzes.',
               style: TextStyle(
                 color: secondaryTextColor,
                 fontSize: 13,

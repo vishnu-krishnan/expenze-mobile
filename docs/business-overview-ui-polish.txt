@@ -1,0 +1,35 @@
+# Business Overview - UI Polish & UX Optimization
+
+Problem
+The Expenze app felt technically functional but lacked personality, visual fluidity, and professional copy. Critical paths like profile updates also contained bugs that hindered user trust.
+
+Objective
+Enhance the user experience by injecting a friendly yet professional tone, adding smooth animations, and fixing functional bugs in user management.
+
+Feature Summary
+1. Engaging Copy: Updated all screens with witty, professional text to guide users through their financial journey.
+2. Visual Fluidity: Added entrance animations to Onboarding, Login, and Registration screens for a "premium" feel.
+3. Functional Reliability: Fixed email update logic in AuthProvider to ensure profile changes persist correctly across local and remote storage.
+4. Optimized AI: Switched the default SMS parsing engine to Groq for faster, cost-effective transaction detection.
+
+High-level Workflow
+1. User starts the app (Auth/Onboarding) -> Experiences smooth slide-in animations.
+2. User navigates through screens -> Clear, friendly instructions and status labels.
+3. User updates profile -> Changes are saved reliably to SQLite and SharedPreferences.
+
+Business Value
+- Higher user retention through better "First Time User Experience" (FTUE).
+- Reduced friction in user management.
+- Significant brand differentiation via unique copy style.
+
+Risks
+- Subjective tone might not resonate with all users.
+- Groq free tier rate limits (mitigated by key rotation and batching).
+
+Cost Implications
+- Reduced token costs by prioritizing Groq over higher-priced providers.
+
+Timeline
+- Implemented: 2026-02-24
+
+Date: 2026-02-24

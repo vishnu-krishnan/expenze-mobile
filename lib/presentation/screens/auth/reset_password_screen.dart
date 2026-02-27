@@ -134,7 +134,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
           const SizedBox(height: 40),
 
           Text(
-            'Secure Your Account',
+            'Forgot your PIN?',
             style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
@@ -143,7 +143,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
           ),
           const SizedBox(height: 8),
           Text(
-            'Enter your username and new password.',
+            'No judgment. Happens to the best of us. Set a new one below.',
             style: TextStyle(fontSize: 16, color: AppTheme.textSecondary),
             textAlign: TextAlign.center,
           ),

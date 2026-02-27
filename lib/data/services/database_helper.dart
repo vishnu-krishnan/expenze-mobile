@@ -20,7 +20,7 @@ class DatabaseHelper {
 
     return await openDatabase(
       path,
-      version: 20,
+      version: 22,
       onCreate: _createDB,
       onUpgrade: _onUpgrade,
     );
@@ -198,6 +198,28 @@ class DatabaseHelper {
         logger.e("Database migration error (v20)", error: e);
       }
     }
+    if (oldVersion < 21) {
+      try {
+        final userInfo = await db.rawQuery('PRAGMA table_info(users)');
+        if (!userInfo.any((col) => col['name'] == 'is_verified')) {
+          await db.execute(
+              'ALTER TABLE users ADD COLUMN is_verified INTEGER DEFAULT 0');
+        }
+      } catch (e) {
+        logger.e("Database migration error (v21)", error: e);
+      }
+    }
+    if (oldVersion < 22) {
+      try {
+        final userInfo = await db.rawQuery('PRAGMA table_info(users)');
+        if (!userInfo.any((col) => col['name'] == 'is_verified')) {
+          await db.execute(
+              'ALTER TABLE users ADD COLUMN is_verified INTEGER DEFAULT 0');
+        }
+      } catch (e) {
+        logger.e("Database migration error (v22)", error: e);
+      }
+    }
   }
 
   Future<void> _createDB(Database db, int version) async {
@@ -211,6 +233,7 @@ class DatabaseHelper {
         password TEXT,
         default_budget REAL DEFAULT 0,
         synced INTEGER DEFAULT 0,
+        is_verified INTEGER DEFAULT 0,
         created_at TEXT,
         updated_at TEXT
       )

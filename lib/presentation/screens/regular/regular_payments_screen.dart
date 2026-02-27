@@ -145,13 +145,15 @@ class _RegularPaymentsScreenState extends State<RegularPaymentsScreen> {
                 size: 64, color: AppTheme.primary.withValues(alpha: 0.4)),
           ),
           const SizedBox(height: 24),
-          Text('No regular expenses yet',
+          Text('No recurring bills yet',
               style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                   color: secondaryTextColor)),
           const SizedBox(height: 8),
-          Text('Add your subscriptions to track them automatically',
+          Text(
+              'Netflix, rent, gym — add them here\nso they never sneak up on you.',
+              textAlign: TextAlign.center,
               style: TextStyle(
                   fontSize: 13,
                   color: secondaryTextColor.withValues(alpha: 0.7))),
@@ -353,7 +355,7 @@ class _RegularPaymentsScreenState extends State<RegularPaymentsScreen> {
                     color: AppTheme.success, size: 16),
                 const SizedBox(width: 8),
                 Text(
-                  'All commitments cleared!',
+                  'You\'re all caught up! 🎉',
                   style: TextStyle(
                       color: AppTheme.success.withValues(alpha: 0.8),
                       fontWeight: FontWeight.bold,
@@ -363,7 +365,7 @@ class _RegularPaymentsScreenState extends State<RegularPaymentsScreen> {
             )
           else
             Text(
-              'Pending: ₹${pendingAmount.toStringAsFixed(0)}',
+              'Still pending: ₹${pendingAmount.toStringAsFixed(0)}',
               textAlign: TextAlign.center,
               style: TextStyle(
                   color: AppTheme.danger,
@@ -373,8 +375,8 @@ class _RegularPaymentsScreenState extends State<RegularPaymentsScreen> {
           const SizedBox(height: 4),
           Text(
             isAllCleared
-                ? 'Great job managing your monthly expenses!'
-                : 'You have ₹${pendingAmount.toStringAsFixed(0)} in recurring commitments awaiting payment.',
+                ? 'Bills paid. Wallet intact. Go treat yourself (a little).'
+                : '₹${pendingAmount.toStringAsFixed(0)} in recurring commitments still waiting. You\'ve got this.',
             textAlign: TextAlign.center,
             style: TextStyle(
                 color: secondaryTextColor.withValues(alpha: 0.8),
@@ -608,8 +610,9 @@ class _RegularPaymentsScreenState extends State<RegularPaymentsScreen> {
                           foregroundColor: Colors.white,
                           shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(18))),
-                      child: const Text('Save',
-                          style: TextStyle(
+                      child: Text(
+                          payment == null ? 'Lock It In' : 'Save Changes',
+                          style: const TextStyle(
                               fontSize: 16, fontWeight: FontWeight.bold)),
                     ),
                   ),

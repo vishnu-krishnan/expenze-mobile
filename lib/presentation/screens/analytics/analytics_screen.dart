@@ -52,7 +52,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text('Insights & Trends',
+                        Text('Where\'s it all going?',
                             style: TextStyle(
                                 color: secondaryTextColor,
                                 fontSize: 13,
@@ -95,10 +95,10 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                       ],
                       Text(
                           _selectedPeriod <= 7
-                              ? 'Daily Breakdown'
+                              ? 'Day-by-Day Breakdown'
                               : _selectedPeriod <= 30
-                                  ? 'Weekly Breakdown'
-                                  : 'Daily Summary for Last 3 Months',
+                                  ? 'Week-by-Week Breakdown'
+                                  : 'Daily Summary — Last 3 Months',
                           style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
@@ -106,10 +106,10 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                               letterSpacing: -0.5)),
                       Text(
                           _selectedPeriod <= 7
-                              ? 'Last 7 Days'
+                              ? 'What happened in the last 7 days'
                               : _selectedPeriod <= 30
-                                  ? 'Last 30 Days'
-                                  : 'Last 90 Days',
+                                  ? 'The full 30-day picture'
+                                  : 'Three months. The data doesn\'t lie.',
                           style: TextStyle(
                               fontSize: 13,
                               color: secondaryTextColor,
@@ -139,7 +139,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                             child: const Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Text('Show More History',
+                                Text('Dig deeper into history',
                                     style:
                                         TextStyle(fontWeight: FontWeight.bold)),
                                 SizedBox(width: 8),
@@ -268,7 +268,9 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
   }
 
   Widget _buildLineChart(List<Map<String, dynamic>> trends) {
-    if (trends.isEmpty) return const Center(child: Text('Not enough data'));
+    if (trends.isEmpty) {
+      return const Center(child: Text('Spend something first 😅'));
+    }
 
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final secondaryTextColor =

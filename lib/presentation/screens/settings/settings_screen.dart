@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../providers/theme_provider.dart';
 import '../../providers/expense_provider.dart';
@@ -29,25 +31,26 @@ class SettingsScreen extends StatelessWidget {
         slivers: [
           SliverAppBar(
             backgroundColor: Colors.transparent,
-            expandedHeight: 100,
+            expandedHeight: 120,
             floating: true,
             pinned: false,
             flexibleSpace: FlexibleSpaceBar(
               titlePadding: EdgeInsets.zero,
               background: Padding(
-                padding: const EdgeInsets.fromLTRB(26, 10, 26, 0),
+                padding: const EdgeInsets.fromLTRB(26, 20, 26, 0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text('Configuration',
-                        style: TextStyle(
+                    Text('Tweak it your way',
+                        style: GoogleFonts.inter(
                             color: secondaryTextColor,
                             fontSize: 13,
+                            fontWeight: FontWeight.w600,
                             letterSpacing: 0.5)),
                     Text('Settings',
-                        style: TextStyle(
-                            fontSize: 26,
+                        style: GoogleFonts.outfit(
+                            fontSize: 34,
                             fontWeight: FontWeight.w900,
                             color: textColor,
                             letterSpacing: -1)),
@@ -81,6 +84,18 @@ class SettingsScreen extends StatelessWidget {
                             height: 32,
                             color: secondaryTextColor.withValues(alpha: 0.1)),
                         _buildSettingsItem(
+                          icon: LucideIcons.bell,
+                          label: 'Manage Notifications',
+                          subtitle: 'Alerts, reminders & SMS scraping',
+                          onTap: () =>
+                              Navigator.pushNamed(context, '/notifications'),
+                          textColor: textColor,
+                          secondaryTextColor: secondaryTextColor,
+                        ),
+                        Divider(
+                            height: 32,
+                            color: secondaryTextColor.withValues(alpha: 0.1)),
+                        _buildSettingsItem(
                           icon: LucideIcons.target,
                           label: 'Monthly Budget',
                           subtitle: limit > 0
@@ -105,7 +120,7 @@ class SettingsScreen extends StatelessWidget {
                           context: context,
                           icon: LucideIcons.lock,
                           label: 'App Lock',
-                          subtitle: 'Require PIN to open app',
+                          subtitle: 'Your finances, your fortress.',
                           value: authProvider.isLockEnabled,
                           onChanged: (val) {
                             if (val) {
@@ -125,7 +140,7 @@ class SettingsScreen extends StatelessWidget {
                             context: context,
                             icon: LucideIcons.fingerprint,
                             label: 'Biometric Lock',
-                            subtitle: 'Unlock using Fingerprint',
+                            subtitle: 'One finger to rule them all.',
                             value: authProvider.useBiometrics,
                             onChanged: (val) {
                               authProvider.updateBiometrics(val);
@@ -147,12 +162,14 @@ class SettingsScreen extends StatelessWidget {
                         _buildSettingsItem(
                           icon: LucideIcons.cloud,
                           label: 'Google Drive Sync',
-                          subtitle: 'Coming Soon',
+                          subtitle: 'Coming soon — good things take time.',
                           onTap: () {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
-                                  content: Text(
-                                      'Google Drive sync will be available in the next update!')),
+                                content: Text(
+                                    'Cloud backup is on the roadmap! Check back soon.'),
+                                behavior: SnackBarBehavior.floating,
+                              ),
                             );
                           },
                           textColor: textColor.withValues(alpha: 0.5),
@@ -250,6 +267,14 @@ class SettingsScreen extends StatelessWidget {
                           onTap: () => _showChangelogDialog(
                               context, textColor, secondaryTextColor),
                         ),
+                        _buildSettingsItem(
+                          icon: LucideIcons.helpCircle,
+                          label: 'Help & Support',
+                          subtitle: 'Reach out to our team',
+                          textColor: textColor,
+                          secondaryTextColor: secondaryTextColor,
+                          onTap: () => _showHelpDialog(context),
+                        ),
                       ],
                     ),
                   ),
@@ -274,7 +299,7 @@ class SettingsScreen extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             const Text(
-                'Set a 4-digit PIN to protect your financial data and enable biometric unlocking.'),
+                'Keep the bad guys out. Set a 4-digit PIN — and for bonus security, enable fingerprint unlock below.'),
             const SizedBox(height: 20),
             TextField(
               controller: controller,
@@ -312,12 +337,12 @@ class SettingsScreen extends StatelessWidget {
 
   Widget _buildSectionTitle(String title, Color textColor) {
     return Padding(
-      padding: const EdgeInsets.only(left: 8),
+      padding: const EdgeInsets.only(left: 8, bottom: 4),
       child: Text(
         title.toUpperCase(),
-        style: TextStyle(
+        style: GoogleFonts.inter(
           fontSize: 12,
-          fontWeight: FontWeight.bold,
+          fontWeight: FontWeight.w800,
           color: textColor.withValues(alpha: 0.5),
           letterSpacing: 1.5,
         ),
@@ -327,11 +352,17 @@ class SettingsScreen extends StatelessWidget {
 
   Widget _buildSettingsCard(BuildContext context, {required Widget child}) {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 20),
       decoration: BoxDecoration(
         color: Theme.of(context).cardTheme.color,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: AppTheme.softShadow,
+        borderRadius: BorderRadius.circular(28),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
+        ],
       ),
       child: child,
     );
@@ -348,16 +379,16 @@ class SettingsScreen extends StatelessWidget {
     required Color secondaryTextColor,
   }) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 12),
+      padding: const EdgeInsets.symmetric(vertical: 14),
       child: Row(
         children: [
           Container(
-            padding: const EdgeInsets.all(10),
+            padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               color: AppTheme.primary.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(16),
             ),
-            child: Icon(icon, size: 20, color: AppTheme.primary),
+            child: Icon(icon, size: 22, color: AppTheme.primary),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -366,16 +397,18 @@ class SettingsScreen extends StatelessWidget {
               children: [
                 Text(
                   label,
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 15,
+                  style: GoogleFonts.outfit(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 16,
                     color: textColor,
+                    letterSpacing: -0.3,
                   ),
                 ),
+                const SizedBox(height: 2),
                 Text(
                   subtitle,
-                  style: TextStyle(
-                    fontSize: 12,
+                  style: GoogleFonts.inter(
+                    fontSize: 13,
                     color: secondaryTextColor,
                   ),
                 ),
@@ -387,6 +420,7 @@ class SettingsScreen extends StatelessWidget {
             onChanged: onChanged,
             activeThumbColor: Colors.white,
             activeTrackColor: AppTheme.primary,
+            inactiveTrackColor: textColor.withValues(alpha: 0.1),
           ),
         ],
       ),
@@ -403,17 +437,18 @@ class SettingsScreen extends StatelessWidget {
   }) {
     return InkWell(
       onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 12),
+        padding: const EdgeInsets.symmetric(vertical: 14),
         child: Row(
           children: [
             Container(
-              padding: const EdgeInsets.all(10),
+              padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 color: AppTheme.primary.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(16),
               ),
-              child: Icon(icon, size: 20, color: AppTheme.primary),
+              child: Icon(icon, size: 22, color: AppTheme.primary),
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -422,24 +457,28 @@ class SettingsScreen extends StatelessWidget {
                 children: [
                   Text(
                     label,
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 15,
+                    style: GoogleFonts.outfit(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 16,
                       color: textColor,
+                      letterSpacing: -0.3,
                     ),
                   ),
-                  if (subtitle != null)
+                  if (subtitle != null) ...[
+                    const SizedBox(height: 2),
                     Text(
                       subtitle,
-                      style: TextStyle(
-                        fontSize: 12,
+                      style: GoogleFonts.inter(
+                        fontSize: 13,
                         color: secondaryTextColor,
                       ),
                     ),
+                  ]
                 ],
               ),
             ),
-            Icon(LucideIcons.chevronRight, size: 16, color: secondaryTextColor),
+            Icon(LucideIcons.chevronRight,
+                size: 18, color: textColor.withValues(alpha: 0.2)),
           ],
         ),
       ),
@@ -468,8 +507,8 @@ class SettingsScreen extends StatelessWidget {
             const SizedBox(height: 4),
             Text(
               isPastMonth
-                  ? 'Updating budget for a past month'
-                  : 'Set a budget to stay on track',
+                  ? 'Heads up: you\'re editing a past month'
+                  : 'A budget is basically a plan not to panic.',
               style: TextStyle(
                   fontSize: 13,
                   color: isPastMonth
@@ -566,7 +605,7 @@ class SettingsScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Choose when this budget takes effect.',
+                'Pick your scope — no take-backs, but you can always change it again.',
                 style:
                     TextStyle(fontSize: 13, color: secondaryText, height: 1.5),
               ),
@@ -684,86 +723,198 @@ class SettingsScreen extends StatelessWidget {
 
   void _showChangelogDialog(
       BuildContext context, Color textColor, Color secondaryTextColor) {
-    showDialog(
+    showGeneralDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: Theme.of(context).cardColor,
-        title: const Text('Release History',
-            style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: -0.5)),
-        content: SizedBox(
-          width: double.maxFinite,
-          child: Scrollbar(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.only(right: 8),
+      barrierDismissible: true,
+      barrierLabel: 'Changelog',
+      transitionDuration: const Duration(milliseconds: 300),
+      pageBuilder: (context, anim1, anim2) {
+        return Scaffold(
+          backgroundColor: Colors.transparent,
+          body: Center(
+            child: Container(
+              margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 60),
+              decoration: BoxDecoration(
+                color: Theme.of(context).scaffoldBackgroundColor,
+                borderRadius: BorderRadius.circular(32),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.2),
+                    blurRadius: 40,
+                    offset: const Offset(0, 20),
+                  ),
+                ],
+              ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: AppVersion.history.take(5).map((release) {
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text('Version ${release.version}',
-                              style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: AppTheme.primary,
-                                  fontSize: 16)),
-                          Text(release.date,
+                children: [
+                  // Header
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(24, 24, 16, 16),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Release History',
                               style: TextStyle(
-                                  fontSize: 11, color: secondaryTextColor)),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      ...release.changes.map((change) => Padding(
-                            padding: const EdgeInsets.only(bottom: 8, left: 4),
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Container(
-                                  margin: const EdgeInsets.only(top: 6),
-                                  width: 5,
-                                  height: 5,
-                                  decoration: BoxDecoration(
-                                    color: secondaryTextColor.withValues(
-                                        alpha: 0.5),
-                                    shape: BoxShape.circle,
-                                  ),
-                                ),
-                                const SizedBox(width: 10),
-                                Expanded(
-                                  child: Text(
-                                    change,
-                                    style: TextStyle(
-                                      color: textColor,
-                                      fontSize: 13,
-                                      height: 1.4,
+                                fontSize: 20,
+                                fontWeight: FontWeight.w900,
+                                letterSpacing: -0.5,
+                              ),
+                            ),
+                            Text(
+                              'What\'s new in Expenze',
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: AppTheme.primary,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                        IconButton(
+                          onPressed: () => Navigator.pop(context),
+                          icon: const Icon(LucideIcons.x, size: 20),
+                          style: IconButton.styleFrom(
+                            backgroundColor:
+                                AppTheme.primary.withValues(alpha: 0.1),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const Divider(height: 1),
+                  // List
+                  Expanded(
+                    child: ListView.builder(
+                      padding: const EdgeInsets.all(24),
+                      itemCount: 1,
+                      itemBuilder: (context, index) {
+                        final release = AppVersion.history[index];
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 32),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 10, vertical: 4),
+                                    decoration: BoxDecoration(
+                                      color: index == 0
+                                          ? AppTheme.primary
+                                          : AppTheme.primary
+                                              .withValues(alpha: 0.1),
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: Text(
+                                      'v${release.version}',
+                                      style: TextStyle(
+                                        color: index == 0
+                                            ? Colors.white
+                                            : AppTheme.primary,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 12,
+                                      ),
                                     ),
                                   ),
-                                ),
-                              ],
-                            ),
-                          )),
-                      const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 16),
-                        child: Divider(height: 1),
-                      ),
-                    ],
-                  );
-                }).toList(),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    release.date,
+                                    style: TextStyle(
+                                      color: secondaryTextColor,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                  if (index == 0) ...[
+                                    const SizedBox(width: 8),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 6, vertical: 2),
+                                      decoration: BoxDecoration(
+                                        color: AppTheme.success
+                                            .withValues(alpha: 0.1),
+                                        borderRadius: BorderRadius.circular(4),
+                                      ),
+                                      child: const Text(
+                                        'LATEST',
+                                        style: TextStyle(
+                                          color: AppTheme.success,
+                                          fontSize: 9,
+                                          fontWeight: FontWeight.w900,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ],
+                              ),
+                              const SizedBox(height: 16),
+                              ...release.changes.map((change) {
+                                return Padding(
+                                  padding: const EdgeInsets.only(
+                                      bottom: 12, left: 4),
+                                  child: Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Container(
+                                        margin: const EdgeInsets.only(top: 6),
+                                        width: 4,
+                                        height: 4,
+                                        decoration: BoxDecoration(
+                                          color: AppTheme.primary
+                                              .withValues(alpha: 0.4),
+                                          shape: BoxShape.circle,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Expanded(
+                                        child: Text(
+                                          change,
+                                          style: TextStyle(
+                                            color: textColor,
+                                            fontSize: 14,
+                                            height: 1.5,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              }),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Close'),
+        );
+      },
+      transitionBuilder: (context, anim1, anim2, child) {
+        return FadeTransition(
+          opacity: anim1,
+          child: SlideTransition(
+            position: Tween<Offset>(
+              begin: const Offset(0, 0.1),
+              end: Offset.zero,
+            ).animate(
+                CurvedAnimation(parent: anim1, curve: Curves.easeOutCubic)),
+            child: child,
           ),
-        ],
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-      ),
+        );
+      },
     );
   }
 
@@ -863,5 +1014,141 @@ class SettingsScreen extends StatelessWidget {
       contentPadding: const EdgeInsets.symmetric(horizontal: 16),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
     );
+  }
+
+  void _showHelpDialog(BuildContext context) {
+    final textColor = AppTheme.getTextColor(context);
+    final secondaryTextColor =
+        AppTheme.getTextColor(context, isSecondary: true);
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: Theme.of(context).cardTheme.color,
+        surfaceTintColor: Colors.transparent,
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.orange.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: const Icon(LucideIcons.helpCircle,
+                  color: Colors.orange, size: 20),
+            ),
+            const SizedBox(width: 12),
+            Text('Help & Support',
+                style: TextStyle(
+                    fontWeight: FontWeight.w900,
+                    color: textColor,
+                    letterSpacing: -0.5)),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+                'For any issues, feedback, or just to say hi, reach out to us:',
+                style: TextStyle(color: secondaryTextColor, fontSize: 13)),
+            const SizedBox(height: 24),
+            _buildSupportTile(
+              context,
+              icon: LucideIcons.mail,
+              label: 'Email Support',
+              value: AppVersion.supportEmail,
+              onTap: () => _launchURL('mailto:${AppVersion.supportEmail}'),
+            ),
+            const SizedBox(height: 12),
+            _buildSupportTile(
+              context,
+              icon: LucideIcons.globe,
+              label: 'Official Website',
+              value: 'expenze-elite.netlify.app',
+              onTap: () => _launchURL(AppVersion.website),
+            ),
+            const SizedBox(height: 24),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(LucideIcons.info, size: 12, color: secondaryTextColor),
+                const SizedBox(width: 4),
+                Text(
+                  'App Version: ${AppVersion.current}+${AppVersion.buildNumber}',
+                  style: TextStyle(
+                      fontSize: 11,
+                      color: secondaryTextColor.withValues(alpha: 0.7),
+                      fontWeight: FontWeight.w500),
+                ),
+              ],
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text('Close',
+                style: TextStyle(
+                    color: secondaryTextColor, fontWeight: FontWeight.bold)),
+          )
+        ],
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+      ),
+    );
+  }
+
+  Widget _buildSupportTile(
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+    required String value,
+    required VoidCallback onTap,
+  }) {
+    final secondaryTextColor =
+        AppTheme.getTextColor(context, isSecondary: true);
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          border: Border.all(
+              color: AppTheme.getTextColor(context).withValues(alpha: 0.1)),
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Row(
+          children: [
+            Icon(icon, size: 18, color: AppTheme.primary),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(label,
+                      style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w900,
+                          color: secondaryTextColor.withValues(alpha: 0.6),
+                          letterSpacing: 0.5)),
+                  Text(value,
+                      style: const TextStyle(
+                          fontSize: 14, fontWeight: FontWeight.bold)),
+                ],
+              ),
+            ),
+            const Icon(LucideIcons.externalLink,
+                size: 14, color: AppTheme.primary),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _launchURL(String urlString) async {
+    final Uri url = Uri.parse(urlString);
+    if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
+      // Could add a snackbar here if launch fails
+    }
   }
 }
