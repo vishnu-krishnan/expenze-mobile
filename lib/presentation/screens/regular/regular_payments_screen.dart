@@ -18,6 +18,8 @@ class RegularPaymentsScreen extends StatefulWidget {
 }
 
 class _RegularPaymentsScreenState extends State<RegularPaymentsScreen> {
+  String _sortBy = 'amount'; // 'name', 'amount', 'priority'
+
   @override
   void initState() {
     super.initState();
@@ -71,6 +73,23 @@ class _RegularPaymentsScreenState extends State<RegularPaymentsScreen> {
                   ),
                 ),
               ),
+              actions: [
+                Padding(
+                  padding: const EdgeInsets.only(right: 16),
+                  child: PopupMenuButton<String>(
+                    icon: Icon(LucideIcons.arrowDownUp, color: textColor),
+                    color: Theme.of(context).cardColor,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16)),
+                    onSelected: (val) => setState(() => _sortBy = val),
+                    itemBuilder: (context) => [
+                      _buildSortItem('Amount', 'amount', textColor),
+                      _buildSortItem('Name', 'name', textColor),
+                      _buildSortItem('Priority', 'priority', textColor),
+                    ],
+                  ),
+                ),
+              ],
             ),
             if (context.watch<RegularPaymentProvider>().isLoading)
               const SliverToBoxAdapter(
@@ -79,6 +98,13 @@ class _RegularPaymentsScreenState extends State<RegularPaymentsScreen> {
                   child: LinearProgressIndicator(minHeight: 2),
                 ),
               ),
+            SliverToBoxAdapter(
+              child: Consumer2<RegularPaymentProvider, ExpenseProvider>(
+                builder: (context, rProvider, eProvider, _) =>
+                    _buildSummaryFooter(rProvider.payments, eProvider.expenses,
+                        textColor, secondaryTextColor),
+              ),
+            ),
             SliverPadding(
               padding: const EdgeInsets.symmetric(horizontal: 26, vertical: 20),
               sliver: Consumer3<RegularPaymentProvider, CategoryProvider,
@@ -91,24 +117,39 @@ class _RegularPaymentsScreenState extends State<RegularPaymentsScreen> {
                         child: _buildEmptyState(secondaryTextColor));
                   }
 
+                  final sortedPayments =
+                      List<RegularPayment>.from(provider.payments);
+                  if (_sortBy == 'name') {
+                    sortedPayments.sort((a, b) =>
+                        a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+                  } else if (_sortBy == 'amount') {
+                    sortedPayments.sort((a, b) => b.defaultPlannedAmount
+                        .compareTo(a.defaultPlannedAmount));
+                  } else if (_sortBy == 'priority') {
+                    int pVal(String p) => p == 'HIGH'
+                        ? 3
+                        : p == 'MEDIUM'
+                            ? 2
+                            : 1;
+                    sortedPayments.sort((a, b) {
+                      final pCmp = pVal(b.priority).compareTo(pVal(a.priority));
+                      if (pCmp != 0) return pCmp;
+                      return b.defaultPlannedAmount
+                          .compareTo(a.defaultPlannedAmount);
+                    });
+                  }
+
                   return SliverList(
                     delegate: SliverChildBuilderDelegate(
                       (context, index) {
-                        final payment = provider.payments[index];
+                        final payment = sortedPayments[index];
                         return _buildPaymentCard(payment, categoryProvider,
                             textColor, secondaryTextColor);
                       },
-                      childCount: provider.payments.length,
+                      childCount: sortedPayments.length,
                     ),
                   );
                 },
-              ),
-            ),
-            SliverToBoxAdapter(
-              child: Consumer2<RegularPaymentProvider, ExpenseProvider>(
-                builder: (context, rProvider, eProvider, _) =>
-                    _buildSummaryFooter(rProvider.payments, eProvider.expenses,
-                        textColor, secondaryTextColor),
               ),
             ),
             const SliverToBoxAdapter(child: SizedBox(height: 140)),
@@ -127,6 +168,18 @@ class _RegularPaymentsScreenState extends State<RegularPaymentsScreen> {
           child: const Icon(LucideIcons.plus, color: Colors.white, size: 30),
         ),
       ),
+    );
+  }
+
+  PopupMenuItem<String> _buildSortItem(
+      String text, String value, Color textColor) {
+    return PopupMenuItem<String>(
+      value: value,
+      child: Text(text,
+          style: TextStyle(
+              color: textColor,
+              fontWeight:
+                  _sortBy == value ? FontWeight.bold : FontWeight.normal)),
     );
   }
 
@@ -249,7 +302,7 @@ class _RegularPaymentsScreenState extends State<RegularPaymentsScreen> {
                 _buildDateInfo(
                     'Start Date', payment.startDate, secondaryTextColor),
                 if (payment.endDate != null)
-                  _buildDateInfo('Next Due', payment.endDate!,
+                  _buildDateInfo('End Date', payment.endDate!,
                       isOverdue ? AppTheme.danger : AppTheme.primary),
                 if (payment.durationMonths != null)
                   _buildPeriodInfo('Period', '${payment.durationMonths} Mo',
