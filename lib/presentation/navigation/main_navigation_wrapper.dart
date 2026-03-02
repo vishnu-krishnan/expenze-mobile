@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:provider/provider.dart';
 import '../../core/theme/app_theme.dart';
@@ -19,6 +20,7 @@ class MainNavigationWrapper extends StatefulWidget {
 
 class _MainNavigationWrapperState extends State<MainNavigationWrapper> {
   late int _selectedIndex;
+  bool _isDockVisible = true;
 
   @override
   void initState() {
@@ -50,54 +52,91 @@ class _MainNavigationWrapperState extends State<MainNavigationWrapper> {
         child: Scaffold(
           backgroundColor: Colors.transparent,
           extendBody: true,
-          body: SafeArea(
-            top: true,
-            bottom: false,
-            child: IndexedStack(
-              index: _selectedIndex,
-              children: _screens,
-            ),
+          body: Stack(
+            children: [
+              SafeArea(
+                top: true,
+                bottom: false,
+                child: NotificationListener<ScrollNotification>(
+                  onNotification: (notification) {
+                    if (notification is ScrollUpdateNotification) {
+                      // Only show dock when at or very near the top of the screen content
+                      if (notification.metrics.pixels <= 40) {
+                        if (!_isDockVisible) {
+                          setState(() => _isDockVisible = true);
+                        }
+                      } else {
+                        // Hide dock while scrolling the page slowly or fast
+                        if (_isDockVisible) {
+                          setState(() => _isDockVisible = false);
+                        }
+                      }
+                    }
+                    return false;
+                  },
+                  child: IndexedStack(
+                    index: _selectedIndex,
+                    children: _screens,
+                  ),
+                ),
+              ),
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 0,
+                child: SafeArea(
+                  top: false,
+                  child: _buildModernNavBar(isDark),
+                ),
+              ),
+            ],
           ),
-          bottomNavigationBar: _buildModernNavBar(isDark),
         ),
       ),
     );
   }
 
   Widget _buildModernNavBar(bool isDark) {
-    return Container(
-      margin: const EdgeInsets.fromLTRB(24, 0, 24, 30),
-      height: 70,
-      decoration: BoxDecoration(
-        color: isDark
-            ? AppTheme.bgCardDark.withValues(alpha: 0.8)
-            : Colors.white.withValues(alpha: 0.8),
-        borderRadius: BorderRadius.circular(35),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.1),
-            blurRadius: 30,
-            offset: const Offset(0, 10),
-          ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(35),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                Expanded(child: _buildNavItem(LucideIcons.home, 'Home', 0)),
-                Expanded(
-                    child: _buildNavItem(LucideIcons.pieChart, 'Analytics', 1)),
-                Expanded(
-                    child: _buildNavItem(LucideIcons.calendar, 'Planner', 2)),
-                Expanded(
-                    child: _buildNavItem(LucideIcons.settings, 'Settings', 3)),
-              ],
+    return AnimatedSlide(
+      duration: const Duration(milliseconds: 350),
+      curve: Curves.easeOutCubic,
+      offset: _isDockVisible ? Offset.zero : const Offset(0, 2),
+      child: Container(
+        margin: const EdgeInsets.fromLTRB(24, 0, 24, 30),
+        height: 70,
+        decoration: BoxDecoration(
+          color: isDark
+              ? AppTheme.bgCardDark.withValues(alpha: 0.8)
+              : Colors.white.withValues(alpha: 0.8),
+          borderRadius: BorderRadius.circular(35),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.1),
+              blurRadius: 30,
+              offset: const Offset(0, 10),
+            ),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(35),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  Expanded(child: _buildNavItem(LucideIcons.home, 'Home', 0)),
+                  Expanded(
+                      child:
+                          _buildNavItem(LucideIcons.pieChart, 'Analytics', 1)),
+                  Expanded(
+                      child: _buildNavItem(LucideIcons.calendar, 'Planner', 2)),
+                  Expanded(
+                      child:
+                          _buildNavItem(LucideIcons.settings, 'Settings', 3)),
+                ],
+              ),
             ),
           ),
         ),
