@@ -3,6 +3,7 @@ import 'package:sqflite/sqflite.dart';
 import '../../core/utils/logger.dart';
 import 'package:path/path.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class DatabaseHelper {
   static final DatabaseHelper instance = DatabaseHelper._init();
@@ -515,15 +516,28 @@ class DatabaseHelper {
 
       if (!await dbFile.exists()) return null;
 
-      String? selectedDirectory = await FilePicker.platform.getDirectoryPath();
-
-      if (selectedDirectory == null) {
-        return null;
+      // Request Manage External Storage on Android 11+ or regular Storage on older versions
+      if (!await Permission.manageExternalStorage.isGranted) {
+        await Permission.manageExternalStorage.request();
+      }
+      if (!await Permission.storage.isGranted) {
+        await Permission.storage.request();
       }
 
-      final backupPath = join(selectedDirectory, 'expenze_backup.db');
-      await dbFile.copy(backupPath);
-      return backupPath;
+      if (await Permission.manageExternalStorage.isGranted ||
+          await Permission.storage.isGranted) {
+        final directory = Directory('/storage/emulated/0/expenze');
+        if (!await directory.exists()) {
+          await directory.create(recursive: true);
+        }
+
+        final backupPath = join(directory.path, 'expenze_backup.db');
+        await dbFile.copy(backupPath);
+        return backupPath;
+      } else {
+        logger.e('Storage permission denied.');
+        return null;
+      }
     } catch (e) {
       logger.e('Error exporting database: $e');
       return null;
