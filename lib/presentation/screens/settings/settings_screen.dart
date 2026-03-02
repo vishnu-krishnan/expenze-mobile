@@ -9,6 +9,7 @@ import '../../providers/expense_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../../core/constants/app_version.dart';
 import '../../../data/services/api_service.dart';
+import '../../../data/services/database_helper.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -175,6 +176,74 @@ class SettingsScreen extends StatelessWidget {
                           textColor: textColor.withValues(alpha: 0.5),
                           secondaryTextColor:
                               secondaryTextColor.withValues(alpha: 0.5),
+                        ),
+                        Divider(
+                            height: 32,
+                            color: secondaryTextColor.withValues(alpha: 0.1)),
+                        _buildSettingsItem(
+                          icon: LucideIcons.downloadCloud,
+                          label: 'Export Local Backup',
+                          subtitle: 'Save a copy of your data locally',
+                          onTap: () async {
+                            final path =
+                                await DatabaseHelper.instance.exportDatabase();
+                            if (!context.mounted) return;
+                            if (path != null) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('Backup saved to $path'),
+                                  behavior: SnackBarBehavior.floating,
+                                  backgroundColor: AppTheme.success,
+                                ),
+                              );
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content:
+                                      Text('Backup export failed or cancelled'),
+                                  behavior: SnackBarBehavior.floating,
+                                  backgroundColor: AppTheme.danger,
+                                ),
+                              );
+                            }
+                          },
+                          textColor: textColor,
+                          secondaryTextColor: secondaryTextColor,
+                        ),
+                        Divider(
+                            height: 32,
+                            color: secondaryTextColor.withValues(alpha: 0.1)),
+                        _buildSettingsItem(
+                          icon: LucideIcons.uploadCloud,
+                          label: 'Import Local Backup',
+                          subtitle:
+                              'Restore your data from a prior backup file',
+                          onTap: () async {
+                            final success =
+                                await DatabaseHelper.instance.importDatabase();
+                            if (!context.mounted) return;
+                            if (success) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text(
+                                      'Backup restored successfully! Please restart the app.'),
+                                  behavior: SnackBarBehavior.floating,
+                                  backgroundColor: AppTheme.success,
+                                ),
+                              );
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content:
+                                      Text('Backup import failed or cancelled'),
+                                  behavior: SnackBarBehavior.floating,
+                                  backgroundColor: AppTheme.danger,
+                                ),
+                              );
+                            }
+                          },
+                          textColor: textColor,
+                          secondaryTextColor: secondaryTextColor,
                         ),
                       ],
                     ),

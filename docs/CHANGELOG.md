@@ -1,6 +1,21 @@
 # Expenze Application Changelog
 
-## Version 1.4.4+15 - 2026-02-24
+## Version 1.6.0+18 - 2026-03-02
+
+### Added
+- **Local Backup & Restore**: Added ability to export expenses database to a local `.db` file, and import it back to restore all previous data across reinstalls.
+
+## Version 1.5.1+17 - 2026-02-27
+
+### Fixed
+- **UI Responsiveness**: Fixed keyboard overlap issues across various text input screens (like Notes) by dynamically adjusting bottom padding for improved typing experience.
+- **Regular Expenses Data**: Fixed an issue where the `endDate` field was displaying the `nextDueDate`. Re-labeled it correctly as "End Date".
+- **Notes UI Improvements**: Enhanced Notes screen with rich typography, shadow effects, and automatic list formatting features.
+
+## Version 1.5.0+16 - 2026-02-27
+
+### Added
+- **Account Verification**: Major enhancements to the email verification flow, including a polished OTP input experience and fixed resend mechanisms.
 
 ### Added
 - **Dynamic Spectrum Cards**: Implemented a color-shifting background system for main financial cards (Dashboard & Planner). Card colors now transition from Teal (Healthy) to Lime (Attention), Amber (Warning), Red (Danger), and Dark Red (Critical) based on real-time budget usage.

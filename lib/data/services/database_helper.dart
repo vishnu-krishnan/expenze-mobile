@@ -1,6 +1,8 @@
+import 'dart:io';
 import 'package:sqflite/sqflite.dart';
 import '../../core/utils/logger.dart';
 import 'package:path/path.dart';
+import 'package:file_picker/file_picker.dart';
 
 class DatabaseHelper {
   static final DatabaseHelper instance = DatabaseHelper._init();
@@ -503,5 +505,57 @@ class DatabaseHelper {
       where: 'email = ?',
       whereArgs: [email],
     );
+  }
+
+  Future<String?> exportDatabase() async {
+    try {
+      final dbPath = await getDatabasesPath();
+      final path = join(dbPath, 'expenze.db');
+      final dbFile = File(path);
+
+      if (!await dbFile.exists()) return null;
+
+      String? selectedDirectory = await FilePicker.platform.getDirectoryPath();
+
+      if (selectedDirectory == null) {
+        return null;
+      }
+
+      final backupPath = join(selectedDirectory, 'expenze_backup.db');
+      await dbFile.copy(backupPath);
+      return backupPath;
+    } catch (e) {
+      logger.e('Error exporting database: $e');
+      return null;
+    }
+  }
+
+  Future<bool> importDatabase() async {
+    try {
+      FilePickerResult? result = await FilePicker.platform.pickFiles(
+        type: FileType.any,
+      );
+
+      if (result != null && result.files.single.path != null) {
+        final sourcePath = result.files.single.path!;
+        final dbPath = await getDatabasesPath();
+        final path = join(dbPath, 'expenze.db');
+
+        if (_database != null) {
+          await _database!.close();
+          _database = null;
+        }
+
+        final sourceFile = File(sourcePath);
+        await sourceFile.copy(path);
+
+        _database = await _initDB('expenze.db');
+        return true;
+      }
+      return false;
+    } catch (e) {
+      logger.e('Error importing database: $e');
+      return false;
+    }
   }
 }

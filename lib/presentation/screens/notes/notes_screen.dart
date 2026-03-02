@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../data/models/note.dart';
 import '../../../presentation/providers/note_provider.dart';
@@ -14,12 +15,64 @@ class NotesScreen extends StatefulWidget {
 }
 
 class _NotesScreenState extends State<NotesScreen> {
+  int? _editingNoteId;
+  bool _isAddingNew = false;
+
+  final _titleController = TextEditingController();
+  final _contentController = TextEditingController();
+  DateTime? _selectedDate;
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<NoteProvider>().loadNotes();
     });
+  }
+
+  void _startEditing(Note? note) {
+    setState(() {
+      if (note == null) {
+        _isAddingNew = true;
+        _editingNoteId = null;
+      } else {
+        _isAddingNew = false;
+        _editingNoteId = note.id;
+      }
+      _titleController.text = note?.title ?? '';
+      _contentController.text = note?.content ?? '';
+      _selectedDate = note?.reminderDate;
+    });
+  }
+
+  void _cancelEditing() {
+    setState(() {
+      _isAddingNew = false;
+      _editingNoteId = null;
+    });
+  }
+
+  void _saveNote(Note? note) {
+    if (_titleController.text.isNotEmpty ||
+        _contentController.text.isNotEmpty) {
+      if (note == null) {
+        context.read<NoteProvider>().addNote(
+              _titleController.text,
+              _contentController.text,
+              reminderDate: _selectedDate,
+            );
+      } else {
+        context.read<NoteProvider>().updateNote(
+              note.copyWith(
+                title: _titleController.text,
+                content: _contentController.text,
+                reminderDate: _selectedDate,
+                isReminderActive: _selectedDate != null,
+              ),
+            );
+      }
+    }
+    _cancelEditing();
   }
 
   @override
@@ -42,16 +95,17 @@ class _NotesScreenState extends State<NotesScreen> {
           children: [
             AppBar(
               title: Text('Notes',
-                  style: TextStyle(
+                  style: GoogleFonts.outfit(
                       color: textColor,
                       fontWeight: FontWeight.w900,
-                      fontSize: 26,
+                      fontSize: 34,
                       letterSpacing: -1)),
               centerTitle: false,
               titleSpacing: 26,
               automaticallyImplyLeading: false,
               backgroundColor: Colors.transparent,
               elevation: 0,
+              toolbarHeight: 100,
             ),
             Expanded(
               child: Consumer<NoteProvider>(
@@ -60,17 +114,37 @@ class _NotesScreenState extends State<NotesScreen> {
                     return const Center(child: CircularProgressIndicator());
                   }
 
-                  if (provider.notes.isEmpty) {
+                  if (provider.notes.isEmpty && !_isAddingNew) {
                     return _buildEmptyState(secondaryTextColor);
                   }
 
+                  final itemCount =
+                      provider.notes.length + (_isAddingNew ? 1 : 0);
+
                   return ListView.builder(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 20, vertical: 10),
-                    itemCount: provider.notes.length,
+                    physics: const BouncingScrollPhysics(),
+                    padding: EdgeInsets.only(
+                        left: 24,
+                        right: 24,
+                        top: 10,
+                        bottom: MediaQuery.of(context).viewInsets.bottom + 120),
+                    itemCount: itemCount,
                     itemBuilder: (context, index) {
+                      if (_isAddingNew && index == 0) {
+                        return _buildEditableCard(
+                            null, textColor, secondaryTextColor);
+                      }
+
+                      final noteIndex = _isAddingNew ? index - 1 : index;
+                      final note = provider.notes[noteIndex];
+
+                      if (_editingNoteId == note.id) {
+                        return _buildEditableCard(
+                            note, textColor, secondaryTextColor);
+                      }
+
                       return _buildNoteCard(
-                          provider.notes[index], textColor, secondaryTextColor);
+                          note, textColor, secondaryTextColor);
                     },
                   );
                 },
@@ -79,11 +153,21 @@ class _NotesScreenState extends State<NotesScreen> {
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _showNoteDialog(context),
-        backgroundColor: AppTheme.primary,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-        child: const Icon(LucideIcons.plus, color: Colors.white, size: 30),
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.only(bottom: 120),
+        child: FloatingActionButton(
+          heroTag: 'notes_fab',
+          onPressed: () {
+            if (!_isAddingNew && _editingNoteId == null) {
+              _startEditing(null);
+            }
+          },
+          backgroundColor: AppTheme.primary,
+          elevation: 8,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+          child: const Icon(LucideIcons.plus, color: Colors.white, size: 30),
+        ),
       ),
     );
   }
@@ -100,17 +184,17 @@ class _NotesScreenState extends State<NotesScreen> {
           Text(
             'Your brain called — it wants backup.',
             textAlign: TextAlign.center,
-            style: TextStyle(
+            style: GoogleFonts.outfit(
                 color: secondaryTextColor,
-                fontSize: 17,
-                fontWeight: FontWeight.w700),
+                fontSize: 18,
+                fontWeight: FontWeight.w800),
           ),
           const SizedBox(height: 8),
           Text(
             'Jot down thoughts, reminders, or\nwhy you spent ₹2,000 on that thing.',
             textAlign: TextAlign.center,
-            style: TextStyle(
-                color: secondaryTextColor.withValues(alpha: 0.6), fontSize: 13),
+            style: GoogleFonts.inter(
+                color: secondaryTextColor.withValues(alpha: 0.6), fontSize: 14),
           ),
         ],
       ),
@@ -127,75 +211,86 @@ class _NotesScreenState extends State<NotesScreen> {
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
         color: Theme.of(context).cardTheme.color,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: AppTheme.softShadow,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            height: 4,
+            height: 6,
             decoration: BoxDecoration(
-              color: colorVal.withValues(alpha: 0.5),
+              color: colorVal.withValues(alpha: 0.8),
               borderRadius:
-                  const BorderRadius.vertical(top: Radius.circular(20)),
+                  const BorderRadius.vertical(top: Radius.circular(24)),
             ),
           ),
           Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Expanded(
                       child: Text(
-                        note.title,
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 17,
+                        note.title.isEmpty ? 'Untitled' : note.title,
+                        style: GoogleFonts.outfit(
+                            fontWeight: FontWeight.w800,
+                            fontSize: 18,
                             color: textColor),
                       ),
                     ),
                     IconButton(
                       icon: Icon(
                         note.isPinned ? LucideIcons.pin : LucideIcons.pinOff,
-                        size: 18,
+                        size: 20,
                         color: note.isPinned
                             ? AppTheme.primary
-                            : secondaryTextColor.withValues(alpha: 0.5),
+                            : secondaryTextColor.withValues(alpha: 0.3),
                       ),
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
                       onPressed: () =>
                           context.read<NoteProvider>().togglePin(note),
                     ),
                   ],
                 ),
+                const SizedBox(height: 8),
                 Text(
                   note.content,
-                  style: TextStyle(color: secondaryTextColor, fontSize: 14),
+                  style: GoogleFonts.inter(
+                      color: secondaryTextColor, fontSize: 14, height: 1.6),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 20),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     if (note.reminderDate != null)
                       Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 10, vertical: 4),
+                            horizontal: 10, vertical: 6),
                         decoration: BoxDecoration(
                           color: AppTheme.primary.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius: BorderRadius.circular(10),
                         ),
                         child: Row(
                           children: [
                             const Icon(LucideIcons.bell,
-                                size: 12, color: AppTheme.primary),
-                            const SizedBox(width: 4),
+                                size: 14, color: AppTheme.primary),
+                            const SizedBox(width: 6),
                             Text(
                               DateFormat('MMM d, h:mm a')
                                   .format(note.reminderDate!),
-                              style: const TextStyle(
+                              style: GoogleFonts.inter(
                                   color: AppTheme.primary,
                                   fontSize: 11,
                                   fontWeight: FontWeight.bold),
@@ -207,16 +302,17 @@ class _NotesScreenState extends State<NotesScreen> {
                       const SizedBox(),
                     Row(
                       children: [
-                        IconButton(
-                          icon: Icon(LucideIcons.edit2,
-                              size: 16, color: secondaryTextColor),
-                          onPressed: () => _showNoteDialog(context, note: note),
+                        GestureDetector(
+                          onTap: () => _startEditing(note),
+                          child: Icon(LucideIcons.edit2,
+                              size: 18, color: secondaryTextColor),
                         ),
-                        IconButton(
-                          icon: const Icon(LucideIcons.trash2,
-                              size: 16, color: AppTheme.danger),
-                          onPressed: () =>
+                        const SizedBox(width: 16),
+                        GestureDetector(
+                          onTap: () =>
                               context.read<NoteProvider>().deleteNote(note.id!),
+                          child: const Icon(LucideIcons.trash2,
+                              size: 18, color: AppTheme.danger),
                         ),
                       ],
                     ),
@@ -230,137 +326,235 @@ class _NotesScreenState extends State<NotesScreen> {
     );
   }
 
-  void _showNoteDialog(BuildContext context, {Note? note}) {
-    final titleController = TextEditingController(text: note?.title ?? '');
-    final contentController = TextEditingController(text: note?.content ?? '');
-    DateTime? selectedDate = note?.reminderDate;
-
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setModalState) {
-          final isDark = Theme.of(context).brightness == Brightness.dark;
-          final modalBgColor = isDark ? AppTheme.bgCardDark : Colors.white;
-          final textColor = AppTheme.getTextColor(context);
-
-          return Container(
-            padding: EdgeInsets.only(
-              bottom: MediaQuery.of(context).viewInsets.bottom,
-              top: 24,
-              left: 24,
-              right: 24,
-            ),
-            decoration: BoxDecoration(
-              color: modalBgColor,
-              borderRadius:
-                  const BorderRadius.vertical(top: Radius.circular(30)),
-            ),
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(note == null ? 'New Note 📝' : 'Edit Note',
-                      style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: textColor)),
-                  const SizedBox(height: 24),
-                  TextField(
-                    controller: titleController,
-                    decoration: AppTheme.inputDecoration(
-                        'Title', LucideIcons.type,
-                        context: context),
-                    style: TextStyle(color: textColor),
-                  ),
-                  const SizedBox(height: 16),
-                  TextField(
-                    controller: contentController,
-                    maxLines: 4,
-                    decoration: AppTheme.inputDecoration(
-                        'Content', LucideIcons.alignLeft,
-                        context: context),
-                    style: TextStyle(color: textColor),
-                  ),
-                  const SizedBox(height: 16),
-                  ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    leading:
-                        const Icon(LucideIcons.bell, color: AppTheme.primary),
-                    title: Text(
-                        selectedDate == null
-                            ? 'Set Reminder'
-                            : DateFormat('MMM d, yyyy h:mm a')
-                                .format(selectedDate!),
-                        style: TextStyle(color: textColor)),
-                    onTap: () async {
-                      if (!context.mounted) return;
-                      final date = await showDatePicker(
-                        context: context,
-                        initialDate: selectedDate ?? DateTime.now(),
-                        firstDate: DateTime.now(),
-                        lastDate: DateTime.now().add(const Duration(days: 365)),
-                      );
-                      if (date != null) {
-                        if (!context.mounted) return;
-                        final time = await showTimePicker(
-                          context: context,
-                          initialTime: selectedDate != null
-                              ? TimeOfDay.fromDateTime(selectedDate!)
-                              : TimeOfDay.now(),
-                        );
-                        if (time != null) {
-                          setModalState(() {
-                            selectedDate = DateTime(date.year, date.month,
-                                date.day, time.hour, time.minute);
-                          });
-                        }
-                      }
-                    },
-                    trailing: selectedDate != null
-                        ? IconButton(
-                            icon: const Icon(LucideIcons.x, size: 16),
-                            onPressed: () =>
-                                setModalState(() => selectedDate = null))
-                        : null,
-                  ),
-                  const SizedBox(height: 32),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
+  Widget _buildEditableCard(
+      Note? note, Color textColor, Color secondaryTextColor) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardTheme.color,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+            color: AppTheme.primary.withValues(alpha: 0.5), width: 1.5),
+        boxShadow: [
+          BoxShadow(
+            color: AppTheme.primary.withValues(alpha: 0.1),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: _titleController,
+                        decoration: InputDecoration(
+                          hintText: 'Title',
+                          hintStyle: GoogleFonts.outfit(
+                              color: secondaryTextColor.withValues(alpha: 0.5)),
+                          border: InputBorder.none,
+                          enabledBorder: InputBorder.none,
+                          focusedBorder: InputBorder.none,
+                          isDense: true,
+                          contentPadding: EdgeInsets.zero,
+                        ),
+                        style: GoogleFonts.outfit(
+                            color: textColor,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 18),
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(LucideIcons.x, size: 20),
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                      color: secondaryTextColor,
+                      onPressed: _cancelEditing,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    IconButton(
+                      padding: EdgeInsets.zero,
+                      constraints:
+                          const BoxConstraints(minWidth: 32, minHeight: 32),
+                      icon: const Icon(LucideIcons.list, size: 18),
+                      color: AppTheme.primary,
+                      tooltip: 'Bullet List',
                       onPressed: () {
-                        if (titleController.text.isNotEmpty ||
-                            contentController.text.isNotEmpty) {
-                          if (note == null) {
-                            context.read<NoteProvider>().addNote(
-                                  titleController.text,
-                                  contentController.text,
-                                  reminderDate: selectedDate,
-                                );
-                          } else {
-                            context.read<NoteProvider>().updateNote(
-                                  note.copyWith(
-                                    title: titleController.text,
-                                    content: contentController.text,
-                                    reminderDate: selectedDate,
-                                    isReminderActive: selectedDate != null,
-                                  ),
-                                );
+                        if (_contentController.text.isEmpty ||
+                            _contentController.text.endsWith('\n')) {
+                          _contentController.text += '• ';
+                        } else {
+                          _contentController.text += '\n• ';
+                        }
+                        _contentController.selection = TextSelection.collapsed(
+                            offset: _contentController.text.length);
+                      },
+                    ),
+                    IconButton(
+                      padding: EdgeInsets.zero,
+                      constraints:
+                          const BoxConstraints(minWidth: 32, minHeight: 32),
+                      icon: const Icon(LucideIcons.listOrdered, size: 18),
+                      color: AppTheme.primary,
+                      tooltip: 'Numbered List',
+                      onPressed: () {
+                        if (_contentController.text.isEmpty ||
+                            _contentController.text.endsWith('\n')) {
+                          _contentController.text += '1. ';
+                        } else {
+                          _contentController.text += '\n1. ';
+                        }
+                        _contentController.selection = TextSelection.collapsed(
+                            offset: _contentController.text.length);
+                      },
+                    ),
+                    const Spacer(),
+                    GestureDetector(
+                      onTap: () async {
+                        final date = await showDatePicker(
+                          context: context,
+                          initialDate: _selectedDate ?? DateTime.now(),
+                          firstDate: DateTime.now(),
+                          lastDate:
+                              DateTime.now().add(const Duration(days: 365)),
+                        );
+                        if (date != null) {
+                          if (!context.mounted) return;
+                          final time = await showTimePicker(
+                            context: context,
+                            initialTime: _selectedDate != null
+                                ? TimeOfDay.fromDateTime(_selectedDate!)
+                                : TimeOfDay.now(),
+                          );
+                          if (time != null) {
+                            setState(() {
+                              _selectedDate = DateTime(date.year, date.month,
+                                  date.day, time.hour, time.minute);
+                            });
                           }
-                          Navigator.pop(context);
                         }
                       },
-                      child: Text(note == null ? 'Save Note' : 'Save Changes'),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 10, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: _selectedDate != null
+                              ? AppTheme.primary.withValues(alpha: 0.1)
+                              : secondaryTextColor.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(LucideIcons.bell,
+                                size: 14,
+                                color: _selectedDate != null
+                                    ? AppTheme.primary
+                                    : secondaryTextColor),
+                            if (_selectedDate != null) ...[
+                              const SizedBox(width: 6),
+                              Text(
+                                DateFormat('MMM d, h:mm a')
+                                    .format(_selectedDate!),
+                                style: GoogleFonts.inter(
+                                    color: AppTheme.primary,
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.bold),
+                              ),
+                            ]
+                          ],
+                        ),
+                      ),
                     ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: _contentController,
+                  maxLines: null,
+                  minLines: 3,
+                  autofocus: true,
+                  decoration: InputDecoration(
+                    hintText: 'Content...',
+                    hintStyle: GoogleFonts.inter(
+                        color: secondaryTextColor.withValues(alpha: 0.5)),
+                    border: InputBorder.none,
+                    enabledBorder: InputBorder.none,
+                    focusedBorder: InputBorder.none,
+                    isDense: true,
+                    contentPadding: EdgeInsets.zero,
                   ),
-                  const SizedBox(height: 48), // Bottom safe area
-                ],
-              ),
+                  style: GoogleFonts.inter(color: textColor, height: 1.6),
+                  onChanged: (val) {
+                    if (val.endsWith('\n')) {
+                      final lines = val.split('\n');
+                      if (lines.length >= 2) {
+                        final prevLine = lines[lines.length - 2];
+                        if (prevLine.trim() == '•') {
+                          _contentController.text =
+                              val.substring(0, val.length - 2);
+                          _contentController.selection =
+                              TextSelection.collapsed(
+                                  offset: _contentController.text.length);
+                        } else if (prevLine.trimLeft().startsWith('• ')) {
+                          _contentController.text = val + '• ';
+                          _contentController.selection =
+                              TextSelection.collapsed(
+                                  offset: _contentController.text.length);
+                        } else {
+                          final match = RegExp(r'^(\d+)\.\s')
+                              .firstMatch(prevLine.trimLeft());
+                          if (match != null) {
+                            if (prevLine.trim() == match.group(0)!.trim()) {
+                              _contentController.text = val.substring(
+                                  0, val.length - match.group(0)!.length - 1);
+                              _contentController.selection =
+                                  TextSelection.collapsed(
+                                      offset: _contentController.text.length);
+                            } else {
+                              final num = int.parse(match.group(1)!) + 1;
+                              _contentController.text = val + '$num. ';
+                              _contentController.selection =
+                                  TextSelection.collapsed(
+                                      offset: _contentController.text.length);
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                ),
+                const SizedBox(height: 20),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: ElevatedButton(
+                    onPressed: () => _saveNote(note),
+                    style: AppTheme.primaryButtonStyle.copyWith(
+                        padding: WidgetStateProperty.all(
+                            const EdgeInsets.symmetric(
+                                horizontal: 24, vertical: 12)),
+                        shape: WidgetStateProperty.all(RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12)))),
+                    child: Text('Done',
+                        style: GoogleFonts.outfit(
+                            fontWeight: FontWeight.bold, fontSize: 14)),
+                  ),
+                ),
+              ],
             ),
-          );
-        },
+          ),
+        ],
       ),
     );
   }

@@ -11,14 +11,39 @@ class ReleaseInfo {
 }
 
 class AppVersion {
-  static const String current = '1.4.4';
-  static const String buildNumber = '15';
-  static const String releaseName = 'Dynamic Spectrum UI';
+  static const String current = '1.6.0';
+  static const String buildNumber = '18';
+  static const String releaseName = 'Local Backup & Restore';
 
   static const String website = 'https://expenze-elite.netlify.app/';
   static const String supportEmail = 'expenzehelp@gmail.com';
 
   static const List<ReleaseInfo> history = [
+    ReleaseInfo(
+      version: '1.6.0',
+      date: '2026-03-02',
+      changes: [
+        'Local Backup & Restore: Export expenses to a local .db file',
+        'Restore all previous data across reinstallations via importing your .db file',
+      ],
+    ),
+    ReleaseInfo(
+      version: '1.5.1',
+      date: '2026-02-27',
+      changes: [
+        'UI Responsiveness: Fixed keyboard overlap issues across various text input screens by dynamically adjusting bottom padding',
+        'Regular Expenses Data: Re-labeled endDate field correctly to "End Date"',
+        'Notes UI Improvements: Enhanced Notes screen with rich typography, shadow effects, and automatic list formatting features',
+      ],
+    ),
+    ReleaseInfo(
+      version: '1.5.0',
+      date: '2026-02-27',
+      changes: [
+        'Account Verification: Major enhancements to the email verification flow',
+        'Polished OTP input experience and fixed resend mechanisms',
+      ],
+    ),
     ReleaseInfo(
       version: '1.4.4',
       date: '2026-02-24',
