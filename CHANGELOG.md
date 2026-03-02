@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.7.1+21] - 2026-03-03
+### Fixed
+- **UI Polish**: Final refinement of dashboard action cards and layout consistency.
+- **Font Reversion**: Completed full reversion to original typography across all application screens.
+
+## [1.7.0+20] - 2026-03-03
+### Added
+- **Wish List Module**: New dedicated tracker for future purchase goals (Electronics, Shopping).
+- **UX Safety**: Implemented confirmation dialogs before deleting Notes or Wish List entries.
+- **Database Resilience**: Fixed SQLite initialization for the `wishes` table.
+
+## [1.6.1+19] - 2026-03-02
+### Added
+- **Animated Actions**: Introduced micro-animations (scale on tap) to the Dashboard Quick Actions.
+
+### Fixed
+- **Code Health**: Replaced all deprecated `withOpacity` calls with `withValues`.
+
 ## [1.6.0+18] - 2026-03-02
 ### Added
 - **Local Backup & Restore**: Added ability to export expenses database to a local `.db` file, and import it back to restore all previous data across reinstalls.

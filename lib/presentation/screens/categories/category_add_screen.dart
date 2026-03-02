@@ -148,7 +148,7 @@ class _CategoryAddScreenState extends State<CategoryAddScreen> {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(cat['emoji'], style: const TextStyle(fontSize: 18)),
+                Text(cat['emoji'], style: TextStyle(fontSize: 18)),
                 const SizedBox(width: 8),
                 Text(
                   cat['name'],
@@ -286,8 +286,8 @@ class _CategoryAddScreenState extends State<CategoryAddScreen> {
                                           )
                                         ],
                                 ),
-                                child: Text(emoji,
-                                    style: const TextStyle(fontSize: 22)),
+                                child:
+                                    Text(emoji, style: TextStyle(fontSize: 22)),
                               ),
                             );
                           },
@@ -315,7 +315,7 @@ class _CategoryAddScreenState extends State<CategoryAddScreen> {
               ),
               backgroundColor: WidgetStateProperty.all(AppTheme.primary),
             ),
-            child: const Text('Bring it to life',
+            child: Text('Bring it to life',
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
           ),
         ],

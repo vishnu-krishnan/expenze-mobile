@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:provider/provider.dart';
 import '../../../core/theme/app_theme.dart';
@@ -151,7 +150,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
                             children: [
                               Text(
                                 'Almost in — tell us who\'s boss.',
-                                style: GoogleFonts.outfit(
+                                style: TextStyle(
                                   fontSize: 34,
                                   fontWeight: FontWeight.bold,
                                   color: AppTheme.getTextColor(context),
@@ -161,7 +160,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
                               const SizedBox(height: 12),
                               Text(
                                 'Quick setup. No forms that ask for your blood type.',
-                                style: GoogleFonts.inter(
+                                style: TextStyle(
                                   fontSize: 16,
                                   color: AppTheme.getTextColor(context,
                                       isSecondary: true),
@@ -228,7 +227,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
       children: [
         Text(
           label,
-          style: GoogleFonts.outfit(
+          style: TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w800,
             letterSpacing: 1.5,
@@ -258,12 +257,12 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
           child: TextField(
             controller: controller,
             keyboardType: keyboardType,
-            style: GoogleFonts.inter(
+            style: TextStyle(
                 fontSize: 16,
                 color: isDark ? Colors.white : AppTheme.textPrimary),
             decoration: InputDecoration(
               hintText: hint,
-              hintStyle: GoogleFonts.inter(
+              hintStyle: TextStyle(
                   color: isDark ? Colors.white30 : AppTheme.textLight),
               prefixIcon: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 18),
@@ -282,7 +281,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
             padding: const EdgeInsets.only(top: 8, left: 16),
             child: Text(
               errorText,
-              style: GoogleFonts.inter(
+              style: TextStyle(
                 color: AppTheme.danger,
                 fontSize: 12,
                 fontWeight: FontWeight.w500,
@@ -319,7 +318,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
         ),
         child: Text(
           'Lock In & Get Started',
-          style: GoogleFonts.outfit(
+          style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w800,
             letterSpacing: 0.5,

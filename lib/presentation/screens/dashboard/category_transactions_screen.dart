@@ -90,7 +90,7 @@ class _CategoryTransactionsScreenState
                     ),
                     child: Text(
                       widget.categoryIcon ?? '📁',
-                      style: const TextStyle(fontSize: 20),
+                      style: TextStyle(fontSize: 20),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -120,7 +120,7 @@ class _CategoryTransactionsScreenState
             ),
             Expanded(
               child: _isLoading
-                  ? const Center(child: CircularProgressIndicator())
+                  ? Center(child: CircularProgressIndicator())
                   : _transactions.isEmpty
                       ? Center(
                           child: Text(
@@ -235,7 +235,7 @@ class _CategoryTransactionsScreenState
                           ),
                           child: Text(
                             expense.paymentMode.toUpperCase(),
-                            style: const TextStyle(
+                            style: TextStyle(
                                 color: AppTheme.primary,
                                 fontSize: 8,
                                 fontWeight: FontWeight.bold),

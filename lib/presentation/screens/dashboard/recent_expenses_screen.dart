@@ -61,7 +61,7 @@ class RecentExpensesScreen extends StatelessWidget {
               child: Consumer<ExpenseProvider>(
                 builder: (context, provider, child) {
                   if (provider.isLoading) {
-                    return const Center(child: CircularProgressIndicator());
+                    return Center(child: CircularProgressIndicator());
                   }
 
                   if (provider.categoryBreakdown.isEmpty) {
@@ -144,8 +144,8 @@ class RecentExpensesScreen extends StatelessWidget {
                   borderRadius: BorderRadius.circular(16),
                 ),
                 alignment: Alignment.center,
-                child: Text(item['icon'] ?? '📁',
-                    style: const TextStyle(fontSize: 24)),
+                child:
+                    Text(item['icon'] ?? '📁', style: TextStyle(fontSize: 24)),
               ),
               const SizedBox(width: 16),
               Expanded(

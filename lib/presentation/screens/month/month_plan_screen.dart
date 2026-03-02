@@ -295,9 +295,8 @@ class _MonthPlanScreenState extends State<MonthPlanScreen> {
                       child: _buildSummaryStatColumn(
                         label: 'Pending',
                         amount: pendingPlanned,
-                        valueColor: isStrained
-                            ? Colors.white
-                            : const Color(0xFFFFB74D),
+                        valueColor:
+                            isStrained ? Colors.white : const Color(0xFFFFB74D),
                         labelColor: Colors.white70,
                       ),
                     ),
@@ -306,12 +305,10 @@ class _MonthPlanScreenState extends State<MonthPlanScreen> {
                       child: _buildSummaryStatColumn(
                         label: 'Impulse',
                         amount: unplanned,
-                        valueColor: isStrained
-                            ? Colors.white70
-                            : Colors.white38,
-                        labelColor: isStrained
-                            ? Colors.white70
-                            : Colors.white38,
+                        valueColor:
+                            isStrained ? Colors.white70 : Colors.white38,
+                        labelColor:
+                            isStrained ? Colors.white70 : Colors.white38,
                       ),
                     ),
                   ],
@@ -479,8 +476,7 @@ class _MonthPlanScreenState extends State<MonthPlanScreen> {
   Widget _buildExpenseCard(Expense expense, ExpenseProvider provider) {
     final bool isUnplanned = expense.plannedAmount == 0;
     final bool isConfirmed = expense.isPaid;
-    final bool isOver =
-        isConfirmed &&
+    final bool isOver = isConfirmed &&
         !isUnplanned &&
         (expense.actualAmount > expense.plannedAmount);
     final textColor = AppTheme.getTextColor(context);
@@ -508,221 +504,188 @@ class _MonthPlanScreenState extends State<MonthPlanScreen> {
     final Color statusColor = isConfirmed
         ? const Color(0xFF66BB6A) // green  — confirmed
         : isUnplanned
-        ? Colors
-              .grey // grey   — unplanned (low priority)
-        : const Color(0xFFFFB74D); // amber — pending
+            ? Colors.grey // grey   — unplanned (low priority)
+            : const Color(0xFFFFB74D); // amber — pending
 
     return GestureDetector(
       onTap: () => _showExpenseDetails(context, expense, category),
       child: Container(
-        margin: const EdgeInsets.only(bottom: 12),
+        margin: const EdgeInsets.only(bottom: 10),
         decoration: BoxDecoration(
           color: isDark ? AppTheme.bgCardDark : Colors.white,
-          borderRadius: BorderRadius.circular(24),
+          borderRadius: BorderRadius.circular(16),
           boxShadow: AppTheme.softShadow,
-          // Left accent border indicates priority/status
           border: Border(
             left: BorderSide(
               color: isUnplanned
                   ? Colors.grey.withValues(alpha: 0.4)
                   : statusColor,
-              width: 4,
+              width: 3,
             ),
           ),
         ),
         child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          child: Row(
             children: [
-              Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: statusColor.withValues(
-                        alpha: isUnplanned ? 0.07 : 0.12,
-                      ),
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Text(
-                      category.icon ?? '📁',
-                      style: const TextStyle(fontSize: 20),
-                    ),
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: statusColor.withValues(
+                    alpha: isUnplanned ? 0.07 : 0.12,
                   ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  category.icon ?? '📁',
+                  style: TextStyle(fontSize: 18),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
                       children: [
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                expense.name,
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16,
-                                  color: textColor,
-                                ),
-                              ),
-                            ),
-                            if (expense.paymentMode != 'Other')
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 6,
-                                  vertical: 2,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: AppTheme.primary.withValues(
-                                    alpha: 0.1,
-                                  ),
-                                  borderRadius: BorderRadius.circular(6),
-                                ),
-                                child: Text(
-                                  expense.paymentMode.toUpperCase(),
-                                  style: const TextStyle(
-                                    color: AppTheme.primary,
-                                    fontSize: 8,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                          ],
-                        ),
-                        if (dateStr.isNotEmpty)
-                          Text(
-                            dateStr,
+                        Expanded(
+                          child: Text(
+                            expense.name,
                             style: TextStyle(
-                              color: secondaryTextColor,
-                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                              color: textColor,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        if (expense.paymentMode != 'Other') ...[
+                          const SizedBox(width: 6),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: AppTheme.primary.withValues(
+                                alpha: 0.1,
+                              ),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Text(
+                              expense.paymentMode.toUpperCase(),
+                              style: TextStyle(
+                                color: AppTheme.primary,
+                                fontSize: 9,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
+                        ],
                       ],
                     ),
-                  ),
-                  IconButton(
-                    icon: Icon(
-                      LucideIcons.edit3,
-                      size: 18,
-                      color: secondaryTextColor,
-                    ),
-                    onPressed: () => _showEditExpenseDialog(context, expense),
-                  ),
-                  if (!isUnplanned)
-                    Checkbox(
-                      value: expense.isPaid,
-                      onChanged: (val) => _showPaidDialog(expense, provider),
-                      activeColor: const Color(
-                        0xFF66BB6A,
-                      ), // green when checked
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(6),
+                    const SizedBox(height: 2),
+                    if (dateStr.isNotEmpty)
+                      Text(
+                        dateStr,
+                        style: TextStyle(
+                          color: secondaryTextColor,
+                          fontSize: 11,
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  if (isUnplanned)
+                    Text(
+                      '₹${expense.actualAmount.toInt()}',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF66BB6A),
+                        fontSize: 14,
+                      ),
+                    )
+                  else if (!isConfirmed)
+                    Text(
+                      '₹${expense.plannedAmount.toInt()}',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: textColor,
+                        fontSize: 14,
                       ),
                     )
                   else
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      child: Icon(
-                        LucideIcons.checkCircle2,
-                        color: Colors.grey.withValues(alpha: 0.5),
-                        size: 20,
+                    Text(
+                      '₹${expense.actualAmount.toInt()}',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color:
+                            isOver ? AppTheme.danger : const Color(0xFF66BB6A),
+                        fontSize: 14,
+                      ),
+                    ),
+                  if (!isUnplanned &&
+                      isConfirmed &&
+                      expense.plannedAmount != expense.actualAmount)
+                    Text(
+                      'Plan: ₹${expense.plannedAmount.toInt()}',
+                      style: TextStyle(
+                        color: secondaryTextColor,
+                        fontSize: 11,
+                        decoration: TextDecoration.lineThrough,
+                      ),
+                    ),
+                  if (!isUnplanned && !isConfirmed)
+                    Text(
+                      'Pending',
+                      style: TextStyle(
+                        color: Color(0xFFFFB74D),
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                 ],
               ),
-              Divider(height: 24, color: statusColor.withValues(alpha: 0.15)),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  if (isUnplanned)
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'Spent',
-                          style: TextStyle(
-                            color: Color(0xFF66BB6A),
-                            fontWeight: FontWeight.w600,
-                            fontSize: 12,
-                          ),
-                        ),
-                        Text(
-                          '₹${expense.actualAmount.toInt()}',
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Color(0xFF66BB6A),
-                          ),
-                        ),
-                      ],
-                    )
-                  else ...[
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Planned',
-                          style: TextStyle(
-                            color: secondaryTextColor,
-                            fontSize: 12,
-                          ),
-                        ),
-                        Text(
-                          '₹${expense.plannedAmount.toInt()}',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: textColor,
-                          ),
-                        ),
-                      ],
-                    ),
-                    if (isConfirmed)
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Text(
-                            'Spent',
-                            style: TextStyle(
-                              color: const Color(0xFF66BB6A),
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          Text(
-                            '₹${expense.actualAmount.toInt()}',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: isOver
-                                  ? AppTheme.danger
-                                  : const Color(0xFF66BB6A),
-                            ),
-                          ),
-                        ],
-                      )
-                    else
-                      Row(
-                        children: [
-                          Container(
-                            width: 6,
-                            height: 6,
-                            decoration: const BoxDecoration(
-                              color: Color(0xFFFFB74D),
-                              shape: BoxShape.circle,
-                            ),
-                          ),
-                          const SizedBox(width: 5),
-                          const Text(
-                            'Pending',
-                            style: TextStyle(
-                              color: Color(0xFFFFB74D),
-                              fontWeight: FontWeight.bold,
-                              fontSize: 12,
-                            ),
-                          ),
-                        ],
-                      ),
-                  ],
-                ],
+              const SizedBox(width: 4),
+              IconButton(
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+                icon: Icon(
+                  LucideIcons.edit3,
+                  size: 18,
+                  color: secondaryTextColor,
+                ),
+                onPressed: () => _showEditExpenseDialog(context, expense),
               ),
+              const SizedBox(width: 8),
+              if (!isUnplanned)
+                Transform.scale(
+                  scale: 0.9,
+                  child: Checkbox(
+                    value: expense.isPaid,
+                    onChanged: (val) => _showPaidDialog(expense, provider),
+                    activeColor: const Color(0xFF66BB6A),
+                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                )
+              else
+                Padding(
+                  padding: const EdgeInsets.only(left: 12, right: 4),
+                  child: Icon(
+                    LucideIcons.checkCircle2,
+                    color: Colors.grey.withValues(alpha: 0.5),
+                    size: 20,
+                  ),
+                ),
             ],
           ),
         ),
@@ -777,7 +740,7 @@ class _MonthPlanScreenState extends State<MonthPlanScreen> {
                   ),
                   child: Text(
                     category.icon ?? '📝',
-                    style: const TextStyle(fontSize: 32),
+                    style: TextStyle(fontSize: 32),
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -904,7 +867,7 @@ class _MonthPlanScreenState extends State<MonthPlanScreen> {
       context: context,
       builder: (context) => StatefulBuilder(
         builder: (context, setDialogState) => AlertDialog(
-          title: const Text(
+          title: Text(
             'Closing the loop',
             style: TextStyle(fontWeight: FontWeight.bold),
           ),
@@ -913,7 +876,7 @@ class _MonthPlanScreenState extends State<MonthPlanScreen> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('How much did this actually cost?'),
+              Text('How much did this actually cost?'),
               const SizedBox(height: 16),
               TextField(
                 controller: controller,
@@ -927,7 +890,7 @@ class _MonthPlanScreenState extends State<MonthPlanScreen> {
                 style: TextStyle(color: AppTheme.getTextColor(context)),
               ),
               const SizedBox(height: 20),
-              const Text('Payment Date:'),
+              Text('Payment Date:'),
               const SizedBox(height: 8),
               InkWell(
                 onTap: () async {
@@ -1013,7 +976,7 @@ class _MonthPlanScreenState extends State<MonthPlanScreen> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
+              child: Text('Cancel'),
             ),
             ElevatedButton(
               onPressed: () {
@@ -1026,7 +989,7 @@ class _MonthPlanScreenState extends State<MonthPlanScreen> {
                 );
                 if (context.mounted) Navigator.pop(context);
               },
-              child: const Text('Confirm'),
+              child: Text('Confirm'),
             ),
           ],
         ),
@@ -1205,8 +1168,8 @@ class _MonthPlanScreenState extends State<MonthPlanScreen> {
                       );
 
                       await context.read<ExpenseProvider>().updateExpense(
-                        updated,
-                      );
+                            updated,
+                          );
                       if (context.mounted) Navigator.pop(context);
                     },
                     style: ElevatedButton.styleFrom(
@@ -1214,7 +1177,7 @@ class _MonthPlanScreenState extends State<MonthPlanScreen> {
                         borderRadius: BorderRadius.circular(18),
                       ),
                     ),
-                    child: const Text(
+                    child: Text(
                       'Update',
                       style: TextStyle(
                         fontSize: 16,

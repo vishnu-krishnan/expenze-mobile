@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../../core/theme/app_theme.dart';
@@ -180,7 +179,7 @@ class ProfileScreen extends StatelessWidget {
           alignment: Alignment.center,
           child: Text(
             (user['full_name']?[0] ?? 'U').toUpperCase(),
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 52,
               fontWeight: FontWeight.w900,
               color: AppTheme.primary,
@@ -238,7 +237,7 @@ class ProfileScreen extends StatelessWidget {
         Icon(icon, color: color, size: 22),
         const SizedBox(height: 8),
         Text(value,
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900)),
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900)),
         Text(label.toUpperCase(),
             style: TextStyle(
               fontSize: 10,
@@ -288,7 +287,7 @@ class ProfileScreen extends StatelessWidget {
                 color: AppTheme.primary,
               ),
               if (!isVerified) ...[
-                const Padding(
+                Padding(
                   padding: EdgeInsets.symmetric(horizontal: 20),
                   child: Divider(height: 1, color: Colors.black12),
                 ),
@@ -338,8 +337,7 @@ class ProfileScreen extends StatelessWidget {
                 children: [
                   Text(
                     title,
-                    style: const TextStyle(
-                        fontWeight: FontWeight.w700, fontSize: 15),
+                    style: TextStyle(fontWeight: FontWeight.w700, fontSize: 15),
                   ),
                   if (subtitle != null) ...[
                     const SizedBox(height: 2),
@@ -378,19 +376,19 @@ class ProfileScreen extends StatelessWidget {
         showDialog(
           context: context,
           builder: (dialogContext) => AlertDialog(
-            title: const Text('Clear App Data',
+            title: Text('Clear App Data',
                 style: TextStyle(fontWeight: FontWeight.w900)),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                     'Are you sure? This will delete all local records. To confirm, solve this simple puzzle:'),
                 const SizedBox(height: 16),
                 Center(
                   child: Text(
                     '$num1 + $num2 = ?',
-                    style: const TextStyle(
+                    style: TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
                         color: AppTheme.primary),
@@ -412,7 +410,7 @@ class ProfileScreen extends StatelessWidget {
             actions: [
               TextButton(
                   onPressed: () => Navigator.pop(dialogContext),
-                  child: const Text('Cancel')),
+                  child: Text('Cancel')),
               ElevatedButton(
                 onPressed: () async {
                   if (answerController.text == answer.toString()) {
@@ -449,7 +447,7 @@ class ProfileScreen extends StatelessWidget {
                               const Icon(LucideIcons.xCircle,
                                   color: Colors.white, size: 24),
                               const SizedBox(width: 12),
-                              const Expanded(
+                              Expanded(
                                 child: Text(
                                   "Math is hard, isn't it? Try again!",
                                   style: TextStyle(
@@ -471,7 +469,7 @@ class ProfileScreen extends StatelessWidget {
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12)),
                 ),
-                child: const Text('Clear Data'),
+                child: Text('Clear Data'),
               ),
             ],
             shape:
@@ -480,7 +478,7 @@ class ProfileScreen extends StatelessWidget {
         );
       },
       icon: const Icon(LucideIcons.trash2, color: AppTheme.danger, size: 20),
-      label: const Text(
+      label: Text(
         'CLEAR APP DATA',
         style: TextStyle(
             color: AppTheme.danger,
@@ -742,7 +740,7 @@ class _EditProfileSheetState extends State<_EditProfileSheet> {
                               child: CircularProgressIndicator(
                                   strokeWidth: 2, color: Colors.white),
                             )
-                          : const Text(
+                          : Text(
                               'Save Changes',
                               style: TextStyle(
                                   fontWeight: FontWeight.w700, fontSize: 15),
@@ -920,7 +918,7 @@ class _VerificationSheetState extends State<_VerificationSheet>
           ),
           child: Text(
             isFilled ? currentText[index] : '',
-            style: GoogleFonts.outfit(
+            style: TextStyle(
               fontSize: 26,
               fontWeight: FontWeight.w800,
               color: AppTheme.primary,
@@ -988,7 +986,7 @@ class _VerificationSheetState extends State<_VerificationSheet>
 
             Text(
               'Secure Your Account',
-              style: GoogleFonts.outfit(
+              style: TextStyle(
                 fontSize: 26,
                 fontWeight: FontWeight.w900,
                 color: textColor,
@@ -999,7 +997,7 @@ class _VerificationSheetState extends State<_VerificationSheet>
             Text(
               'We\'ve sent a 6-digit verification code to your email. Enter it below to unlock cloud sync and premium features.',
               textAlign: TextAlign.center,
-              style: GoogleFonts.inter(
+              style: TextStyle(
                 fontSize: 14,
                 color: secondaryColor,
                 height: 1.5,
@@ -1026,7 +1024,7 @@ class _VerificationSheetState extends State<_VerificationSheet>
                       focusedBorder: InputBorder.none,
                       fillColor: Colors.transparent,
                     ),
-                    style: const TextStyle(color: Colors.transparent),
+                    style: TextStyle(color: Colors.transparent),
                     onChanged: (v) {
                       setState(() {});
                       if (v.length == 6) {
@@ -1051,7 +1049,7 @@ class _VerificationSheetState extends State<_VerificationSheet>
                   _timer > 0
                       ? 'Resend code in ${_timer}s'
                       : 'Didn\'t get the code? ',
-                  style: GoogleFonts.inter(
+                  style: TextStyle(
                     fontSize: 14,
                     color: secondaryColor,
                   ),
@@ -1066,7 +1064,7 @@ class _VerificationSheetState extends State<_VerificationSheet>
                     ),
                     child: Text(
                       'Resend',
-                      style: GoogleFonts.inter(
+                      style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w800,
                         color: AppTheme.primary,
@@ -1095,7 +1093,7 @@ class _VerificationSheetState extends State<_VerificationSheet>
                     ),
                     child: Text(
                       'Later',
-                      style: GoogleFonts.outfit(
+                      style: TextStyle(
                         fontWeight: FontWeight.w700,
                         color: secondaryColor,
                       ),
@@ -1135,7 +1133,7 @@ class _VerificationSheetState extends State<_VerificationSheet>
                             )
                           : Text(
                               'Verify Now',
-                              style: GoogleFonts.outfit(
+                              style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w800,
                               ),

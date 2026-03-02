@@ -23,7 +23,7 @@ class DatabaseHelper {
 
     return await openDatabase(
       path,
-      version: 22,
+      version: 24,
       onCreate: _createDB,
       onUpgrade: _onUpgrade,
     );
@@ -223,6 +223,42 @@ class DatabaseHelper {
         logger.e("Database migration error (v22)", error: e);
       }
     }
+    if (oldVersion < 23) {
+      try {
+        await db.execute('''
+          CREATE TABLE IF NOT EXISTS wishes (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            amount REAL NOT NULL,
+            source_link TEXT,
+            notes TEXT,
+            is_completed INTEGER DEFAULT 0,
+            created_at TEXT,
+            updated_at TEXT
+          )
+        ''');
+      } catch (e) {
+        logger.e("Database migration error (v23)", error: e);
+      }
+    }
+    if (oldVersion < 24) {
+      try {
+        await db.execute('''
+          CREATE TABLE IF NOT EXISTS wishes (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            amount REAL NOT NULL,
+            source_link TEXT,
+            notes TEXT,
+            is_completed INTEGER DEFAULT 0,
+            created_at TEXT,
+            updated_at TEXT
+          )
+        ''');
+      } catch (e) {
+        logger.e("Database migration error (v24)", error: e);
+      }
+    }
   }
 
   Future<void> _createDB(Database db, int version) async {
@@ -369,6 +405,20 @@ class DatabaseHelper {
       )
     ''');
 
+    // Wishes table
+    await db.execute('''
+      CREATE TABLE wishes (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        amount REAL NOT NULL,
+        source_link TEXT,
+        notes TEXT,
+        is_completed INTEGER DEFAULT 0,
+        created_at TEXT,
+        updated_at TEXT
+      )
+    ''');
+
     // Finalize DB creation
     await _insertDefaultCategories(db);
   }
@@ -429,6 +479,7 @@ class DatabaseHelper {
     await db.delete('sms_messages');
     await db.delete('sync_queue');
     await db.delete('notes');
+    await db.delete('wishes');
   }
 
   // Auth related
@@ -571,5 +622,26 @@ class DatabaseHelper {
       logger.e('Error importing database: $e');
       return false;
     }
+  }
+
+  // WISHES OPERATIONS
+  Future<List<Map<String, dynamic>>> getWishes() async {
+    final db = await instance.database;
+    return await db.query('wishes', orderBy: 'created_at DESC');
+  }
+
+  Future<int> insertWish(Map<String, dynamic> row) async {
+    final db = await instance.database;
+    return await db.insert('wishes', row);
+  }
+
+  Future<int> updateWish(int id, Map<String, dynamic> row) async {
+    final db = await instance.database;
+    return await db.update('wishes', row, where: 'id = ?', whereArgs: [id]);
+  }
+
+  Future<int> deleteWish(int id) async {
+    final db = await instance.database;
+    return await db.delete('wishes', where: 'id = ?', whereArgs: [id]);
   }
 }

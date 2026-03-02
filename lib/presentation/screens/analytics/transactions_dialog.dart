@@ -39,10 +39,12 @@ class _TransactionsDialogState extends State<TransactionsDialog> {
   @override
   Widget build(BuildContext context) {
     final textColor = AppTheme.getTextColor(context);
-    final secondaryTextColor = AppTheme.getTextColor(context, isSecondary: true);
+    final secondaryTextColor =
+        AppTheme.getTextColor(context, isSecondary: true);
     final displayDate = widget.dateStr.length > 7
         ? DateFormat('d MMM yyyy').format(DateTime.parse(widget.dateStr))
-        : DateFormat('MMMM yyyy').format(DateTime.parse('${widget.dateStr}-01'));
+        : DateFormat('MMMM yyyy')
+            .format(DateTime.parse('${widget.dateStr}-01'));
 
     return Dialog(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -84,7 +86,7 @@ class _TransactionsDialogState extends State<TransactionsDialog> {
               ),
               const SizedBox(height: 16),
               if (_isLoading)
-                const Padding(
+                Padding(
                   padding: EdgeInsets.all(32),
                   child: Center(child: CircularProgressIndicator()),
                 )

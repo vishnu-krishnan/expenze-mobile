@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:provider/provider.dart';
 import '../../../core/theme/app_theme.dart';
@@ -113,7 +112,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             const SizedBox(height: 24),
                             Text(
                               'EXPENZE',
-                              style: GoogleFonts.outfit(
+                              style: TextStyle(
                                 fontSize: 28,
                                 fontWeight: FontWeight.w900,
                                 color: AppTheme.getTextColor(context),
@@ -138,7 +137,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             children: [
                               Text(
                                 'Good to see you again!',
-                                style: GoogleFonts.outfit(
+                                style: TextStyle(
                                   fontSize: 34,
                                   fontWeight: FontWeight.bold,
                                   color: AppTheme.getTextColor(context),
@@ -148,7 +147,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               const SizedBox(height: 8),
                               Text(
                                 'Your money missed you. Let\'s pick up where you left off.',
-                                style: GoogleFonts.inter(
+                                style: TextStyle(
                                   fontSize: 16,
                                   color: AppTheme.getTextColor(context,
                                       isSecondary: true),
@@ -203,7 +202,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           onPressed: () {},
                           child: Text(
                             'Forgot Passcode?',
-                            style: GoogleFonts.inter(
+                            style: TextStyle(
                               fontSize: 13,
                               fontWeight: FontWeight.w600,
                               color: AppTheme.primary,
@@ -222,7 +221,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           children: [
                             Text(
                               "New here? Your wallet is waiting. ",
-                              style: GoogleFonts.inter(
+                              style: TextStyle(
                                 fontSize: 14,
                                 color: AppTheme.getTextColor(context,
                                     isSecondary: true),
@@ -233,7 +232,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                   context, '/register'),
                               child: Text(
                                 'Create Account',
-                                style: GoogleFonts.inter(
+                                style: TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w800,
                                   color: AppTheme.primary,
@@ -271,7 +270,7 @@ class _LoginScreenState extends State<LoginScreen> {
           Expanded(
             child: Text(
               message,
-              style: GoogleFonts.inter(
+              style: TextStyle(
                   color: AppTheme.danger,
                   fontSize: 13,
                   fontWeight: FontWeight.w600),
@@ -297,7 +296,7 @@ class _LoginScreenState extends State<LoginScreen> {
       children: [
         Text(
           label,
-          style: GoogleFonts.outfit(
+          style: TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w800,
             letterSpacing: 1.2,
@@ -323,15 +322,15 @@ class _LoginScreenState extends State<LoginScreen> {
             controller: controller,
             obscureText: obscureText,
             validator: validator,
-            style: GoogleFonts.inter(
+            style: TextStyle(
               fontSize: 16,
               color: isDark ? Colors.white : AppTheme.textPrimary,
               fontWeight: FontWeight.w600,
             ),
             decoration: InputDecoration(
               hintText: hint,
-              hintStyle: GoogleFonts.inter(
-                  color: isDark ? Colors.white24 : Colors.black26),
+              hintStyle:
+                  TextStyle(color: isDark ? Colors.white24 : Colors.black26),
               prefixIcon: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 18),
                 child: Icon(icon, color: AppTheme.primary, size: 22),
@@ -377,7 +376,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     strokeWidth: 3, color: Colors.white))
             : Text(
                 'Let Me In',
-                style: GoogleFonts.outfit(
+                style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w800,
                   letterSpacing: 0.5,
@@ -407,7 +406,7 @@ class _LoginScreenState extends State<LoginScreen> {
             const SizedBox(width: 12),
             Text(
               'Sign in with Google',
-              style: GoogleFonts.inter(
+              style: TextStyle(
                 color: AppTheme.getTextColor(context),
                 fontWeight: FontWeight.w700,
                 fontSize: 15,

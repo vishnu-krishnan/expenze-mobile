@@ -1,5 +1,33 @@
 # Activity Log
 
+[2026-03-03] UI Polish & Final Reversion
+Change Type: Patch
+Decision made:
+- Final polish of dashboard animations.
+- Complete reversion to original font styles across all screens.
+- Bumped version to 1.7.1+21.
+Reason: Finalize design aesthetics and ensure consistency.
+Impact: UX | Visuals
+
+[2026-03-03] Wish List Feature & Major Release
+Change Type: Major
+Decision made:
+- Implemented 'Wish List' module for tracking future desired purchases.
+- Fixed 'no such table: wishes' via DatabaseHelper migration.
+- Added delete confirmation prompts for Notes and Wishes.
+- Bumped version to 1.7.0+20.
+Reason: New feature and core stability.
+Impact: Functionality | Reliability
+
+[2026-03-02] Interactive Dashboard & Code Cleanup
+Change Type: Patch
+Decision made:
+- Added `_AnimatedActionCard` with scale animations on tap to the Dashboard.
+- Mass-migrated deprecated `withOpacity` to `withValues` globally.
+- Bumped version to 1.6.1+19.
+Reason: Modernize interaction and clean up lints.
+Impact: UX | Maintainability
+
 [2026-02-24] Dynamic Spectrum Cards & Layout Standard
 Change Type: Patch
 Decision made:

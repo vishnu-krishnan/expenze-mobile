@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'package:lucide_icons/lucide_icons.dart';
@@ -22,6 +23,7 @@ class DashboardScreen extends StatefulWidget {
 class _DashboardScreenState extends State<DashboardScreen> {
   String _quoteText = '';
   String _quoteAuthor = '';
+  bool _isFabVisible = true;
 
   @override
   void initState() {
@@ -125,6 +127,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     animation: controller,
                     builder: (context, _) {
                       final double dy = controller.value.clamp(0.0, 1.0) * 80.0;
+                      if (dy == 0) return const SizedBox.shrink();
                       return Transform.translate(
                         offset: Offset(0, dy - 40),
                         child: AnimatedContainer(
@@ -172,144 +175,168 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ],
               );
             },
-            child: CustomScrollView(
-              physics: const AlwaysScrollableScrollPhysics(
-                parent: BouncingScrollPhysics(),
-              ),
-              slivers: [
-                if (provider.isLoading)
-                  const SliverToBoxAdapter(
-                    child: LinearProgressIndicator(
-                      minHeight: 3,
-                      color: AppTheme.primary,
-                      backgroundColor: Colors.transparent,
+            child: NotificationListener<ScrollNotification>(
+              onNotification: (ScrollNotification notification) {
+                if (notification is ScrollUpdateNotification) {
+                  if (notification.scrollDelta != null) {
+                    if (notification.scrollDelta! > 2 && _isFabVisible) {
+                      setState(() => _isFabVisible = false);
+                    } else if (notification.scrollDelta! < -2 &&
+                        !_isFabVisible) {
+                      setState(() => _isFabVisible = true);
+                    }
+                  }
+                }
+                return false;
+              },
+              child: CustomScrollView(
+                physics: const AlwaysScrollableScrollPhysics(
+                  parent: BouncingScrollPhysics(),
+                ),
+                slivers: [
+                  if (provider.isLoading)
+                    const SliverToBoxAdapter(
+                      child: LinearProgressIndicator(
+                        minHeight: 3,
+                        color: AppTheme.primary,
+                        backgroundColor: Colors.transparent,
+                      ),
+                    ),
+                  SliverAppBar(
+                    backgroundColor: Colors.transparent,
+                    automaticallyImplyLeading: false,
+                    expandedHeight: 100,
+                    floating: true,
+                    pinned: false,
+                    flexibleSpace: FlexibleSpaceBar(
+                      titlePadding: EdgeInsets.zero,
+                      background: Padding(
+                        padding: const EdgeInsets.fromLTRB(26, 10, 26, 0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              _getTimeBasedGreeting(),
+                              style: TextStyle(
+                                color: secondaryTextColor,
+                                fontSize: 14,
+                                letterSpacing: 0.5,
+                              ),
+                            ),
+                            Text(
+                              user?['full_name'] ?? 'User',
+                              style: TextStyle(
+                                fontSize: 26,
+                                fontWeight: FontWeight.w900,
+                                color: textColor,
+                                letterSpacing: -0.8,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
                   ),
-                SliverAppBar(
-                  backgroundColor: Colors.transparent,
-                  automaticallyImplyLeading: false,
-                  expandedHeight: 100,
-                  floating: true,
-                  pinned: false,
-                  flexibleSpace: FlexibleSpaceBar(
-                    titlePadding: EdgeInsets.zero,
-                    background: Padding(
-                      padding: const EdgeInsets.fromLTRB(26, 10, 26, 0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.center,
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.only(bottom: 16),
+                      child: _buildWalletCard(actual, remaining, pctUsed,
+                          provider, summary, planned),
+                    ),
+                  ),
+                  SliverToBoxAdapter(
+                    child: _buildQuickActions(context),
+                  ),
+                  if (_quoteText.isNotEmpty)
+                    SliverToBoxAdapter(
+                      child: _buildQuoteCard(textColor, secondaryTextColor),
+                    ),
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(26, 32, 26, 16),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            _getTimeBasedGreeting(),
+                            'Where your money ran off to',
                             style: TextStyle(
-                              color: secondaryTextColor,
-                              fontSize: 14,
-                              letterSpacing: 0.5,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: textColor,
+                              letterSpacing: -0.5,
                             ),
                           ),
-                          Text(
-                            user?['full_name'] ?? 'User',
-                            style: TextStyle(
-                              fontSize: 26,
-                              fontWeight: FontWeight.w900,
-                              color: textColor,
-                              letterSpacing: -0.8,
+                          GestureDetector(
+                            onTap: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) =>
+                                      const RecentExpensesScreen()),
                             ),
+                            child: Icon(LucideIcons.arrowRight,
+                                size: 18, color: secondaryTextColor),
                           ),
                         ],
                       ),
                     ),
                   ),
-                ),
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.only(bottom: 16),
-                    child: _buildWalletCard(
-                        actual, remaining, pctUsed, provider, summary, planned),
-                  ),
-                ),
-                SliverToBoxAdapter(
-                  child: _buildQuickActions(context),
-                ),
-                if (_quoteText.isNotEmpty)
-                  SliverToBoxAdapter(
-                    child: _buildQuoteCard(textColor, secondaryTextColor),
-                  ),
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(26, 32, 26, 16),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'Where your money ran off to',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: textColor,
-                            letterSpacing: -0.5,
-                          ),
-                        ),
-                        GestureDetector(
-                          onTap: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) =>
-                                    const RecentExpensesScreen()),
-                          ),
-                          child: Icon(LucideIcons.arrowRight,
-                              size: 18, color: secondaryTextColor),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                SliverPadding(
-                  padding: const EdgeInsets.symmetric(horizontal: 26),
-                  sliver: SliverList(
-                    delegate: SliverChildBuilderDelegate(
-                      (context, index) {
-                        final item = provider.categoryBreakdown[index];
-                        return GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) =>
-                                    CategoryTransactionsScreen(
-                                  categoryId: item['id'] as int?,
-                                  categoryName:
-                                      item['category_name'] ?? 'Imported',
-                                  monthKey: provider.currentMonthKey,
-                                  categoryIcon: item['icon'],
-                                  categoryColor: item['color'],
+                  SliverPadding(
+                    padding: const EdgeInsets.symmetric(horizontal: 26),
+                    sliver: SliverList(
+                      delegate: SliverChildBuilderDelegate(
+                        (context, index) {
+                          final item = provider.categoryBreakdown[index];
+                          return GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      CategoryTransactionsScreen(
+                                    categoryId: item['id'] as int?,
+                                    categoryName:
+                                        item['category_name'] ?? 'Imported',
+                                    monthKey: provider.currentMonthKey,
+                                    categoryIcon: item['icon'],
+                                    categoryColor: item['color'],
+                                  ),
                                 ),
-                              ),
-                            );
-                          },
-                          child: _buildCategoryItem(context, item),
-                        );
-                      },
-                      childCount: provider.categoryBreakdown.take(3).length,
+                              );
+                            },
+                            child: _buildCategoryItem(context, item),
+                          );
+                        },
+                        childCount: provider.categoryBreakdown.take(3).length,
+                      ),
                     ),
                   ),
-                ),
-                const SliverToBoxAdapter(child: SizedBox(height: 140)),
-              ],
+                  const SliverToBoxAdapter(child: SizedBox(height: 140)),
+                ],
+              ),
             ),
           );
         },
       ),
       floatingActionButton: Padding(
         padding: const EdgeInsets.only(bottom: 120),
-        child: FloatingActionButton(
-          heroTag: 'dashboard_fab',
-          onPressed: () => _showAddExpenseDialog(context),
-          backgroundColor: AppTheme.primary,
-          elevation: 10,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-          child: const Icon(LucideIcons.plus, color: Colors.white, size: 30),
+        child: AnimatedSlide(
+          duration: const Duration(milliseconds: 300),
+          offset: _isFabVisible ? Offset.zero : const Offset(0, 2),
+          child: AnimatedOpacity(
+            duration: const Duration(milliseconds: 300),
+            opacity: _isFabVisible ? 1.0 : 0.0,
+            child: FloatingActionButton(
+              heroTag: 'dashboard_fab',
+              onPressed: () => _showAddExpenseDialog(context),
+              backgroundColor: AppTheme.primary,
+              elevation: 10,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(18)),
+              child:
+                  const Icon(LucideIcons.plus, color: Colors.white, size: 30),
+            ),
+          ),
         ),
       ),
     );
@@ -404,7 +431,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text(
+                      Text(
                         'Total Spent',
                         style: TextStyle(
                             color: Colors.white70,
@@ -426,7 +453,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             padding: const EdgeInsets.symmetric(horizontal: 6),
                             child: Text(
                               _formatMonthName(provider.currentMonthKey),
-                              style: const TextStyle(
+                              style: TextStyle(
                                 color: Colors.white,
                                 fontWeight: FontWeight.bold,
                                 fontSize: 13,
@@ -453,15 +480,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     alignment: Alignment.centerLeft,
                     child: Text(
                       '₹${actual.toLocaleString()}',
-                      style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 44,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: -2),
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 48,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: -1,
+                        height: 1.1,
+                      ),
                     ),
                   ),
-
-                  const SizedBox(height: 20),
 
                   // Divider line
                   Container(
@@ -539,7 +566,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   child: Icon(icon, size: 11, color: Colors.white54),
                 ),
               Text(label,
-                  style: const TextStyle(
+                  style: TextStyle(
                       color: Colors.white60,
                       fontSize: 11,
                       fontWeight: FontWeight.w600,
@@ -644,7 +671,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 color: AppTheme.primary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: const Text('✨', style: TextStyle(fontSize: 18)),
+              child: Text('✨', style: TextStyle(fontSize: 18)),
             ),
             const SizedBox(width: 14),
             Expanded(
@@ -683,62 +710,46 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget _buildQuickActions(BuildContext context) {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
+      physics: const BouncingScrollPhysics(),
       padding: const EdgeInsets.symmetric(horizontal: 26),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildActionCard(context, LucideIcons.mail, 'Import',
-              AppTheme.primary, () => Navigator.pushNamed(context, '/import')),
-          const SizedBox(width: 12),
-          _buildActionCard(context, LucideIcons.repeat, 'Regular',
-              AppTheme.primary, () => Navigator.pushNamed(context, '/regular')),
-          const SizedBox(width: 12),
-          _buildActionCard(context, LucideIcons.stickyNote, 'Notes',
-              AppTheme.primary, () => Navigator.pushNamed(context, '/notes')),
-          const SizedBox(width: 12),
-          _buildActionCard(
-              context,
-              LucideIcons.layoutGrid,
-              'Categories',
-              AppTheme.primary,
-              () => Navigator.pushNamed(context, '/categories')),
+          _AnimatedActionCard(
+            icon: LucideIcons.downloadCloud,
+            label: 'Import',
+            color: AppTheme.primary,
+            onTap: () => Navigator.pushNamed(context, '/import'),
+          ),
+          const SizedBox(width: 14),
+          _AnimatedActionCard(
+            icon: LucideIcons.repeat,
+            label: 'Regular',
+            color: const Color(0xFFE67E22), // Orange
+            onTap: () => Navigator.pushNamed(context, '/regular'),
+          ),
+          const SizedBox(width: 14),
+          _AnimatedActionCard(
+            icon: LucideIcons.stickyNote,
+            label: 'Notes',
+            color: AppTheme.success, // Green
+            onTap: () => Navigator.pushNamed(context, '/notes'),
+          ),
+          const SizedBox(width: 14),
+          _AnimatedActionCard(
+            icon: LucideIcons.gift,
+            label: 'Wishes',
+            color: const Color(0xFF9B59B6), // Purple
+            onTap: () => Navigator.pushNamed(context, '/wishes'),
+          ),
+          const SizedBox(width: 14),
+          _AnimatedActionCard(
+            icon: LucideIcons.layoutGrid,
+            label: 'Categories',
+            color: const Color(0xFFE74C3C), // Red
+            onTap: () => Navigator.pushNamed(context, '/categories'),
+          ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildActionCard(BuildContext context, IconData icon, String label,
-      Color color, VoidCallback onTap) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: MediaQuery.of(context).size.width *
-            0.22, // Slightly smaller to fit 4
-        padding: const EdgeInsets.symmetric(vertical: 20),
-        decoration: BoxDecoration(
-          color: isDark ? AppTheme.bgCardDark : Colors.white,
-          borderRadius: BorderRadius.circular(24),
-          boxShadow: AppTheme.softShadow,
-        ),
-        child: Column(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.1),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(icon, color: color, size: 22),
-            ),
-            const SizedBox(height: 12),
-            Text(label,
-                style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                    color: AppTheme.getTextColor(context))),
-          ],
-        ),
       ),
     );
   }
@@ -777,8 +788,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               borderRadius: BorderRadius.circular(16),
             ),
             alignment: Alignment.center,
-            child: Text(item['icon'] ?? '📁',
-                style: const TextStyle(fontSize: 24)),
+            child: Text(item['icon'] ?? '📁', style: TextStyle(fontSize: 24)),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -965,7 +975,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       style: ElevatedButton.styleFrom(
                           shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(18))),
-                      child: const Text('Add',
+                      child: Text('Add',
                           style: TextStyle(
                               fontSize: 16, fontWeight: FontWeight.bold)),
                     ),
@@ -1002,6 +1012,88 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
         ],
       ],
+    );
+  }
+}
+
+class _AnimatedActionCard extends StatefulWidget {
+  final IconData icon;
+  final String label;
+  final Color color;
+  final VoidCallback onTap;
+
+  const _AnimatedActionCard({
+    required this.icon,
+    required this.label,
+    required this.color,
+    required this.onTap,
+  });
+
+  @override
+  State<_AnimatedActionCard> createState() => _AnimatedActionCardState();
+}
+
+class _AnimatedActionCardState extends State<_AnimatedActionCard>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _scaleAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 150));
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.95)
+        .animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return GestureDetector(
+      onTapDown: (_) => _controller.forward(),
+      onTapUp: (_) {
+        _controller.reverse();
+        widget.onTap();
+      },
+      onTapCancel: () => _controller.reverse(),
+      child: ScaleTransition(
+        scale: _scaleAnimation,
+        child: Container(
+          width: MediaQuery.of(context).size.width * 0.22,
+          padding: const EdgeInsets.symmetric(vertical: 20),
+          decoration: BoxDecoration(
+            color: isDark ? AppTheme.bgCardDark : Colors.white,
+            borderRadius: BorderRadius.circular(24),
+            boxShadow: AppTheme.softShadow,
+          ),
+          child: Column(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: widget.color.withValues(alpha: 0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(widget.icon, color: widget.color, size: 22),
+              ),
+              const SizedBox(height: 12),
+              Text(widget.label,
+                  style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.getTextColor(context))),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

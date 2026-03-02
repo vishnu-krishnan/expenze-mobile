@@ -218,8 +218,8 @@ class _CategoryEditScreenState extends State<CategoryEditScreen> {
                                           )
                                         ],
                                 ),
-                                child: Text(emoji,
-                                    style: const TextStyle(fontSize: 22)),
+                                child:
+                                    Text(emoji, style: TextStyle(fontSize: 22)),
                               ),
                             );
                           },
@@ -247,7 +247,7 @@ class _CategoryEditScreenState extends State<CategoryEditScreen> {
               ),
               backgroundColor: WidgetStateProperty.all(AppTheme.primary),
             ),
-            child: const Text('Save Changes',
+            child: Text('Save Changes',
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
           ),
         ],
@@ -260,13 +260,12 @@ class _CategoryEditScreenState extends State<CategoryEditScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('The Nuclear Option'),
+        title: Text('The Nuclear Option'),
         content: Text(
             'Once you delete "${widget.category.name}", all related transactions will feel lost. Ready to let go?'),
         actions: [
           TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('CANCEL')),
+              onPressed: () => Navigator.pop(context), child: Text('CANCEL')),
           TextButton(
             onPressed: () async {
               final nav = Navigator.of(context);
@@ -278,8 +277,7 @@ class _CategoryEditScreenState extends State<CategoryEditScreen> {
                 Navigator.pop(context); // Pop screen
               }
             },
-            child:
-                const Text('DELETE', style: TextStyle(color: AppTheme.danger)),
+            child: Text('DELETE', style: TextStyle(color: AppTheme.danger)),
           ),
         ],
       ),

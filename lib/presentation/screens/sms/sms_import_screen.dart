@@ -259,7 +259,9 @@ class _SmsImportScreenState extends State<SmsImportScreen>
 
           // Stage 1: Check pending expenses for Exact Amount + Name Match
           final nameMatchedPending = matchPool.where((e) {
-            if (e.monthKey != monthKey || e.plannedAmount != amount || e.isPaid) {
+            if (e.monthKey != monthKey ||
+                e.plannedAmount != amount ||
+                e.isPaid) {
               return false;
             }
             final expenseName = e.name.toLowerCase();
@@ -1026,7 +1028,7 @@ class _SmsImportScreenState extends State<SmsImportScreen>
     }
 
     if (_isLoading && _detectedExpenses.isEmpty) {
-      return const Center(child: CircularProgressIndicator());
+      return Center(child: CircularProgressIndicator());
     }
 
     return Consumer<CategoryProvider>(
@@ -1146,7 +1148,7 @@ class _SmsImportScreenState extends State<SmsImportScreen>
                           color: AppTheme.success.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(6),
                         ),
-                        child: const Row(
+                        child: Row(
                           children: [
                             Icon(LucideIcons.link,
                                 size: 10, color: AppTheme.success),
@@ -1167,7 +1169,7 @@ class _SmsImportScreenState extends State<SmsImportScreen>
                           color: AppTheme.primary.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(6),
                         ),
-                        child: const Row(
+                        child: Row(
                           children: [
                             Icon(LucideIcons.check,
                                 size: 12, color: AppTheme.primary),
@@ -1190,7 +1192,7 @@ class _SmsImportScreenState extends State<SmsImportScreen>
                         ),
                         child: Text(
                           expense.paymentMode.toUpperCase(),
-                          style: const TextStyle(
+                          style: TextStyle(
                             color: AppTheme.primary,
                             fontSize: 9,
                             fontWeight: FontWeight.bold,
@@ -1329,7 +1331,7 @@ class _SmsImportScreenState extends State<SmsImportScreen>
                                         shape: BoxShape.circle,
                                       ),
                                       child: Text(c.icon ?? '❓',
-                                          style: const TextStyle(fontSize: 12)),
+                                          style: TextStyle(fontSize: 12)),
                                     ),
                                     const SizedBox(width: 10),
                                     Expanded(
@@ -1405,27 +1407,27 @@ class _SmsImportScreenState extends State<SmsImportScreen>
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Clear imported SMS?'),
+        title: Text('Clear imported SMS?'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
                 'This will delete all expenses imported from SMS for this month. You will need to re-scan to get them back.'),
             const SizedBox(height: 16),
-            const Text('Type "CONFIRM" to proceed:',
+            Text('Type "CONFIRM" to proceed:',
                 style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
             TextField(
               controller: confirmController,
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                border: const OutlineInputBorder(),
                 hintText: 'CONFIRM',
                 hintStyle: TextStyle(fontSize: 12),
                 contentPadding:
-                    EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               ),
-              style: const TextStyle(fontSize: 13),
+              style: TextStyle(fontSize: 13),
               onChanged: (value) {
                 // Force rebuild to update button state
                 (context as Element).markNeedsBuild();
@@ -1436,7 +1438,7 @@ class _SmsImportScreenState extends State<SmsImportScreen>
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text('Cancel'),
           ),
           ValueListenableBuilder<TextEditingValue>(
             valueListenable: confirmController,

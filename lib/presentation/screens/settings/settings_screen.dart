@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../providers/theme_provider.dart';
 import '../../providers/expense_provider.dart';
@@ -44,13 +43,13 @@ class SettingsScreen extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text('Tweak it your way',
-                        style: GoogleFonts.inter(
+                        style: TextStyle(
                             color: secondaryTextColor,
                             fontSize: 13,
                             fontWeight: FontWeight.w600,
                             letterSpacing: 0.5)),
                     Text('Settings',
-                        style: GoogleFonts.outfit(
+                        style: TextStyle(
                             fontSize: 34,
                             fontWeight: FontWeight.w900,
                             color: textColor,
@@ -362,12 +361,12 @@ class SettingsScreen extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Security Setup',
+        title: Text('Security Setup',
             style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: -0.5)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text(
+            Text(
                 'Keep the bad guys out. Set a 4-digit PIN — and for bonus security, enable fingerprint unlock below.'),
             const SizedBox(height: 20),
             TextField(
@@ -375,7 +374,7 @@ class SettingsScreen extends StatelessWidget {
               keyboardType: TextInputType.number,
               maxLength: 4,
               textAlign: TextAlign.center,
-              style: const TextStyle(
+              style: TextStyle(
                   fontSize: 24, fontWeight: FontWeight.bold, letterSpacing: 10),
               decoration: AppTheme.inputDecoration('PIN', LucideIcons.lock,
                   context: context),
@@ -384,8 +383,7 @@ class SettingsScreen extends StatelessWidget {
         ),
         actions: [
           TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel')),
+              onPressed: () => Navigator.pop(context), child: Text('Cancel')),
           ElevatedButton(
             onPressed: () async {
               if (controller.text.length == 4) {
@@ -396,7 +394,7 @@ class SettingsScreen extends StatelessWidget {
               }
             },
             style: AppTheme.primaryButtonStyle,
-            child: const Text('Secure App'),
+            child: Text('Secure App'),
           ),
         ],
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
@@ -409,7 +407,7 @@ class SettingsScreen extends StatelessWidget {
       padding: const EdgeInsets.only(left: 8, bottom: 4),
       child: Text(
         title.toUpperCase(),
-        style: GoogleFonts.inter(
+        style: TextStyle(
           fontSize: 12,
           fontWeight: FontWeight.w800,
           color: textColor.withValues(alpha: 0.5),
@@ -466,7 +464,7 @@ class SettingsScreen extends StatelessWidget {
               children: [
                 Text(
                   label,
-                  style: GoogleFonts.outfit(
+                  style: TextStyle(
                     fontWeight: FontWeight.w700,
                     fontSize: 16,
                     color: textColor,
@@ -476,7 +474,7 @@ class SettingsScreen extends StatelessWidget {
                 const SizedBox(height: 2),
                 Text(
                   subtitle,
-                  style: GoogleFonts.inter(
+                  style: TextStyle(
                     fontSize: 13,
                     color: secondaryTextColor,
                   ),
@@ -526,7 +524,7 @@ class SettingsScreen extends StatelessWidget {
                 children: [
                   Text(
                     label,
-                    style: GoogleFonts.outfit(
+                    style: TextStyle(
                       fontWeight: FontWeight.w700,
                       fontSize: 16,
                       color: textColor,
@@ -537,7 +535,7 @@ class SettingsScreen extends StatelessWidget {
                     const SizedBox(height: 2),
                     Text(
                       subtitle,
-                      style: GoogleFonts.inter(
+                      style: TextStyle(
                         fontSize: 13,
                         color: secondaryTextColor,
                       ),
@@ -571,7 +569,7 @@ class SettingsScreen extends StatelessWidget {
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Set Monthly Budget',
+            Text('Set Monthly Budget',
                 style: TextStyle(fontWeight: FontWeight.w900, fontSize: 18)),
             const SizedBox(height: 4),
             Text(
@@ -594,7 +592,7 @@ class SettingsScreen extends StatelessWidget {
           decoration: AppTheme.inputDecoration(
               'Budget Amount (₹)', LucideIcons.indianRupee,
               context: ctx),
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.bold,
             color: AppTheme.primary,
@@ -603,7 +601,7 @@ class SettingsScreen extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel'),
+            child: Text('Cancel'),
           ),
           ElevatedButton(
             onPressed: () {
@@ -660,7 +658,7 @@ class SettingsScreen extends StatelessWidget {
                 ),
                 child: Text(
                   '₹${amount.toStringAsFixed(0)}  /  month',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.bold,
                     color: AppTheme.primary,
@@ -723,7 +721,7 @@ class SettingsScreen extends StatelessWidget {
                     padding:
                         const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                   ),
-                  child: const Text('Cancel', style: TextStyle(fontSize: 13)),
+                  child: Text('Cancel', style: TextStyle(fontSize: 13)),
                 ),
               ),
             ],
@@ -823,7 +821,7 @@ class SettingsScreen extends StatelessWidget {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Column(
+                        Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
@@ -863,7 +861,9 @@ class SettingsScreen extends StatelessWidget {
                   Expanded(
                     child: ListView.builder(
                       padding: const EdgeInsets.all(24),
-                      itemCount: 1,
+                      itemCount: AppVersion.history.length > 5
+                          ? 5
+                          : AppVersion.history.length,
                       itemBuilder: (context, index) {
                         final release = AppVersion.history[index];
                         return Padding(
@@ -913,7 +913,7 @@ class SettingsScreen extends StatelessWidget {
                                             .withValues(alpha: 0.1),
                                         borderRadius: BorderRadius.circular(4),
                                       ),
-                                      child: const Text(
+                                      child: Text(
                                         'LATEST',
                                         style: TextStyle(
                                           color: AppTheme.success,
@@ -992,7 +992,7 @@ class SettingsScreen extends StatelessWidget {
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: Theme.of(context).cardColor,
-        title: const Text('Choose Theme',
+        title: Text('Choose Theme',
             style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: -0.5)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
@@ -1041,7 +1041,7 @@ class SettingsScreen extends StatelessWidget {
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: Theme.of(context).cardColor,
-        title: const Text('Choose AI Engine',
+        title: Text('Choose AI Engine',
             style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: -0.5)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
@@ -1201,8 +1201,8 @@ class SettingsScreen extends StatelessWidget {
                           color: secondaryTextColor.withValues(alpha: 0.6),
                           letterSpacing: 0.5)),
                   Text(value,
-                      style: const TextStyle(
-                          fontSize: 14, fontWeight: FontWeight.bold)),
+                      style:
+                          TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
                 ],
               ),
             ),

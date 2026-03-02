@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:provider/provider.dart';
 import '../../../core/theme/app_theme.dart';
@@ -115,7 +114,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             children: [
                               Text(
                                 'Let\'s get you sorted.',
-                                style: GoogleFonts.outfit(
+                                style: TextStyle(
                                   fontSize: 42,
                                   fontWeight: FontWeight.w900,
                                   color: AppTheme.getTextColor(context),
@@ -125,7 +124,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               const SizedBox(height: 12),
                               Text(
                                 'No credit card. No spam. Just you and your money — finally on speaking terms.',
-                                style: GoogleFonts.inter(
+                                style: TextStyle(
                                   fontSize: 16,
                                   color: AppTheme.getTextColor(context,
                                       isSecondary: true),
@@ -148,12 +147,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         ),
                         child: Row(
                           children: [
-                            const Text('💡', style: TextStyle(fontSize: 20)),
+                            Text('💡', style: TextStyle(fontSize: 20)),
                             const SizedBox(width: 12),
                             Expanded(
                               child: Text(
                                 'Pro tip: set a monthly budget right after signup. Future-you will be very thankful.',
-                                style: GoogleFonts.inter(
+                                style: TextStyle(
                                   fontSize: 13,
                                   color: AppTheme.getTextColor(context),
                                   fontWeight: FontWeight.w500,
@@ -211,7 +210,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           children: [
                             Text(
                               'Already using Expenze? ',
-                              style: GoogleFonts.inter(
+                              style: TextStyle(
                                 fontSize: 14,
                                 color: AppTheme.getTextColor(context,
                                     isSecondary: true),
@@ -222,7 +221,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                   context, '/login'),
                               child: Text(
                                 'Sign In',
-                                style: GoogleFonts.inter(
+                                style: TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w800,
                                   color: AppTheme.primary,
@@ -260,7 +259,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           Expanded(
             child: Text(
               message,
-              style: GoogleFonts.inter(
+              style: TextStyle(
                 color: AppTheme.danger,
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
@@ -287,7 +286,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       children: [
         Text(
           label,
-          style: GoogleFonts.outfit(
+          style: TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w800,
             letterSpacing: 1.2,
@@ -314,22 +313,22 @@ class _RegisterScreenState extends State<RegisterScreen> {
             obscureText: obscureText,
             keyboardType: keyboardType,
             validator: validator,
-            style: GoogleFonts.inter(
+            style: TextStyle(
               fontSize: 16,
               color: isDark ? Colors.white : AppTheme.textPrimary,
               fontWeight: FontWeight.w600,
             ),
             decoration: InputDecoration(
               hintText: hint,
-              hintStyle: GoogleFonts.inter(
-                  color: isDark ? Colors.white24 : Colors.black26),
+              hintStyle:
+                  TextStyle(color: isDark ? Colors.white24 : Colors.black26),
               prefixIcon: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 18),
                 child: Icon(icon, color: AppTheme.primary, size: 22),
               ),
               border: InputBorder.none,
               contentPadding: const EdgeInsets.symmetric(vertical: 20),
-              errorStyle: const TextStyle(
+              errorStyle: TextStyle(
                   height: 0), // Use manual validation messages if needed
             ),
           ),
@@ -369,7 +368,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     strokeWidth: 3, color: Colors.white))
             : Text(
                 'I\'m Ready — Let\'s Go!',
-                style: GoogleFonts.outfit(
+                style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w800,
                   letterSpacing: 0.5,

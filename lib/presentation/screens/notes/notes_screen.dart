@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../data/models/note.dart';
 import '../../../presentation/providers/note_provider.dart';
@@ -17,6 +17,7 @@ class NotesScreen extends StatefulWidget {
 class _NotesScreenState extends State<NotesScreen> {
   int? _editingNoteId;
   bool _isAddingNew = false;
+  bool _isFabVisible = true;
 
   final _titleController = TextEditingController();
   final _contentController = TextEditingController();
@@ -75,6 +76,47 @@ class _NotesScreenState extends State<NotesScreen> {
     _cancelEditing();
   }
 
+  Future<bool?> _showDeleteConfirmation(BuildContext context, String itemName) {
+    return showDialog<bool>(
+      context: context,
+      builder: (context) {
+        final textColor = AppTheme.getTextColor(context);
+        final secondaryTextColor =
+            AppTheme.getTextColor(context, isSecondary: true);
+        return AlertDialog(
+          backgroundColor: Theme.of(context).cardTheme.color,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+          title: Text(
+            'Delete \'$itemName\'?',
+            style: TextStyle(color: textColor, fontWeight: FontWeight.bold),
+          ),
+          content: Text(
+            'Are you sure you want to delete this? This action cannot be undone.',
+            style: TextStyle(color: secondaryTextColor),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: Text('Cancel', style: TextStyle(color: Colors.grey)),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppTheme.danger,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12)),
+              ),
+              child: Text('Delete',
+                  style: TextStyle(
+                      color: Colors.white, fontWeight: FontWeight.bold)),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final textColor = AppTheme.getTextColor(context);
@@ -95,7 +137,7 @@ class _NotesScreenState extends State<NotesScreen> {
           children: [
             AppBar(
               title: Text('Notes',
-                  style: GoogleFonts.outfit(
+                  style: TextStyle(
                       color: textColor,
                       fontWeight: FontWeight.w900,
                       fontSize: 34,
@@ -111,7 +153,7 @@ class _NotesScreenState extends State<NotesScreen> {
               child: Consumer<NoteProvider>(
                 builder: (context, provider, child) {
                   if (provider.isLoading) {
-                    return const Center(child: CircularProgressIndicator());
+                    return Center(child: CircularProgressIndicator());
                   }
 
                   if (provider.notes.isEmpty && !_isAddingNew) {
@@ -121,31 +163,47 @@ class _NotesScreenState extends State<NotesScreen> {
                   final itemCount =
                       provider.notes.length + (_isAddingNew ? 1 : 0);
 
-                  return ListView.builder(
-                    physics: const BouncingScrollPhysics(),
-                    padding: EdgeInsets.only(
-                        left: 24,
-                        right: 24,
-                        top: 10,
-                        bottom: MediaQuery.of(context).viewInsets.bottom + 120),
-                    itemCount: itemCount,
-                    itemBuilder: (context, index) {
-                      if (_isAddingNew && index == 0) {
-                        return _buildEditableCard(
-                            null, textColor, secondaryTextColor);
+                  return NotificationListener<ScrollNotification>(
+                    onNotification: (ScrollNotification notification) {
+                      if (notification is ScrollUpdateNotification) {
+                        if (notification.scrollDelta != null) {
+                          if (notification.scrollDelta! > 2 && _isFabVisible) {
+                            setState(() => _isFabVisible = false);
+                          } else if (notification.scrollDelta! < -2 &&
+                              !_isFabVisible) {
+                            setState(() => _isFabVisible = true);
+                          }
+                        }
                       }
-
-                      final noteIndex = _isAddingNew ? index - 1 : index;
-                      final note = provider.notes[noteIndex];
-
-                      if (_editingNoteId == note.id) {
-                        return _buildEditableCard(
-                            note, textColor, secondaryTextColor);
-                      }
-
-                      return _buildNoteCard(
-                          note, textColor, secondaryTextColor);
+                      return false;
                     },
+                    child: ListView.builder(
+                      physics: const BouncingScrollPhysics(),
+                      padding: EdgeInsets.only(
+                          left: 24,
+                          right: 24,
+                          top: 10,
+                          bottom:
+                              MediaQuery.of(context).viewInsets.bottom + 120),
+                      itemCount: itemCount,
+                      itemBuilder: (context, index) {
+                        if (_isAddingNew && index == 0) {
+                          return _buildEditableCard(
+                              null, textColor, secondaryTextColor);
+                        }
+
+                        final noteIndex = _isAddingNew ? index - 1 : index;
+                        final note = provider.notes[noteIndex];
+
+                        if (_editingNoteId == note.id) {
+                          return _buildEditableCard(
+                              note, textColor, secondaryTextColor);
+                        }
+
+                        return _buildNoteCard(
+                            note, textColor, secondaryTextColor);
+                      },
+                    ),
                   );
                 },
               ),
@@ -155,18 +213,27 @@ class _NotesScreenState extends State<NotesScreen> {
       ),
       floatingActionButton: Padding(
         padding: const EdgeInsets.only(bottom: 120),
-        child: FloatingActionButton(
-          heroTag: 'notes_fab',
-          onPressed: () {
-            if (!_isAddingNew && _editingNoteId == null) {
-              _startEditing(null);
-            }
-          },
-          backgroundColor: AppTheme.primary,
-          elevation: 8,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-          child: const Icon(LucideIcons.plus, color: Colors.white, size: 30),
+        child: AnimatedSlide(
+          duration: const Duration(milliseconds: 300),
+          offset: _isFabVisible ? Offset.zero : const Offset(0, 2),
+          child: AnimatedOpacity(
+            duration: const Duration(milliseconds: 300),
+            opacity: _isFabVisible ? 1.0 : 0.0,
+            child: FloatingActionButton(
+              heroTag: 'notes_fab',
+              onPressed: () {
+                if (!_isAddingNew && _editingNoteId == null) {
+                  _startEditing(null);
+                }
+              },
+              backgroundColor: AppTheme.primary,
+              elevation: 8,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(18)),
+              child:
+                  const Icon(LucideIcons.plus, color: Colors.white, size: 30),
+            ),
+          ),
         ),
       ),
     );
@@ -184,7 +251,7 @@ class _NotesScreenState extends State<NotesScreen> {
           Text(
             'Your brain called — it wants backup.',
             textAlign: TextAlign.center,
-            style: GoogleFonts.outfit(
+            style: TextStyle(
                 color: secondaryTextColor,
                 fontSize: 18,
                 fontWeight: FontWeight.w800),
@@ -193,7 +260,7 @@ class _NotesScreenState extends State<NotesScreen> {
           Text(
             'Jot down thoughts, reminders, or\nwhy you spent ₹2,000 on that thing.',
             textAlign: TextAlign.center,
-            style: GoogleFonts.inter(
+            style: TextStyle(
                 color: secondaryTextColor.withValues(alpha: 0.6), fontSize: 14),
           ),
         ],
@@ -243,7 +310,7 @@ class _NotesScreenState extends State<NotesScreen> {
                     Expanded(
                       child: Text(
                         note.title.isEmpty ? 'Untitled' : note.title,
-                        style: GoogleFonts.outfit(
+                        style: TextStyle(
                             fontWeight: FontWeight.w800,
                             fontSize: 18,
                             color: textColor),
@@ -267,7 +334,7 @@ class _NotesScreenState extends State<NotesScreen> {
                 const SizedBox(height: 8),
                 Text(
                   note.content,
-                  style: GoogleFonts.inter(
+                  style: TextStyle(
                       color: secondaryTextColor, fontSize: 14, height: 1.6),
                 ),
                 const SizedBox(height: 20),
@@ -290,7 +357,7 @@ class _NotesScreenState extends State<NotesScreen> {
                             Text(
                               DateFormat('MMM d, h:mm a')
                                   .format(note.reminderDate!),
-                              style: GoogleFonts.inter(
+                              style: TextStyle(
                                   color: AppTheme.primary,
                                   fontSize: 11,
                                   fontWeight: FontWeight.bold),
@@ -309,8 +376,14 @@ class _NotesScreenState extends State<NotesScreen> {
                         ),
                         const SizedBox(width: 16),
                         GestureDetector(
-                          onTap: () =>
-                              context.read<NoteProvider>().deleteNote(note.id!),
+                          onTap: () async {
+                            final confirm = await _showDeleteConfirmation(
+                                context,
+                                note.title.isEmpty ? 'Untitled' : note.title);
+                            if (confirm == true) {
+                              context.read<NoteProvider>().deleteNote(note.id!);
+                            }
+                          },
                           child: const Icon(LucideIcons.trash2,
                               size: 18, color: AppTheme.danger),
                         ),
@@ -358,7 +431,7 @@ class _NotesScreenState extends State<NotesScreen> {
                         controller: _titleController,
                         decoration: InputDecoration(
                           hintText: 'Title',
-                          hintStyle: GoogleFonts.outfit(
+                          hintStyle: TextStyle(
                               color: secondaryTextColor.withValues(alpha: 0.5)),
                           border: InputBorder.none,
                           enabledBorder: InputBorder.none,
@@ -366,7 +439,7 @@ class _NotesScreenState extends State<NotesScreen> {
                           isDense: true,
                           contentPadding: EdgeInsets.zero,
                         ),
-                        style: GoogleFonts.outfit(
+                        style: TextStyle(
                             color: textColor,
                             fontWeight: FontWeight.bold,
                             fontSize: 18),
@@ -467,7 +540,7 @@ class _NotesScreenState extends State<NotesScreen> {
                               Text(
                                 DateFormat('MMM d, h:mm a')
                                     .format(_selectedDate!),
-                                style: GoogleFonts.inter(
+                                style: TextStyle(
                                     color: AppTheme.primary,
                                     fontSize: 11,
                                     fontWeight: FontWeight.bold),
@@ -487,7 +560,7 @@ class _NotesScreenState extends State<NotesScreen> {
                   autofocus: true,
                   decoration: InputDecoration(
                     hintText: 'Content...',
-                    hintStyle: GoogleFonts.inter(
+                    hintStyle: TextStyle(
                         color: secondaryTextColor.withValues(alpha: 0.5)),
                     border: InputBorder.none,
                     enabledBorder: InputBorder.none,
@@ -495,7 +568,7 @@ class _NotesScreenState extends State<NotesScreen> {
                     isDense: true,
                     contentPadding: EdgeInsets.zero,
                   ),
-                  style: GoogleFonts.inter(color: textColor, height: 1.6),
+                  style: TextStyle(color: textColor, height: 1.6),
                   onChanged: (val) {
                     if (val.endsWith('\n')) {
                       final lines = val.split('\n');
@@ -547,7 +620,7 @@ class _NotesScreenState extends State<NotesScreen> {
                         shape: WidgetStateProperty.all(RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12)))),
                     child: Text('Done',
-                        style: GoogleFonts.outfit(
+                        style: TextStyle(
                             fontWeight: FontWeight.bold, fontSize: 14)),
                   ),
                 ),

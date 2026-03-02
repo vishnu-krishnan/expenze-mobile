@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../../core/theme/app_theme.dart';
 import 'profile_setup_page.dart';
@@ -66,7 +65,7 @@ class LandingPage extends StatelessWidget {
                           const SizedBox(width: 16),
                           Text(
                             'EXPENZE',
-                            style: GoogleFonts.outfit(
+                            style: TextStyle(
                               fontSize: 22,
                               fontWeight: FontWeight.w900,
                               color: AppTheme.getTextColor(context),
@@ -81,7 +80,7 @@ class LandingPage extends StatelessWidget {
                       // Professional & Friendly Copy
                       Text(
                         'Stop guessing where your money went.',
-                        style: GoogleFonts.outfit(
+                        style: TextStyle(
                           fontSize: 40,
                           fontWeight: FontWeight.bold,
                           color: AppTheme.getTextColor(context),
@@ -94,7 +93,7 @@ class LandingPage extends StatelessWidget {
 
                       Text(
                         'EXPENZE tracks your spending so you can actually afford nice things. No complicated setup, no unnecessary accounts — just clarity from day one.',
-                        style: GoogleFonts.inter(
+                        style: TextStyle(
                           fontSize: 16,
                           color:
                               AppTheme.getTextColor(context, isSecondary: true),
@@ -170,7 +169,7 @@ class LandingPage extends StatelessWidget {
             children: [
               Text(
                 title,
-                style: GoogleFonts.outfit(
+                style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
                   color: AppTheme.getTextColor(context),
@@ -178,7 +177,7 @@ class LandingPage extends StatelessWidget {
               ),
               Text(
                 desc,
-                style: GoogleFonts.inter(
+                style: TextStyle(
                   fontSize: 13,
                   color: AppTheme.getTextColor(context, isSecondary: true),
                 ),
@@ -227,7 +226,7 @@ class LandingPage extends StatelessWidget {
           children: [
             Text(
               'Yes, I\'m Ready',
-              style: GoogleFonts.outfit(
+              style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w800,
                 letterSpacing: 0.5,

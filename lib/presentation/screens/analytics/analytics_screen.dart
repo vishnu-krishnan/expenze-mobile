@@ -136,7 +136,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                                         .withValues(alpha: 0.2)),
                               ),
                             ),
-                            child: const Row(
+                            child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Text('Dig deeper into history',
@@ -269,7 +269,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
 
   Widget _buildLineChart(List<Map<String, dynamic>> trends) {
     if (trends.isEmpty) {
-      return const Center(child: Text('Spend something first 😅'));
+      return Center(child: Text('Spend something first 😅'));
     }
 
     final isDark = Theme.of(context).brightness == Brightness.dark;

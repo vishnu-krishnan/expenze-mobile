@@ -23,6 +23,8 @@ import 'data/services/notification_service.dart';
 import 'data/services/api_service.dart';
 import 'presentation/screens/settings/settings_screen.dart';
 import 'presentation/screens/settings/notifications_screen.dart';
+import 'presentation/providers/wish_provider.dart';
+import 'presentation/screens/wishes/wishes_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -110,6 +112,10 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider<RegularPaymentProvider>(
           create: (context) => RegularPaymentProvider()..loadPayments(),
         ),
+        // Wish Provider
+        ChangeNotifierProvider<WishProvider>(
+          create: (context) => WishProvider(),
+        ),
       ],
       child: Consumer<ThemeProvider>(
         builder: (context, themeProvider, child) {
@@ -132,6 +138,7 @@ class MyApp extends StatelessWidget {
               '/import': (context) => const SmsImportScreen(),
               '/profile': (context) => const ProfileScreen(),
               '/notes': (context) => const NotesScreen(),
+              '/wishes': (context) => const WishesScreen(),
               '/settings': (context) => const SettingsScreen(),
               '/notifications': (context) => const NotificationSettingsScreen(),
               '/analytics': (context) =>

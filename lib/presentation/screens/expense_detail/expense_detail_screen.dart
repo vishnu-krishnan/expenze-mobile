@@ -151,7 +151,7 @@ Shared via Expenze App
               alignment: Alignment.center,
               child: Text(
                 category.icon ?? '💰',
-                style: const TextStyle(fontSize: 40),
+                style: TextStyle(fontSize: 40),
               ),
             ),
           ],
@@ -186,7 +186,7 @@ Shared via Expenze App
                   color: AppTheme.primary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: const Text(
+                child: Text(
                   'IMPORTED',
                   style: TextStyle(
                       color: AppTheme.primary,
@@ -325,7 +325,7 @@ Shared via Expenze App
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Text(value,
-                        style: const TextStyle(
+                        style: TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w900,
                             color: AppTheme.primary)),
@@ -405,10 +405,7 @@ Shared via Expenze App
               ),
               child: Text(
                 metadata,
-                style: TextStyle(
-                    fontSize: 10,
-                    color: secondaryTextColor,
-                    fontFamily: 'monospace'),
+                style: TextStyle(fontSize: 10, color: secondaryTextColor),
               ),
             ),
           ],

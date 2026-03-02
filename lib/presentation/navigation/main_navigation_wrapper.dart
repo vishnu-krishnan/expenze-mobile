@@ -1,4 +1,5 @@
 import 'dart:ui';
+import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:lucide_icons/lucide_icons.dart';
@@ -45,51 +46,58 @@ class _MainNavigationWrapperState extends State<MainNavigationWrapper> {
         if (didPop) return;
         setState(() => _selectedIndex = 0);
       },
-      child: Container(
-        decoration: isDark
-            ? AppTheme.darkBackgroundDecoration
-            : AppTheme.backgroundDecoration,
-        child: Scaffold(
-          backgroundColor: Colors.transparent,
-          extendBody: true,
-          body: Stack(
-            children: [
-              SafeArea(
-                top: true,
-                bottom: false,
-                child: NotificationListener<ScrollNotification>(
-                  onNotification: (notification) {
-                    if (notification is ScrollUpdateNotification) {
-                      // Only show dock when at or very near the top of the screen content
-                      if (notification.metrics.pixels <= 40) {
-                        if (!_isDockVisible) {
-                          setState(() => _isDockVisible = true);
-                        }
-                      } else {
-                        // Hide dock while scrolling the page slowly or fast
-                        if (_isDockVisible) {
-                          setState(() => _isDockVisible = false);
+      child: AnnotatedRegion<SystemUiOverlayStyle>(
+        value: SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+          statusBarBrightness: isDark ? Brightness.dark : Brightness.light,
+        ),
+        child: Container(
+          decoration: isDark
+              ? AppTheme.darkBackgroundDecoration
+              : AppTheme.backgroundDecoration,
+          child: Scaffold(
+            backgroundColor: Colors.transparent,
+            extendBody: true,
+            body: Stack(
+              children: [
+                SafeArea(
+                  top: true,
+                  bottom: false,
+                  child: NotificationListener<ScrollNotification>(
+                    onNotification: (notification) {
+                      if (notification is ScrollUpdateNotification) {
+                        // Only show dock when at or very near the top of the screen content
+                        if (notification.metrics.pixels <= 40) {
+                          if (!_isDockVisible) {
+                            setState(() => _isDockVisible = true);
+                          }
+                        } else {
+                          // Hide dock while scrolling the page slowly or fast
+                          if (_isDockVisible) {
+                            setState(() => _isDockVisible = false);
+                          }
                         }
                       }
-                    }
-                    return false;
-                  },
-                  child: IndexedStack(
-                    index: _selectedIndex,
-                    children: _screens,
+                      return false;
+                    },
+                    child: IndexedStack(
+                      index: _selectedIndex,
+                      children: _screens,
+                    ),
                   ),
                 ),
-              ),
-              Positioned(
-                left: 0,
-                right: 0,
-                bottom: 0,
-                child: SafeArea(
-                  top: false,
-                  child: _buildModernNavBar(isDark),
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  child: SafeArea(
+                    top: false,
+                    child: _buildModernNavBar(isDark),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

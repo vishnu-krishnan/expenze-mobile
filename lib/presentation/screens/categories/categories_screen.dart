@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:provider/provider.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../../core/theme/app_theme.dart';
@@ -15,6 +16,8 @@ class CategoriesScreen extends StatefulWidget {
 }
 
 class _CategoriesScreenState extends State<CategoriesScreen> {
+  bool _isFabVisible = true;
+
   @override
   Widget build(BuildContext context) {
     final textColor = AppTheme.getTextColor(context);
@@ -29,84 +32,107 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
           : AppTheme.backgroundDecoration,
       child: Scaffold(
         backgroundColor: Colors.transparent,
-        body: CustomScrollView(
-          physics: const BouncingScrollPhysics(),
-          slivers: [
-            SliverAppBar(
-              backgroundColor: Colors.transparent,
-              automaticallyImplyLeading: false,
-              expandedHeight: 100,
-              floating: true,
-              pinned: false,
-              flexibleSpace: FlexibleSpaceBar(
-                titlePadding: EdgeInsets.zero,
-                background: Padding(
-                  padding: const EdgeInsets.fromLTRB(26, 10, 26, 0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text('Favourite Categories',
-                          style: TextStyle(
-                              fontSize: 26,
-                              fontWeight: FontWeight.w900,
-                              color: textColor,
-                              letterSpacing: -1)),
-                    ],
+        body: NotificationListener<ScrollNotification>(
+          onNotification: (ScrollNotification notification) {
+            if (notification is ScrollUpdateNotification) {
+              if (notification.scrollDelta != null) {
+                if (notification.scrollDelta! > 2 && _isFabVisible) {
+                  setState(() => _isFabVisible = false);
+                } else if (notification.scrollDelta! < -2 && !_isFabVisible) {
+                  setState(() => _isFabVisible = true);
+                }
+              }
+            }
+            return false;
+          },
+          child: CustomScrollView(
+            physics: const BouncingScrollPhysics(),
+            slivers: [
+              SliverAppBar(
+                backgroundColor: Colors.transparent,
+                automaticallyImplyLeading: false,
+                expandedHeight: 100,
+                floating: true,
+                pinned: false,
+                flexibleSpace: FlexibleSpaceBar(
+                  titlePadding: EdgeInsets.zero,
+                  background: Padding(
+                    padding: const EdgeInsets.fromLTRB(26, 10, 26, 0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text('Favourite Categories',
+                            style: TextStyle(
+                                fontSize: 26,
+                                fontWeight: FontWeight.w900,
+                                color: textColor,
+                                letterSpacing: -1)),
+                      ],
+                    ),
                   ),
                 ),
               ),
-            ),
-            SliverPadding(
-              padding: const EdgeInsets.symmetric(horizontal: 26),
-              sliver: Consumer<CategoryProvider>(
-                builder: (context, provider, child) {
-                  if (provider.isLoading) {
-                    return const SliverFillRemaining(
-                        child: Center(child: CircularProgressIndicator()));
-                  }
+              SliverPadding(
+                padding: const EdgeInsets.symmetric(horizontal: 26),
+                sliver: Consumer<CategoryProvider>(
+                  builder: (context, provider, child) {
+                    if (provider.isLoading) {
+                      return const SliverFillRemaining(
+                          child: Center(child: CircularProgressIndicator()));
+                    }
 
-                  if (provider.categories.isEmpty) {
-                    return SliverFillRemaining(
-                        child: _buildEmptyState(secondaryTextColor));
-                  }
+                    if (provider.categories.isEmpty) {
+                      return SliverFillRemaining(
+                          child: _buildEmptyState(secondaryTextColor));
+                    }
 
-                  return SliverGrid(
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      mainAxisSpacing: 16,
-                      crossAxisSpacing: 16,
-                      childAspectRatio: 1.1,
-                    ),
-                    delegate: SliverChildBuilderDelegate(
-                      (context, index) {
-                        final cat = provider.categories[index];
-                        return _buildCategoryCard(
-                            context, cat, textColor, secondaryTextColor);
-                      },
-                      childCount: provider.categories.length,
-                    ),
-                  );
-                },
+                    return SliverGrid(
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        mainAxisSpacing: 16,
+                        crossAxisSpacing: 16,
+                        childAspectRatio: 1.1,
+                      ),
+                      delegate: SliverChildBuilderDelegate(
+                        (context, index) {
+                          final cat = provider.categories[index];
+                          return _buildCategoryCard(
+                              context, cat, textColor, secondaryTextColor);
+                        },
+                        childCount: provider.categories.length,
+                      ),
+                    );
+                  },
+                ),
               ),
-            ),
-            const SliverToBoxAdapter(child: SizedBox(height: 140)),
-          ],
+              const SliverToBoxAdapter(child: SizedBox(height: 140)),
+            ],
+          ),
         ),
         floatingActionButton: Padding(
           padding: const EdgeInsets.only(bottom: 120),
-          child: FloatingActionButton(
-            heroTag: 'categories_fab',
-            onPressed: () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => const CategoryAddScreen())),
-            backgroundColor: AppTheme.primary,
-            elevation: 8,
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-            child: const Icon(LucideIcons.plus, color: Colors.white, size: 28),
+          child: AnimatedSlide(
+            duration: const Duration(milliseconds: 300),
+            offset: _isFabVisible ? Offset.zero : const Offset(0, 2),
+            child: AnimatedOpacity(
+              duration: const Duration(milliseconds: 300),
+              opacity: _isFabVisible ? 1.0 : 0.0,
+              child: FloatingActionButton(
+                heroTag: 'categories_fab',
+                onPressed: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const CategoryAddScreen())),
+                backgroundColor: AppTheme.primary,
+                elevation: 8,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(18)),
+                child:
+                    const Icon(LucideIcons.plus, color: Colors.white, size: 28),
+              ),
+            ),
           ),
         ),
       ),
@@ -177,8 +203,8 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                       borderRadius: BorderRadius.circular(20),
                     ),
                     alignment: Alignment.center,
-                    child: Text(cat.icon ?? '📁',
-                        style: const TextStyle(fontSize: 32)),
+                    child:
+                        Text(cat.icon ?? '📁', style: TextStyle(fontSize: 32)),
                   ),
                   const SizedBox(height: 12),
                   Padding(
@@ -228,13 +254,13 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                       ],
                     ),
                   ),
-                  const PopupMenuItem(
+                  PopupMenuItem(
                     value: 'delete',
                     child: Row(
                       children: [
-                        Icon(LucideIcons.trash2,
+                        const Icon(LucideIcons.trash2,
                             size: 16, color: AppTheme.danger),
-                        SizedBox(width: 12),
+                        const SizedBox(width: 12),
                         Text('Delete',
                             style: TextStyle(color: AppTheme.danger)),
                       ],
@@ -253,15 +279,14 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Wait, really?',
+        title: Text('Wait, really?',
             style: TextStyle(fontWeight: FontWeight.w900)),
         content: Text(
             'Once "${cat.name}" is gone, it\'s gone. Still want to proceed?'),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
         actions: [
           TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel')),
+              onPressed: () => Navigator.pop(context), child: Text('Cancel')),
           ElevatedButton(
             onPressed: () {
               context.read<CategoryProvider>().deleteCategory(cat.id);
@@ -270,7 +295,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
             style: ElevatedButton.styleFrom(
                 backgroundColor: AppTheme.danger,
                 foregroundColor: Colors.white),
-            child: const Text('Delete'),
+            child: Text('Delete'),
           ),
         ],
       ),

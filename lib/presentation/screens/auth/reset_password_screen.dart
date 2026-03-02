@@ -88,7 +88,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
     return Scaffold(
       backgroundColor: AppTheme.bgPrimary,
       appBar: AppBar(
-        title: const Text('Reset Password'),
+        title: Text('Reset Password'),
         backgroundColor: Colors.transparent,
         elevation: 0,
         centerTitle: false,
@@ -117,7 +117,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                   color: AppTheme.primary,
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Text('₹',
+                child: Text('₹',
                     style: TextStyle(
                         color: Colors.white,
                         fontSize: 24,
@@ -205,7 +205,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                           child: CircularProgressIndicator(
                               strokeWidth: 2, color: Colors.white),
                         )
-                      : const Text('Reset Password'),
+                      : Text('Reset Password'),
                 ),
               ],
             ),
@@ -226,7 +226,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(label,
-            style: const TextStyle(
+            style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
                 color: AppTheme.textPrimary)),

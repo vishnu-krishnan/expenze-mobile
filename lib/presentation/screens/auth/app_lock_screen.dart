@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:provider/provider.dart';
 import '../../../core/theme/app_theme.dart';
@@ -139,7 +138,7 @@ class _AppLockScreenState extends State<AppLockScreen> {
 
                   Text(
                     'EXPENZE',
-                    style: GoogleFonts.outfit(
+                    style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.w900,
                       color: AppTheme.getTextColor(context),
@@ -151,7 +150,7 @@ class _AppLockScreenState extends State<AppLockScreen> {
 
                   Text(
                     'Your money\'s behind this door. Prove it\'s yours.',
-                    style: GoogleFonts.inter(
+                    style: TextStyle(
                       fontSize: 16,
                       color: AppTheme.getTextColor(context, isSecondary: true),
                     ),
@@ -206,7 +205,7 @@ class _AppLockScreenState extends State<AppLockScreen> {
                     child: _isError
                         ? Text(
                             'Nope, that\'s not it. Try again!',
-                            style: GoogleFonts.inter(
+                            style: TextStyle(
                               color: Colors.redAccent,
                               fontSize: 14,
                               fontWeight: FontWeight.w600,
@@ -275,7 +274,7 @@ class _AppLockScreenState extends State<AppLockScreen> {
         ),
         child: Text(
           value,
-          style: GoogleFonts.outfit(
+          style: TextStyle(
             fontSize: 28,
             fontWeight: FontWeight.w600,
             color: AppTheme.getTextColor(context),

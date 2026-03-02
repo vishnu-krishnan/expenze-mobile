@@ -11,14 +11,42 @@ class ReleaseInfo {
 }
 
 class AppVersion {
-  static const String current = '1.6.0';
-  static const String buildNumber = '18';
-  static const String releaseName = 'Local Backup & Restore';
+  static const String current = '1.7.1';
+  static const String buildNumber = '21';
+  static const String releaseName = 'UI Polish & Final Stabilization';
 
   static const String website = 'https://expenze-elite.netlify.app/';
   static const String supportEmail = 'expenzehelp@gmail.com';
 
   static const List<ReleaseInfo> history = [
+    ReleaseInfo(
+      version: '1.7.1',
+      date: '2026-03-03',
+      changes: [
+        'Dashboard Polish: Refined animated action cards and hover effects',
+        'Stability Fix: Final cleanup of font standardizations to match original theme',
+        'UX Patch: Resolved various small UI layout inconsistencies found across screens',
+      ],
+    ),
+    ReleaseInfo(
+      version: '1.7.0',
+      date: '2026-03-03',
+      changes: [
+        'Wish List: New specialized module to save and track your future desires (Electronics, Shopping, etc.)',
+        'Wish List: Support for optional amounts, links/sources, and custom naming',
+        'Database Stability: Added migration logic for \'wishes\' table to resolve initial load crashes',
+        'Reliability: Implemented delete confirmation prompts for both Notes and Wishes',
+      ],
+    ),
+    ReleaseInfo(
+      version: '1.6.1',
+      date: '2026-03-02',
+      changes: [
+        'Interactive Dashboard: Introduced subtle scale animations to Quick Action cards',
+        'UI Cleanup: Resolved standing deprecation and linting warnings for opacity',
+        'Performance: Database initialization and hot reload optimization',
+      ],
+    ),
     ReleaseInfo(
       version: '1.6.0',
       date: '2026-03-02',
