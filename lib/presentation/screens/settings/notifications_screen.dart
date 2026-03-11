@@ -24,6 +24,7 @@ class NotificationSettingsScreen extends StatelessWidget {
             ? AppTheme.darkBackgroundDecoration
             : AppTheme.backgroundDecoration,
         child: SafeArea(
+          bottom: false,
           child: Column(
             children: [
               _buildHeader(context, textColor),

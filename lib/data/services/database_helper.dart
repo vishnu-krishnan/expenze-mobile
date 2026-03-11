@@ -23,7 +23,7 @@ class DatabaseHelper {
 
     return await openDatabase(
       path,
-      version: 24,
+      version: 25,
       onCreate: _createDB,
       onUpgrade: _onUpgrade,
     );
@@ -241,22 +241,14 @@ class DatabaseHelper {
         logger.e("Database migration error (v23)", error: e);
       }
     }
-    if (oldVersion < 24) {
+    if (oldVersion < 25) {
       try {
-        await db.execute('''
-          CREATE TABLE IF NOT EXISTS wishes (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT NOT NULL,
-            amount REAL NOT NULL,
-            source_link TEXT,
-            notes TEXT,
-            is_completed INTEGER DEFAULT 0,
-            created_at TEXT,
-            updated_at TEXT
-          )
-        ''');
+        await db.execute(
+            "ALTER TABLE wishes ADD COLUMN priority TEXT DEFAULT 'MEDIUM'");
+        await db.execute(
+            'ALTER TABLE wishes ADD COLUMN saved_amount REAL DEFAULT 0');
       } catch (e) {
-        logger.e("Database migration error (v24)", error: e);
+        logger.e("Database migration error (v25)", error: e);
       }
     }
   }
@@ -414,6 +406,8 @@ class DatabaseHelper {
         source_link TEXT,
         notes TEXT,
         is_completed INTEGER DEFAULT 0,
+        priority TEXT DEFAULT 'MEDIUM',
+        saved_amount REAL DEFAULT 0,
         created_at TEXT,
         updated_at TEXT
       )

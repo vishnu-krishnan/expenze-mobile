@@ -62,7 +62,8 @@ class _MonthPlanScreenState extends State<MonthPlanScreen> {
                     flexibleSpace: FlexibleSpaceBar(
                       titlePadding: EdgeInsets.zero,
                       background: Padding(
-                        padding: const EdgeInsets.fromLTRB(26, 10, 26, 0),
+                        padding: EdgeInsets.fromLTRB(
+                            26, MediaQuery.of(context).padding.top + 10, 26, 0),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisAlignment: MainAxisAlignment.center,

@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.7.2+22] - 2026-03-11
+### Added
+- **Global Typography**: Implemented **Outfit** as the global application font.
+- **Header Synchronization**: Unified header layouts (size, weight, spacing) across Dashboard, Analytics, Settings, Notes, Wishlist, and Categories.
+- **UX Flow**: Removed redundant back buttons on main screens (Notes, Wishlist) for a cleaner UX.
+- **Standardized FAB**: Fixed the position of the plus button (+) to be perfectly identical on every screen.
+- **Edge-to-Edge**: Finalized transparent system navigation bar integration.
+
 ## [1.7.1+21] - 2026-03-03
 ### Fixed
 - **UI Polish**: Final refinement of dashboard action cards and layout consistency.

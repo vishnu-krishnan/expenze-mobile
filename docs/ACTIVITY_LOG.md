@@ -1,5 +1,19 @@
 # Activity Log
 
+[2026-03-11] Elite Typography & Layout Synchronization
+Change Type: Patch
+Decision made:
+- Implemented global 'Outfit' font family in AppTheme.
+- Standardized headers (size, weight, spacing, padding) across all screens.
+- Aligned Settings screen header with Dashboard/Analytics.
+- Removed redundant back buttons on Notes and Wishlist.
+- Synchronized FAB (+) button position to 120px bottom padding.
+- Fixed edge-to-edge system navigation bar transparency.
+- Bumped version to 1.7.2+22.
+Reason: Achieve a perfectly consistent, premium "Elite" user experience across the entire app.
+Impact: UX | Visuals | Consistency
+
+
 [2026-03-03] UI Polish & Final Reversion
 Change Type: Patch
 Decision made:

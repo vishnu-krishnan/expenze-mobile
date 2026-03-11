@@ -11,14 +11,26 @@ class ReleaseInfo {
 }
 
 class AppVersion {
-  static const String current = '1.7.1';
-  static const String buildNumber = '21';
-  static const String releaseName = 'UI Polish & Final Stabilization';
+  static const String current = '1.7.2';
+  static const String buildNumber = '22';
+  static const String releaseName = 'Elite Typography & Layout Consistency';
 
   static const String website = 'https://expenze-elite.netlify.app/';
   static const String supportEmail = 'expenzehelp@gmail.com';
 
   static const List<ReleaseInfo> history = [
+    ReleaseInfo(
+      version: '1.7.2',
+      date: '2026-03-11',
+      changes: [
+        'Global Typography: Implemented \'Outfit\' as the mandatory global font across the entire application.',
+        'Layout Synchronization: Standardized all screen headers (Dashboard, Analytics, Settings, Notes, Wishlist, Categories) with unified padding, font sizes, and weights.',
+        'Header Refinement: Realigned Settings screen title to match Dashboard (26pt, w900) and matched all top insets.',
+        'Navigation Polish: Removed redundant back buttons on main tab screens (Notes, Wishlist) to streamline the UX flow.',
+        'FAB Standardization: Synchronized the Floating Action Button (Plus button) position and padding across all modules (120px bottom offset).',
+        'System UI: Finalized edge-to-edge transparent system navigation bar integration on Android.',
+      ],
+    ),
     ReleaseInfo(
       version: '1.7.1',
       date: '2026-03-03',

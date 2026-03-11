@@ -97,6 +97,7 @@ class AppTheme {
     useMaterial3: true,
     primaryColor: primary,
     scaffoldBackgroundColor: bgPrimary,
+    fontFamily: GoogleFonts.outfit().fontFamily,
     textTheme: GoogleFonts.outfitTextTheme().copyWith(
       displayLarge:
           GoogleFonts.outfit(color: textPrimary, fontWeight: FontWeight.bold)
@@ -179,6 +180,7 @@ class AppTheme {
     useMaterial3: true,
     primaryColor: primary,
     scaffoldBackgroundColor: bgPrimaryDark,
+    fontFamily: GoogleFonts.outfit().fontFamily,
     textTheme: GoogleFonts.outfitTextTheme(ThemeData.dark().textTheme).copyWith(
       displayLarge: GoogleFonts.outfit(
               color: textPrimaryDark, fontWeight: FontWeight.bold)

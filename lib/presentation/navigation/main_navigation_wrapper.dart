@@ -51,8 +51,16 @@ class _MainNavigationWrapperState extends State<MainNavigationWrapper> {
           statusBarColor: Colors.transparent,
           statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
           statusBarBrightness: isDark ? Brightness.dark : Brightness.light,
+          systemNavigationBarColor: const Color(0x00000000),
+          systemNavigationBarDividerColor: Colors.transparent,
+          systemNavigationBarIconBrightness:
+              isDark ? Brightness.light : Brightness.dark,
+          systemNavigationBarContrastEnforced: false,
+          systemStatusBarContrastEnforced: false,
         ),
         child: Container(
+          width: double.infinity,
+          height: double.infinity,
           decoration: isDark
               ? AppTheme.darkBackgroundDecoration
               : AppTheme.backgroundDecoration,
@@ -61,40 +69,64 @@ class _MainNavigationWrapperState extends State<MainNavigationWrapper> {
             extendBody: true,
             body: Stack(
               children: [
-                SafeArea(
-                  top: true,
-                  bottom: false,
-                  child: NotificationListener<ScrollNotification>(
-                    onNotification: (notification) {
-                      if (notification is ScrollUpdateNotification) {
-                        // Only show dock when at or very near the top of the screen content
-                        if (notification.metrics.pixels <= 40) {
-                          if (!_isDockVisible) {
-                            setState(() => _isDockVisible = true);
-                          }
-                        } else {
-                          // Hide dock while scrolling the page slowly or fast
-                          if (_isDockVisible) {
-                            setState(() => _isDockVisible = false);
-                          }
+                NotificationListener<ScrollNotification>(
+                  onNotification: (notification) {
+                    if (notification is ScrollUpdateNotification) {
+                      final delta = notification.scrollDelta ?? 0;
+
+                      // Show dock when at top or scrolling up
+                      if (notification.metrics.pixels <= 20 || delta < -2) {
+                        if (!_isDockVisible) {
+                          setState(() => _isDockVisible = true);
                         }
                       }
-                      return false;
-                    },
-                    child: IndexedStack(
-                      index: _selectedIndex,
-                      children: _screens,
-                    ),
+                      // Hide dock when scrolling down
+                      else if (delta > 2 && notification.metrics.pixels > 40) {
+                        if (_isDockVisible) {
+                          setState(() => _isDockVisible = false);
+                        }
+                      }
+                    }
+                    return false;
+                  },
+                  child: IndexedStack(
+                    index: _selectedIndex,
+                    children: _screens,
                   ),
                 ),
+                // Bottom Scrim/Background Overlay
                 Positioned(
                   left: 0,
                   right: 0,
                   bottom: 0,
-                  child: SafeArea(
-                    top: false,
-                    child: _buildModernNavBar(isDark),
+                  child: AnimatedOpacity(
+                    duration: const Duration(milliseconds: 350),
+                    opacity: _isDockVisible ? 1.0 : 0.0,
+                    child: Container(
+                      height:
+                          MediaQuery.of(context).viewPadding.bottom + 110,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Colors.transparent,
+                            (isDark ? Colors.black : Colors.white)
+                                .withOpacity(0.1),
+                            (isDark ? Colors.black : Colors.white)
+                                .withOpacity(0.35),
+                          ],
+                        ),
+                      ),
+                    ),
                   ),
+                ),
+                // Navigation Bar
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  child: _buildModernNavBar(isDark),
                 ),
               ],
             ),
@@ -110,12 +142,13 @@ class _MainNavigationWrapperState extends State<MainNavigationWrapper> {
       curve: Curves.easeOutCubic,
       offset: _isDockVisible ? Offset.zero : const Offset(0, 2),
       child: Container(
-        margin: const EdgeInsets.fromLTRB(24, 0, 24, 30),
+        margin: EdgeInsets.fromLTRB(
+            24, 0, 24, MediaQuery.of(context).viewPadding.bottom + 12),
         height: 70,
         decoration: BoxDecoration(
           color: isDark
-              ? AppTheme.bgCardDark.withValues(alpha: 0.8)
-              : Colors.white.withValues(alpha: 0.8),
+              ? AppTheme.bgCardDark.withOpacity(0.8)
+              : Colors.white.withOpacity(0.8),
           borderRadius: BorderRadius.circular(35),
           boxShadow: [
             BoxShadow(
@@ -194,10 +227,11 @@ class _MainNavigationWrapperState extends State<MainNavigationWrapper> {
               const SizedBox(height: 4),
               Text(
                 label,
-                style: const TextStyle(
+                style: TextStyle(
                   color: AppTheme.primary,
                   fontSize: 10,
-                  fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.w900, // Matching the dashboard bold headings
+                  letterSpacing: -0.2, // Tighter look
                 ),
               ),
             ]

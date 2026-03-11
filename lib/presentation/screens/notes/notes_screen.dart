@@ -133,82 +133,118 @@ class _NotesScreenState extends State<NotesScreen> {
         decoration: isDark
             ? AppTheme.darkBackgroundDecoration
             : AppTheme.backgroundDecoration,
-        child: Column(
-          children: [
-            AppBar(
-              title: Text('Notes',
-                  style: TextStyle(
-                      color: textColor,
-                      fontWeight: FontWeight.w900,
-                      fontSize: 34,
-                      letterSpacing: -1)),
-              centerTitle: false,
-              titleSpacing: 26,
-              automaticallyImplyLeading: false,
-              backgroundColor: Colors.transparent,
-              elevation: 0,
-              toolbarHeight: 100,
+        child: NotificationListener<ScrollNotification>(
+          onNotification: (ScrollNotification notification) {
+            if (notification is ScrollUpdateNotification) {
+              if (notification.scrollDelta != null) {
+                if (notification.scrollDelta! > 2 && _isFabVisible) {
+                  setState(() => _isFabVisible = false);
+                } else if (notification.scrollDelta! < -2 && !_isFabVisible) {
+                  setState(() => _isFabVisible = true);
+                }
+              }
+            }
+            return false;
+          },
+          child: CustomScrollView(
+            physics: const AlwaysScrollableScrollPhysics(
+              parent: BouncingScrollPhysics(),
             ),
-            Expanded(
-              child: Consumer<NoteProvider>(
+            slivers: [
+                SliverAppBar(
+                  backgroundColor: Colors.transparent,
+                  automaticallyImplyLeading: false,
+                  expandedHeight: 100,
+                  floating: true,
+                  pinned: false,
+                  flexibleSpace: FlexibleSpaceBar(
+                    titlePadding: EdgeInsets.zero,
+                    background: Padding(
+                      padding: EdgeInsets.fromLTRB(
+                          26, MediaQuery.of(context).padding.top + 10, 26, 0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text('Notes',
+                              style: TextStyle(
+                                  fontSize: 26,
+                                  fontWeight: FontWeight.w900,
+                                  color: textColor,
+                                  letterSpacing: -0.8)),
+                          const SizedBox(height: 4),
+                          Text(
+                            'Your brain called — it wants backup.',
+                            style: TextStyle(
+                              color: secondaryTextColor,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              Consumer<NoteProvider>(
                 builder: (context, provider, child) {
                   if (provider.isLoading) {
-                    return Center(child: CircularProgressIndicator());
+                    return const SliverToBoxAdapter(
+                      child: Center(
+                        child: Padding(
+                          padding: EdgeInsets.only(top: 40),
+                          child: CircularProgressIndicator(),
+                        ),
+                      ),
+                    );
                   }
 
                   if (provider.notes.isEmpty && !_isAddingNew) {
-                    return _buildEmptyState(secondaryTextColor);
+                    return SliverFillRemaining(
+                      hasScrollBody: false,
+                      child: _buildEmptyState(secondaryTextColor),
+                    );
                   }
 
                   final itemCount =
                       provider.notes.length + (_isAddingNew ? 1 : 0);
 
-                  return NotificationListener<ScrollNotification>(
-                    onNotification: (ScrollNotification notification) {
-                      if (notification is ScrollUpdateNotification) {
-                        if (notification.scrollDelta != null) {
-                          if (notification.scrollDelta! > 2 && _isFabVisible) {
-                            setState(() => _isFabVisible = false);
-                          } else if (notification.scrollDelta! < -2 &&
-                              !_isFabVisible) {
-                            setState(() => _isFabVisible = true);
-                          }
-                        }
-                      }
-                      return false;
-                    },
-                    child: ListView.builder(
-                      physics: const BouncingScrollPhysics(),
-                      padding: EdgeInsets.only(
-                          left: 24,
-                          right: 24,
-                          top: 10,
-                          bottom:
-                              MediaQuery.of(context).viewInsets.bottom + 120),
-                      itemCount: itemCount,
-                      itemBuilder: (context, index) {
-                        if (_isAddingNew && index == 0) {
-                          return _buildEditableCard(
-                              null, textColor, secondaryTextColor);
-                        }
-
-                        final noteIndex = _isAddingNew ? index - 1 : index;
-                        final note = provider.notes[noteIndex];
-
-                        if (_editingNoteId == note.id) {
-                          return _buildEditableCard(
-                              note, textColor, secondaryTextColor);
-                        }
-
-                        return _buildNoteCard(
-                            note, textColor, secondaryTextColor);
-                      },
+                  return SliverPadding(
+                    padding: EdgeInsets.only(
+                        left: 24,
+                        right: 24,
+                        top: 10,
+                        bottom: MediaQuery.of(context).viewInsets.bottom + 140),
+                    sliver: SliverList(
+                      delegate: SliverChildBuilderDelegate(
+                        (context, index) {
+                          return TweenAnimationBuilder<double>(
+                            duration: Duration(
+                                milliseconds:
+                                    400 + (index * 100).clamp(0, 600)),
+                            tween: Tween(begin: 0.0, end: 1.0),
+                            curve: Curves.easeOutCubic,
+                            builder: (context, value, child) {
+                              return Opacity(
+                                opacity: value,
+                                child: Transform.translate(
+                                  offset: Offset(0, 20 * (1 - value)),
+                                  child: child,
+                                ),
+                              );
+                            },
+                            child: _buildItem(
+                                index, provider, textColor, secondaryTextColor),
+                          );
+                        },
+                        childCount: itemCount,
+                      ),
                     ),
                   );
                 },
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
       floatingActionButton: Padding(
@@ -237,6 +273,26 @@ class _NotesScreenState extends State<NotesScreen> {
         ),
       ),
     );
+  }
+
+  Widget _buildItem(int index, NoteProvider provider, Color textColor,
+      Color secondaryTextColor) {
+    if (_isAddingNew && index == 0) {
+      return _buildEditableCard(null, textColor, secondaryTextColor);
+    }
+
+    final noteIndex = _isAddingNew ? index - 1 : index;
+    if (noteIndex < 0 || noteIndex >= provider.notes.length) {
+      return const SizedBox.shrink();
+    }
+    
+    final note = provider.notes[noteIndex];
+
+    if (_editingNoteId == note.id) {
+      return _buildEditableCard(note, textColor, secondaryTextColor);
+    }
+
+    return _buildNoteCard(note, textColor, secondaryTextColor);
   }
 
   Widget _buildEmptyState(Color secondaryTextColor) {
@@ -311,9 +367,10 @@ class _NotesScreenState extends State<NotesScreen> {
                       child: Text(
                         note.title.isEmpty ? 'Untitled' : note.title,
                         style: TextStyle(
-                            fontWeight: FontWeight.w800,
+                            fontWeight: FontWeight.w900,
                             fontSize: 18,
-                            color: textColor),
+                            color: textColor,
+                            letterSpacing: -0.4),
                       ),
                     ),
                     IconButton(
@@ -441,8 +498,9 @@ class _NotesScreenState extends State<NotesScreen> {
                         ),
                         style: TextStyle(
                             color: textColor,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 18),
+                            fontWeight: FontWeight.w900,
+                            fontSize: 18,
+                            letterSpacing: -0.4),
                       ),
                     ),
                     IconButton(

@@ -31,13 +31,14 @@ class SettingsScreen extends StatelessWidget {
         slivers: [
           SliverAppBar(
             backgroundColor: Colors.transparent,
-            expandedHeight: 120,
+            expandedHeight: 100, // Corrected from 120
             floating: true,
             pinned: false,
             flexibleSpace: FlexibleSpaceBar(
               titlePadding: EdgeInsets.zero,
               background: Padding(
-                padding: const EdgeInsets.fromLTRB(26, 20, 26, 0),
+                padding: EdgeInsets.fromLTRB(
+                    26, MediaQuery.of(context).padding.top + 10, 26, 0), // Corrected from + 20
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -46,14 +47,14 @@ class SettingsScreen extends StatelessWidget {
                         style: TextStyle(
                             color: secondaryTextColor,
                             fontSize: 13,
-                            fontWeight: FontWeight.w600,
+                            fontWeight: FontWeight.w500, // Matching analytics/dashboard feel
                             letterSpacing: 0.5)),
                     Text('Settings',
                         style: TextStyle(
-                            fontSize: 34,
+                            fontSize: 26, // Corrected from 34
                             fontWeight: FontWeight.w900,
                             color: textColor,
-                            letterSpacing: -1)),
+                            letterSpacing: -0.8)), // Corrected from -1 for better consistency
                   ],
                 ),
               ),

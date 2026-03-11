@@ -73,8 +73,11 @@ class ApiService {
 
     // 1. Try to load from .ai_keys asset (if bundled)
     try {
+      _logger.d('Loading .ai_keys from rootBundle...');
       final content = await rootBundle.loadString('.ai_keys');
       final lines = content.split('\n');
+      _logger.d('Found ${lines.length} lines in .ai_keys');
+      
       for (var line in lines) {
         line = line.trim();
         if (line.isEmpty || line.startsWith('#')) continue;
@@ -84,6 +87,8 @@ class ApiService {
           if (parts.length < 2) continue;
           final keyName = parts[0].trim().toUpperCase();
           final value = parts[1].trim();
+
+          if (value.isEmpty) continue;
 
           if (keyName.contains('GROQ')) {
             _keyPools[AiProvider.groq]!.add(value);
@@ -98,7 +103,7 @@ class ApiService {
             _keyPools[AiProvider.groq]!.add(line);
           } else if (line.contains('ant-api')) {
             _keyPools[AiProvider.claude]!.add(line);
-          } else {
+          } else if (line.startsWith('sk-')) {
             _keyPools[AiProvider.openai]!.add(line);
           }
         }
@@ -108,24 +113,29 @@ class ApiService {
     }
 
     // 2. Merge with dotenv keys (optional fallback/override)
-    for (var key in dotenv.env.keys) {
-      final value = dotenv.env[key];
-      if (value == null || value.isEmpty) continue;
+    try {
+      _logger.d('Checking dotenv for AI keys...');
+      for (var key in dotenv.env.keys) {
+        final value = dotenv.env[key];
+        if (value == null || value.isEmpty) continue;
 
-      final keyName = key.toUpperCase();
-      if (keyName.contains('GROQ')) {
-        if (!_keyPools[AiProvider.groq]!.contains(value)) {
-          _keyPools[AiProvider.groq]!.add(value);
-        }
-      } else if (keyName.contains('CLAUDE')) {
-        if (!_keyPools[AiProvider.claude]!.contains(value)) {
-          _keyPools[AiProvider.claude]!.add(value);
-        }
-      } else if (keyName.contains('OPENAI')) {
-        if (!_keyPools[AiProvider.openai]!.contains(value)) {
-          _keyPools[AiProvider.openai]!.add(value);
+        final keyName = key.toUpperCase();
+        if (keyName.contains('GROQ')) {
+          if (!_keyPools[AiProvider.groq]!.contains(value)) {
+            _keyPools[AiProvider.groq]!.add(value);
+          }
+        } else if (keyName.contains('CLAUDE')) {
+          if (!_keyPools[AiProvider.claude]!.contains(value)) {
+            _keyPools[AiProvider.claude]!.add(value);
+          }
+        } else if (keyName.contains('OPENAI')) {
+          if (!_keyPools[AiProvider.openai]!.contains(value)) {
+            _keyPools[AiProvider.openai]!.add(value);
+          }
         }
       }
+    } catch (e) {
+      _logger.w('Error checking dotenv keys: $e');
     }
 
     // Remove duplicates and sort for deterministic rotation
@@ -145,22 +155,27 @@ class ApiService {
     final pool = _keyPools[provider];
     if (pool == null || pool.isEmpty) return '';
 
-    int currentIndex = _poolIndices[provider]!;
-    String key = pool[currentIndex];
+    int attempts = 0;
+    while (attempts < pool.length) {
+      int currentIndex = _poolIndices[provider]!;
+      String key = pool[currentIndex];
 
-    // Proactive Check: If the key looks like a placeholder (from .ai_keys example), skip it
-    if (key.contains('abcdef123456') ||
-        key.length < 20 ||
-        key.contains('placeholder')) {
-      _logger.w('[$provider] Skipping placeholder key at index $currentIndex');
+      // Rotate for next time
       _poolIndices[provider] = (currentIndex + 1) % pool.length;
-      return _getNextKey(provider); // Recursive call to get the next one
+      attempts++;
+
+      // Proactive Check: If the key looks like a placeholder, skip it
+      if (key.contains('abcdef123456') ||
+          key.length < 20 ||
+          key.contains('placeholder')) {
+        _logger.w('[$provider] Skipping placeholder key at index $currentIndex');
+        continue;
+      }
+
+      return key;
     }
 
-    // Rotate for next time
-    _poolIndices[provider] = (currentIndex + 1) % pool.length;
-
-    return key;
+    return '';
   }
 
   void setToken(String? token) {

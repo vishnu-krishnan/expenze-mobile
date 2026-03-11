@@ -56,21 +56,49 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                 pinned: false,
                 flexibleSpace: FlexibleSpaceBar(
                   titlePadding: EdgeInsets.zero,
-                  background: Padding(
-                    padding: const EdgeInsets.fromLTRB(26, 10, 26, 0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text('Favourite Categories',
-                            style: TextStyle(
-                                fontSize: 26,
-                                fontWeight: FontWeight.w900,
-                                color: textColor,
-                                letterSpacing: -1)),
-                      ],
-                    ),
+                background: Padding(
+                    padding: EdgeInsets.fromLTRB(
+                        26, MediaQuery.of(context).padding.top + 10, 26, 0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Row(
+                        children: [
+                          GestureDetector(
+                            onTap: () => Navigator.pop(context),
+                            child: Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: AppTheme.primary.withAlpha(25),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: const Icon(LucideIcons.arrowLeft,
+                                  size: 20, color: AppTheme.primary),
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          Text('Categories',
+                              style: TextStyle(
+                                  fontSize: 26,
+                                  fontWeight: FontWeight.w900,
+                                  color: textColor,
+                                  fontFamily: 'Outfit',
+                                  letterSpacing: -0.8)),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Keep your spending organized.',
+                        style: TextStyle(
+                          color: secondaryTextColor,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
                   ),
+                ),
                 ),
               ),
               SliverPadding(
@@ -218,6 +246,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                         fontWeight: FontWeight.w900,
                         fontSize: 16,
                         color: textColor,
+                        fontFamily: 'Outfit',
                       ),
                     ),
                   ),
