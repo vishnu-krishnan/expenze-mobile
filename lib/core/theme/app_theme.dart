@@ -103,6 +103,40 @@ class AppTheme {
     return isDark ? textPrimaryDark : textPrimary;
   }
 
+  // Color Utility: Desaturate a color to make it look less "popped" and more premium
+  static Color desaturate(Color color, {double amount = 0.5}) {
+    final hsl = HSLColor.fromColor(color);
+    return hsl.withSaturation((hsl.saturation * (1 - amount).clamp(0.0, 1.0))).toColor();
+  }
+
+  // Liquid Glass Utility: Create a transparent, blurred container
+  static BoxDecoration liquidGlassDecoration(BuildContext context, {List<Color>? colors}) {
+    final baseColors = colors ?? [
+      Colors.white.withValues(alpha: 0.1),
+      Colors.white.withValues(alpha: 0.05),
+    ];
+
+    return BoxDecoration(
+      gradient: LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: baseColors.map((c) => c.withValues(alpha: 0.4)).toList(),
+      ),
+      borderRadius: BorderRadius.circular(32),
+      border: Border.all(
+        color: Colors.white.withValues(alpha: 0.15),
+        width: 1.5,
+      ),
+      boxShadow: [
+        BoxShadow(
+          color: Colors.black.withValues(alpha: 0.1),
+          blurRadius: 30,
+          offset: const Offset(0, 16),
+        ),
+      ],
+    );
+  }
+
   // Light Theme
   static ThemeData lightTheme = ThemeData(
     useMaterial3: true,
@@ -269,17 +303,19 @@ class AppTheme {
     ),
   );
 
-  static InputDecoration inputDecoration(String hint, IconData icon,
+  static InputDecoration inputDecoration(String hint, IconData? icon,
       {BuildContext? context}) {
     final color = context != null
         ? getTextColor(context, isSecondary: true)
         : textSecondary;
     return InputDecoration(
       hintText: hint,
-      prefixIcon: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: Icon(icon, color: color, size: 20),
-      ),
+      prefixIcon: icon == null
+          ? null
+          : Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Icon(icon, color: color, size: 20),
+            ),
       hintStyle: GoogleFonts.outfit(color: textLight, fontSize: 16),
     );
   }

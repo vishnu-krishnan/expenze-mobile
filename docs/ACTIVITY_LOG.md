@@ -1,5 +1,16 @@
 # Activity Log
 
+[2026-03-12] Liquid Glass Dashboard Revamp
+Change Type: Major
+Decision made:
+- Implemented "Liquid Glass" theme for the Dashboard Wallet Card.
+- Added mathematical color desaturation logic (AppTheme.desaturate) to reduce visual "pop".
+- Increased backdrop blur to 25px and implemented 4-stop liquid gradients.
+- Added a specular "gloss" layer to the wallet card for depth.
+- Standardized glass borders and neutral shadows.
+Reason: Address user feedback regarding over-saturated colors and aggressive "popped" UI; transition to a more premium, sophisticated aesthetic.
+Impact: UX | Visual Design | Premiumization
+
 [2026-03-11] Elite Typography & Layout Synchronization
 Change Type: Patch
 Decision made:

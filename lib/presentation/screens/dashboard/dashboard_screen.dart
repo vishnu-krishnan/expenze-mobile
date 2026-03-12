@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/rendering.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'package:lucide_icons/lucide_icons.dart';
@@ -254,6 +253,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                 provider, summary, planned),
                           ),
                         ),
+
                         SliverToBoxAdapter(
                           child: _buildQuickActions(context),
                         ),
@@ -277,16 +277,22 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                     letterSpacing: -0.5,
                                   ),
                                 ),
-                                GestureDetector(
-                                  onTap: () => Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) =>
-                                            const RecentExpensesScreen()),
+                                  GestureDetector(
+                                    onTap: () => Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) =>
+                                              const RecentExpensesScreen()),
+                                    ),
+                                    child: Text(
+                                      'View All',
+                                      style: TextStyle(
+                                        color: secondaryTextColor,
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
                                   ),
-                                  child: Icon(LucideIcons.arrowRight,
-                                      size: 18, color: secondaryTextColor),
-                                ),
                               ],
                             ),
                           ),
@@ -359,31 +365,29 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget _buildWalletCard(double actual, double remaining, double pctUsed,
       ExpenseProvider provider, Map<String, double> summary, double planned) {
     List<Color> cardColors;
-    Color shadowBase;
-
     if (pctUsed < 0.5) {
-      // 0-50%: Safe (Teal/Green)
-      cardColors = [AppTheme.primary, AppTheme.primaryDark];
-      shadowBase = AppTheme.primary;
+      // 0-50%: Safe (Soft Emerald/Teal)
+      cardColors = [const Color(0xFF10B981), const Color(0xFF059669)];
     } else if (pctUsed < 0.7) {
-      // 50-70%: Caution (Lime-Yellow)
+      // 50-70%: Caution (Soft Lime)
       cardColors = [const Color(0xFF84CC16), const Color(0xFF65A30D)];
-      shadowBase = const Color(0xFF84CC16);
     } else if (pctUsed < 0.85) {
-      // 70-85%: Warning (Amber/Yellow)
-      cardColors = [AppTheme.warning, AppTheme.warningDark];
-      shadowBase = AppTheme.warning;
+      // 70-85%: Warning (Soft Amber)
+      cardColors = [const Color(0xFFF59E0B), const Color(0xFFD97706)];
     } else if (pctUsed < 1.1) {
-      // 85-110%: Danger (Red)
-      cardColors = [AppTheme.danger, AppTheme.dangerDark];
-      shadowBase = AppTheme.danger;
+      // 85-110%: Danger (Soft Rose/Red)
+      cardColors = [const Color(0xFFEF4444), const Color(0xFFDC2626)];
     } else {
-      // >110%: Critical (Dark Red)
-      cardColors = [const Color(0xFF991B1B), const Color(0xFF7F1D1D)];
-      shadowBase = const Color(0xFF991B1B);
+      // >110%: Critical (Better Red - less dark)
+      cardColors = [const Color(0xFFB91C1C), const Color(0xFF991B1B)];
     }
 
-    final cardShadowColor = shadowBase.withValues(alpha: 0.3);
+    final desaturatedColors =
+        cardColors.map((c) => AppTheme.desaturate(c, amount: 0.45)).toList();
+
+    // Soften the progress bar significantly
+    final progressColor =
+        AppTheme.desaturate(cardColors[0], amount: 0.25).withValues(alpha: 0.7);
     final statusColor = Colors.white;
 
     // Correctly determine budget display: Prioritize limit, fallback to planned sum
@@ -391,180 +395,274 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final budget =
         budgetLimit > 0 ? budgetLimit : (planned > 0 ? planned : 0.0);
 
-    return GestureDetector(
-      onHorizontalDragEnd: (details) {
-        if (details.primaryVelocity! > 0) {
-          _handleMonthChange(-1); // Swipe Right -> Prev
-        } else if (details.primaryVelocity! < 0) {
-          _handleMonthChange(1); // Swipe Left -> Next
-        }
-      },
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(32),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        // Background Blobs for Liquid Glass effect
+        Positioned(
+          bottom: 0,
+          right: 40,
           child: Container(
-            margin: EdgeInsets.zero,
+            width: 160,
+            height: 160,
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors:
-                    cardColors.map((c) => c.withValues(alpha: 0.85)).toList(),
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
+              shape: BoxShape.circle,
+              gradient: RadialGradient(
+                colors: [
+                  desaturatedColors[1].withValues(alpha: 0.2),
+                  Colors.transparent,
+                ],
+                stops: const [0.3, 1.0],
               ),
-              borderRadius: BorderRadius.circular(32),
-              border: Border.all(
-                color: Colors.white.withValues(alpha: 0.1),
-                width: 1.5,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: cardShadowColor,
-                  blurRadius: 30,
-                  offset: const Offset(0, 16),
-                ),
-              ],
-            ),
-            child: Stack(
-              children: [
-                // Decorative circle
-                Positioned(
-                  right: -30,
-                  bottom: -30,
-                  child: CircleAvatar(
-                    radius: 90,
-                    backgroundColor: Colors.white.withValues(alpha: 0.04),
-                  ),
-                ),
-                Positioned(
-                  left: -20,
-                  top: -20,
-                  child: CircleAvatar(
-                    radius: 50,
-                    backgroundColor: Colors.white.withValues(alpha: 0.03),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(24),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      // Top row — month navigation
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'Total Spent',
-                            style: TextStyle(
-                                color: Colors.white70,
-                                fontSize: 13,
-                                fontWeight: FontWeight.w500,
-                                letterSpacing: 0.5),
-                          ),
-                          Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              IconButton(
-                                icon: const Icon(LucideIcons.chevronLeft,
-                                    color: Colors.white60, size: 18),
-                                onPressed: () => _handleMonthChange(-1),
-                                padding: EdgeInsets.zero,
-                                constraints: const BoxConstraints(),
-                              ),
-                              Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 6),
-                                child: Text(
-                                  _formatMonthName(provider.currentMonthKey),
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 13,
-                                  ),
-                                ),
-                              ),
-                              IconButton(
-                                icon: const Icon(LucideIcons.chevronRight,
-                                    color: Colors.white60, size: 18),
-                                onPressed: () => _handleMonthChange(1),
-                                padding: EdgeInsets.zero,
-                                constraints: const BoxConstraints(),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-
-                      const SizedBox(height: 6),
-
-                      // Main amount — large and prominent
-                      FittedBox(
-                        fit: BoxFit.scaleDown,
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          '₹${actual.toLocaleString()}',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 48,
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: -1,
-                            height: 1.1,
-                          ),
-                        ),
-                      ),
-
-                      // Divider line
-                      Container(
-                        height: 1,
-                        color: Colors.white.withValues(alpha: 0.12),
-                      ),
-                      const SizedBox(height: 16),
-
-                      // Two-column stats row
-                      Row(
-                        children: [
-                          Expanded(
-                            child: _buildStatColumn(
-                              label: pctUsed >= 1.0 ? 'Overspent' : 'Remaining',
-                              value: '₹${remaining.abs().toLocaleString()}',
-                              valueColor: statusColor,
-                              icon: pctUsed >= 1.0
-                                  ? LucideIcons.alertTriangle
-                                  : LucideIcons.trendingDown,
-                            ),
-                          ),
-                          Container(
-                            width: 1,
-                            height: 48,
-                            color: Colors.white.withValues(alpha: 0.15),
-                          ),
-                          Expanded(
-                            child: _buildStatColumn(
-                              label: 'Monthly Budget',
-                              value: budget > 0
-                                  ? '₹${budget.toLocaleString()}'
-                                  : 'Not set',
-                              valueColor: Colors.white,
-                              icon: LucideIcons.target,
-                              alignRight: true,
-                            ),
-                          ),
-                        ],
-                      ),
-
-                      const SizedBox(height: 16),
-
-                      // Progress bar
-                      _buildProgressBar(pctUsed, statusColor),
-                    ],
-                  ),
-                ),
-              ],
             ),
           ),
         ),
-      ),
+        Positioned(
+          top: 0,
+          right: 10,
+          child: Container(
+            width: 110,
+            height: 110,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: RadialGradient(
+                colors: [
+                  desaturatedColors[0].withValues(alpha: 0.25),
+                  Colors.transparent,
+                ],
+                stops: const [0.3, 1.0],
+              ),
+            ),
+          ),
+        ),
+        GestureDetector(
+          onHorizontalDragEnd: (details) {
+            if (details.primaryVelocity! > 0) {
+              _handleMonthChange(-1); // Swipe Right -> Prev
+            } else if (details.primaryVelocity! < 0) {
+              _handleMonthChange(1); // Swipe Left -> Next
+            }
+          },
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 26, vertical: 10),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(32),
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 25, sigmaY: 25),
+                child: Container(
+                  margin: EdgeInsets.zero,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        desaturatedColors[0].withValues(alpha: 0.25),
+                        desaturatedColors[0].withValues(alpha: 0.03),
+                        desaturatedColors[1].withValues(alpha: 0.02),
+                        desaturatedColors[1].withValues(alpha: 0.15),
+                      ],
+                      stops: const [0.0, 0.4, 0.7, 1.0],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(32),
+                    border: Border.all(
+                      color: Colors.white
+                          .withValues(alpha: 0.25), // Sharper glass edge
+                      width: 1.2,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: desaturatedColors[0].withValues(alpha: 0.15),
+                        blurRadius: 40,
+                        spreadRadius: -5,
+                        offset: const Offset(0, 20),
+                      ),
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.05),
+                        blurRadius: 20,
+                        offset: const Offset(0, 10),
+                      ),
+                    ],
+                  ),
+                  child: Stack(
+                    children: [
+                      // Top Shine / Gloss Layer
+                      Positioned.fill(
+                        child: Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(32),
+                            gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [
+                                Colors.white.withValues(alpha: 0.08),
+                                Colors.transparent,
+                              ],
+                              stops: const [0.0, 0.3],
+                            ),
+                          ),
+                        ),
+                      ),
+                      // Decorative circle
+                      Positioned(
+                        right: -30,
+                        bottom: -30,
+                        child: CircleAvatar(
+                          radius: 90,
+                          backgroundColor: Colors.white.withValues(alpha: 0.05),
+                        ),
+                      ),
+                      Positioned(
+                        left: -20,
+                        top: -20,
+                        child: CircleAvatar(
+                          radius: 50,
+                          backgroundColor: Colors.white.withValues(alpha: 0.04),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(24),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            // Top row — month navigation
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                const Text(
+                                  'Total Spent',
+                                  style: TextStyle(
+                                      color: Colors.white, // Full white for better visibility
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w600,
+                                      letterSpacing: 0.5,
+                                      shadows: [
+                                        Shadow(
+                                            color: Colors.black26,
+                                            blurRadius: 4,
+                                            offset: Offset(0, 1))
+                                      ]),
+                                ),
+                                Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    GestureDetector(
+                                      onTap: () => _handleMonthChange(-1),
+                                      child: const Padding(
+                                        padding: EdgeInsets.all(8.0),
+                                        child: Text('‹',
+                                            style: TextStyle(
+                                                color: Colors.white60,
+                                                fontSize: 22,
+                                                fontWeight: FontWeight.w300)),
+                                      ),
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 4),
+                                      child: Text(
+                                        _formatMonthName(
+                                            provider.currentMonthKey),
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 13,
+                                        ),
+                                      ),
+                                    ),
+                                    GestureDetector(
+                                      onTap: () => _handleMonthChange(1),
+                                      child: const Padding(
+                                        padding: EdgeInsets.all(8.0),
+                                        child: Text('›',
+                                            style: TextStyle(
+                                                color: Colors.white60,
+                                                fontSize: 22,
+                                                fontWeight: FontWeight.w300)),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+
+                            const SizedBox(height: 6),
+
+                            // Main amount — large and prominent
+                            FittedBox(
+                              fit: BoxFit.scaleDown,
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                '₹${actual.toLocaleString()}',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 48,
+                                  fontWeight: FontWeight.w900,
+                                  letterSpacing: -1,
+                                  height: 1.1,
+                                  shadows: [
+                                    Shadow(
+                                        color: Colors.black26,
+                                        blurRadius: 8,
+                                        offset: Offset(0, 2))
+                                  ],
+                                ),
+                              ),
+                            ),
+
+                            // Divider line
+                            Container(
+                              height: 1,
+                              color: Colors.white.withValues(alpha: 0.12),
+                            ),
+                            const SizedBox(height: 16),
+
+                            // Two-column stats row
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: _buildStatColumn(
+                                    label: pctUsed >= 1.0
+                                        ? 'Overspent'
+                                        : 'Remaining',
+                                    value:
+                                        '₹${remaining.abs().toLocaleString()}',
+                                    valueColor: statusColor,
+                                  ),
+                                ),
+                                Container(
+                                  width: 1,
+                                  height: 48,
+                                  color: Colors.white.withValues(alpha: 0.15),
+                                ),
+                                Expanded(
+                                  child: _buildStatColumn(
+                                    label: 'Monthly Budget',
+                                    value: budget > 0
+                                        ? '₹${budget.toLocaleString()}'
+                                        : 'Not set',
+                                    valueColor: Colors.white,
+                                    alignRight: true,
+                                  ),
+                                ),
+                              ],
+                            ),
+
+                            const SizedBox(height: 16),
+
+                            // Progress bar
+                            _buildProgressBar(pctUsed, progressColor),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -572,7 +670,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
     required String label,
     required String value,
     required Color valueColor,
-    required IconData icon,
     bool alignRight = false,
   }) {
     return Padding(
@@ -586,22 +683,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
             mainAxisAlignment:
                 alignRight ? MainAxisAlignment.end : MainAxisAlignment.start,
             children: [
-              if (!alignRight)
-                Padding(
-                  padding: const EdgeInsets.only(right: 4),
-                  child: Icon(icon, size: 11, color: Colors.white54),
-                ),
               Text(label,
                   style: TextStyle(
-                      color: Colors.white60,
+                      color: Colors.white.withValues(alpha: 0.85), // Increased opacity
                       fontSize: 11,
-                      fontWeight: FontWeight.w600,
-                      letterSpacing: 0.3)),
-              if (alignRight)
-                Padding(
-                  padding: const EdgeInsets.only(left: 4),
-                  child: Icon(icon, size: 11, color: Colors.white54),
-                ),
+                      fontWeight: FontWeight.w700, // Bolder label
+                      letterSpacing: 0.3,
+                      shadows: [
+                        Shadow(
+                            color: Colors.black26,
+                            blurRadius: 2,
+                            offset: Offset(0, 1))
+                      ])),
             ],
           ),
           const SizedBox(height: 4),
@@ -612,7 +705,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
             child: Text(
               value,
               style: TextStyle(
-                  color: valueColor, fontSize: 20, fontWeight: FontWeight.bold),
+                  color: valueColor,
+                  fontSize: 20,
+                  fontWeight: FontWeight.w800,
+                  shadows: [
+                    Shadow(
+                        color: Colors.black26,
+                        blurRadius: 4,
+                        offset: Offset(0, 1))
+                  ]),
             ),
           ),
         ],
@@ -628,33 +729,43 @@ class _DashboardScreenState extends State<DashboardScreen> {
           children: [
             Text(
                 pct >= 1.0
-                    ? '🔴 Oops, over budget!'
+                    ? 'Oops, over budget!'
                     : (pct >= 0.9
-                        ? '🚨 Almost maxed out'
+                        ? 'Almost maxed out'
                         : (pct >= 0.8
-                            ? '⚠️ Getting close'
+                            ? 'Getting close'
                             : (pct >= 0.7
                                 ? 'Mind the spending'
-                                : '✅ Looking good'))),
+                                : 'Looking good'))),
                 style: TextStyle(
                     color: Colors.white,
-                    fontSize: 10,
-                    fontWeight:
-                        pct >= 0.8 ? FontWeight.bold : FontWeight.normal)),
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                    shadows: [
+                      Shadow(
+                          color: Colors.black38,
+                          blurRadius: 4,
+                          offset: const Offset(0, 1))
+                    ])),
             Text('${(pct * 100).toInt()}% used',
                 style: TextStyle(
-                    color: pct >= 0.9 ? Colors.white : Colors.white70,
-                    fontSize: 10,
-                    fontWeight:
-                        pct >= 0.8 ? FontWeight.bold : FontWeight.normal)),
+                    color: Colors.white,
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                    shadows: [
+                      Shadow(
+                          color: Colors.black38,
+                          blurRadius: 4,
+                          offset: const Offset(0, 1))
+                    ])),
           ],
         ),
         const SizedBox(height: 8),
         Container(
-          height: 8,
+          height: 6, // Slightly slimmer for elegance
           decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.15),
-            borderRadius: BorderRadius.circular(4),
+            color: Colors.white.withValues(alpha: 0.08), // More subtle background
+            borderRadius: BorderRadius.circular(3),
           ),
           child: Align(
             alignment: Alignment.centerLeft,
@@ -663,11 +774,27 @@ class _DashboardScreenState extends State<DashboardScreen> {
               child: Container(
                 decoration: BoxDecoration(
                   color: color,
-                  borderRadius: BorderRadius.circular(4),
+                  borderRadius: BorderRadius.circular(3),
                   boxShadow: [
                     BoxShadow(
-                        color: color.withValues(alpha: 0.5), blurRadius: 4),
+                        color: color.withValues(alpha: 0.25), blurRadius: 4),
                   ],
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(3),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.white.withValues(alpha: 0.2),
+                          Colors.transparent,
+                        ],
+                        stops: const [0.0, 0.4],
+                      ),
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -781,14 +908,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final actual = (item['total_actual'] as num?)?.toDouble() ?? 0.0;
     final planned = (item['total_planned'] as num?)?.toDouble() ?? 0.0;
     final amountNum = actual > 0 ? actual : planned;
-    final colorStr = (item['color'] as String?) ?? '#3b82f6';
-
-    Color color;
-    try {
-      color = Color(int.parse(colorStr.replaceFirst('#', '0xff')));
-    } catch (_) {
-      color = AppTheme.primary;
-    }
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -800,17 +919,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
       ),
       child: Row(
         children: [
-          Container(
-            height: 52,
-            width: 52,
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(16),
-            ),
-            alignment: Alignment.center,
-            child: Text(item['icon'] ?? '📁', style: TextStyle(fontSize: 24)),
-          ),
-          const SizedBox(width: 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -860,7 +968,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.transparent,
+      // Liquid Glass Utility: Create a transparent, blurred container
       builder: (context) => StatefulBuilder(
         builder: (context, setModalState) {
           final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -914,7 +1022,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     onChanged: (val) =>
                         setModalState(() => selectedCategoryId = val),
                     decoration: AppTheme.inputDecoration(
-                        'Select category', LucideIcons.layoutGrid,
+                        'Select category', null,
                         context: context),
                   ),
                   const SizedBox(height: 20),
@@ -942,7 +1050,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       }
                     },
                     decoration: AppTheme.inputDecoration(
-                        'Select mode', LucideIcons.creditCard,
+                        'Select mode', null,
                         context: context),
                   ),
                   const SizedBox(height: 20),
@@ -951,7 +1059,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   TextField(
                     controller: nameController,
                     decoration: AppTheme.inputDecoration(
-                        'e.g. Electricity bill', LucideIcons.edit3,
+                        'e.g. Electricity bill', null,
                         context: context),
                     style: TextStyle(color: textColor),
                   ),
@@ -962,7 +1070,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     controller: amountController,
                     keyboardType: TextInputType.number,
                     decoration: AppTheme.inputDecoration(
-                        'e.g. 1200', LucideIcons.indianRupee,
+                        'e.g. 1200', null,
                         context: context),
                     style: TextStyle(color: textColor),
                   ),
@@ -1088,27 +1196,20 @@ class _AnimatedActionCardState extends State<_AnimatedActionCard>
         scale: _scaleAnimation,
         child: Container(
           width: MediaQuery.of(context).size.width * 0.22,
-          padding: const EdgeInsets.symmetric(vertical: 20),
+          padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 8),
           decoration: BoxDecoration(
             color: isDark ? AppTheme.bgCardDark : Colors.white,
             borderRadius: BorderRadius.circular(24),
             boxShadow: AppTheme.softShadow,
           ),
           child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: widget.color.withValues(alpha: 0.1),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(widget.icon, color: widget.color, size: 22),
-              ),
-              const SizedBox(height: 12),
               Text(widget.label,
+                  textAlign: TextAlign.center,
                   style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w800,
                       color: AppTheme.getTextColor(context))),
             ],
           ),
