@@ -10,6 +10,7 @@ import '../../providers/theme_provider.dart';
 import '../../providers/expense_provider.dart';
 import '../../../data/models/category.dart' as model;
 import '../../../data/models/expense.dart';
+import '../../widgets/liquid_glass_fab.dart';
 
 class RegularPaymentsScreen extends StatefulWidget {
   const RegularPaymentsScreen({super.key});
@@ -20,6 +21,7 @@ class RegularPaymentsScreen extends StatefulWidget {
 
 class _RegularPaymentsScreenState extends State<RegularPaymentsScreen> {
   String _sortBy = 'amount'; // 'name', 'amount', 'priority'
+  bool _isFabVisible = true;
 
   @override
   void initState() {
@@ -45,11 +47,30 @@ class _RegularPaymentsScreenState extends State<RegularPaymentsScreen> {
         decoration: isDark
             ? AppTheme.darkBackgroundDecoration
             : AppTheme.backgroundDecoration,
-        child: CustomScrollView(
-          physics: const AlwaysScrollableScrollPhysics(
-            parent: BouncingScrollPhysics(),
-          ),
-          slivers: [
+        child: NotificationListener<ScrollNotification>(
+          onNotification: (ScrollNotification notification) {
+            if (notification is ScrollUpdateNotification) {
+              if (notification.metrics.pixels <= 10) {
+                if (!_isFabVisible) {
+                  setState(() => _isFabVisible = true);
+                }
+                return false;
+              }
+              if (notification.scrollDelta != null) {
+                if (notification.scrollDelta! > 5 && _isFabVisible) {
+                  setState(() => _isFabVisible = false);
+                } else if (notification.scrollDelta! < -5 && !_isFabVisible) {
+                  setState(() => _isFabVisible = true);
+                }
+              }
+            }
+            return false;
+          },
+          child: CustomScrollView(
+            physics: const AlwaysScrollableScrollPhysics(
+              parent: BouncingScrollPhysics(),
+            ),
+            slivers: [
             SliverAppBar(
               backgroundColor: Colors.transparent,
               systemOverlayStyle: AppTheme.headerOverlayStyle,
@@ -174,16 +195,21 @@ class _RegularPaymentsScreenState extends State<RegularPaymentsScreen> {
           ],
         ),
       ),
+    ),
       floatingActionButton: Padding(
-        padding: const EdgeInsets.only(bottom: 120),
-        child: FloatingActionButton(
-          heroTag: 'regular_payments_fab',
-          onPressed: () => _showAddDialog(context),
-          backgroundColor: AppTheme.primary,
-          elevation: 8,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-          child: const Icon(LucideIcons.plus, color: Colors.white, size: 30),
+        padding: const EdgeInsets.only(bottom: 110),
+        child: AnimatedSlide(
+          duration: const Duration(milliseconds: 300),
+          offset: _isFabVisible ? Offset.zero : const Offset(0, 2),
+          child: AnimatedOpacity(
+            duration: const Duration(milliseconds: 300),
+            opacity: _isFabVisible ? 1.0 : 0.0,
+            child: LiquidGlassFAB(
+              heroTag: 'regular_payments_fab',
+              onPressed: () => _showAddDialog(context),
+              icon: LucideIcons.plus,
+            ),
+          ),
         ),
       ),
     );

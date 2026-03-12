@@ -144,16 +144,20 @@ class _MainNavigationWrapperState extends State<MainNavigationWrapper> {
       child: Container(
         margin: EdgeInsets.fromLTRB(
             24, 0, 24, MediaQuery.of(context).viewPadding.bottom + 12),
-        height: 70,
+        height: 75, // Professional height for vertical icons
         decoration: BoxDecoration(
           color: isDark
-              ? AppTheme.bgCardDark.withOpacity(0.8)
-              : Colors.white.withOpacity(0.8),
-          borderRadius: BorderRadius.circular(35),
+              ? AppTheme.primary.withValues(alpha: 0.12)
+              : AppTheme.primary.withValues(alpha: 0.06),
+          borderRadius: BorderRadius.circular(30),
+          border: Border.all(
+            color: AppTheme.primary.withValues(alpha: 0.2),
+            width: 1.2,
+          ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.1),
-              blurRadius: 30,
+              color: AppTheme.primary.withValues(alpha: 0.1),
+              blurRadius: 25,
               offset: const Offset(0, 10),
             ),
           ],
@@ -167,15 +171,10 @@ class _MainNavigationWrapperState extends State<MainNavigationWrapper> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  Expanded(child: _buildNavItem(LucideIcons.home, 'Home', 0)),
-                  Expanded(
-                      child:
-                          _buildNavItem(LucideIcons.pieChart, 'Analytics', 1)),
-                  Expanded(
-                      child: _buildNavItem(LucideIcons.calendar, 'Planner', 2)),
-                  Expanded(
-                      child:
-                          _buildNavItem(LucideIcons.settings, 'Settings', 3)),
+                  _buildNavItem(LucideIcons.home, 'Home', 0),
+                  _buildNavItem(LucideIcons.pieChart, 'Analytics', 1),
+                  _buildNavItem(LucideIcons.calendar, 'Planner', 2),
+                  _buildNavItem(LucideIcons.settings, 'Settings', 3),
                 ],
               ),
             ),
@@ -189,53 +188,104 @@ class _MainNavigationWrapperState extends State<MainNavigationWrapper> {
     final isSelected = _selectedIndex == index;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return GestureDetector(
-      onTap: () {
-        // Always reset data to the current real-time month when switching tabs.
-        // This prevents stale month navigation from dashboard carrying over.
-        Provider.of<ExpenseProvider>(context, listen: false)
-            .resetToCurrentMonth();
-        setState(() => _selectedIndex = index);
-      },
-      behavior: HitTestBehavior.opaque,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.elasticOut,
-        padding: EdgeInsets.symmetric(
-          horizontal: isSelected ? 12 : 10,
-          vertical: 6,
-        ),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? AppTheme.primary.withValues(alpha: 0.15)
-              : Colors.transparent,
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              icon,
-              color: isSelected
-                  ? AppTheme.primary
-                  : (isDark
-                      ? Colors.white60
-                      : AppTheme.textSecondary.withValues(alpha: 0.5)),
-              size: isSelected ? 24 : 22,
-            ),
-            if (isSelected) ...[
-              const SizedBox(height: 4),
-              Text(
-                label,
-                style: TextStyle(
-                  color: AppTheme.primary,
-                  fontSize: 10,
-                  fontWeight: FontWeight.w900, // Matching the dashboard bold headings
-                  letterSpacing: -0.2, // Tighter look
+    return Expanded(
+      child: GestureDetector(
+        onTap: () {
+          Provider.of<ExpenseProvider>(context, listen: false)
+              .resetToCurrentMonth();
+          setState(() => _selectedIndex = index);
+        },
+        behavior: HitTestBehavior.opaque,
+        child: SizedBox(
+          height: double.infinity,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              // Selection background bubble
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 350),
+                curve: Curves.easeOutCubic,
+                width: isSelected ? 72 : 0,
+                height: isSelected ? 58 : 0,
+                decoration: BoxDecoration(
+                  gradient: isSelected
+                      ? LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            AppTheme.primary,
+                            AppTheme.primary.withValues(alpha: 0.85),
+                          ],
+                        )
+                      : null,
+                  borderRadius: BorderRadius.circular(24),
+                  border: isSelected
+                      ? Border.all(
+                          color: Colors.white.withValues(alpha: 0.3),
+                          width: 1.2,
+                        )
+                      : null,
+                  boxShadow: isSelected
+                      ? [
+                          BoxShadow(
+                            color: AppTheme.primary.withValues(alpha: 0.4),
+                            blurRadius: 20,
+                            offset: const Offset(0, 8),
+                            spreadRadius: -2,
+                          ),
+                        ]
+                      : [],
                 ),
               ),
-            ]
-          ],
+              // Content Column
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TweenAnimationBuilder<Color?>(
+                    duration: const Duration(milliseconds: 300),
+                    tween: ColorTween(
+                      end: isSelected
+                          ? Colors.white
+                          : (isDark
+                              ? Colors.white.withValues(alpha: 0.5)
+                              : AppTheme.textSecondary.withValues(alpha: 0.5)),
+                    ),
+                    builder: (context, color, _) => AnimatedScale(
+                      scale: isSelected ? 1.08 : 1.0,
+                      duration: const Duration(milliseconds: 400),
+                      curve: Curves.easeOutBack,
+                      child: Icon(
+                        icon,
+                        color: color,
+                        size: 26,
+                      ),
+                    ),
+                  ),
+                  AnimatedContainer(
+                    duration: const Duration(milliseconds: 300),
+                    height: isSelected ? 18 : 0,
+                    curve: Curves.easeOutCubic,
+                    child: AnimatedOpacity(
+                      duration: const Duration(milliseconds: 300),
+                      opacity: isSelected ? 1.0 : 0.0,
+                      child: Center(
+                        child: Text(
+                          label,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 9.5,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: -0.2,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );

@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.8.0+24] - 2026-03-12
+### Added
+- **Liquid Glass Aesthetic**: Overhauled the global `FloatingActionButton` (FAB) to a premium squircle (rounded square) shape with internal aurora glow. This is synced across all screens.
+- **Action Hub Remaster**: Revamped Dashboard Action Cards with vibrant mesh gradients, inner lighting, and highly contextual icons for Import, Regular, Notes, and Wishes.
+- **Date Context**: Added a stylistic Date Pill to the Dashboard's top nav area.
+
+### Fixed
+- **Guaranteed Visibility**: Added programmatic overrides to scroll listeners to force the FAB to remain visible when at the absolute top of the screen.
+- **Syntax Consistency**: Corrected nested braces on the Regular Payments view for stable UI rendering.
+
 ## [1.7.3+23] - 2026-03-12
 ### Added
 - **Content-Area Refresh**: Refactored the Dashboard to keep the header (greeting/user name) static during pull-to-refresh, isolating the refresh animation to the scrollable content area.

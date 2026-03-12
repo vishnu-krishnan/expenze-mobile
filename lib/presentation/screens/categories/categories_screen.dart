@@ -8,6 +8,7 @@ import '../../providers/category_provider.dart';
 import '../../../data/models/category.dart';
 import 'category_add_screen.dart';
 import 'category_edit_screen.dart';
+import '../../widgets/liquid_glass_fab.dart';
 
 class CategoriesScreen extends StatefulWidget {
   const CategoriesScreen({super.key});
@@ -36,10 +37,16 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
         body: NotificationListener<ScrollNotification>(
           onNotification: (ScrollNotification notification) {
             if (notification is ScrollUpdateNotification) {
+              if (notification.metrics.pixels <= 10) {
+                if (!_isFabVisible) {
+                  setState(() => _isFabVisible = true);
+                }
+                return false;
+              }
               if (notification.scrollDelta != null) {
-                if (notification.scrollDelta! > 2 && _isFabVisible) {
+                if (notification.scrollDelta! > 5 && _isFabVisible) {
                   setState(() => _isFabVisible = false);
-                } else if (notification.scrollDelta! < -2 && !_isFabVisible) {
+                } else if (notification.scrollDelta! < -5 && !_isFabVisible) {
                   setState(() => _isFabVisible = true);
                 }
               }
@@ -130,26 +137,21 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
           ),
         ),
         floatingActionButton: Padding(
-          padding: const EdgeInsets.only(bottom: 120),
+          padding: const EdgeInsets.only(bottom: 110),
           child: AnimatedSlide(
             duration: const Duration(milliseconds: 300),
             offset: _isFabVisible ? Offset.zero : const Offset(0, 2),
             child: AnimatedOpacity(
               duration: const Duration(milliseconds: 300),
               opacity: _isFabVisible ? 1.0 : 0.0,
-              child: FloatingActionButton(
-                heroTag: 'categories_fab',
-                onPressed: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const CategoryAddScreen())),
-                backgroundColor: AppTheme.primary,
-                elevation: 8,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(18)),
-                child:
-                    const Icon(LucideIcons.plus, color: Colors.white, size: 28),
-              ),
+            child: LiquidGlassFAB(
+              heroTag: 'categories_fab',
+              onPressed: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const CategoryAddScreen())),
+              icon: LucideIcons.plus,
+            ),
             ),
           ),
         ),

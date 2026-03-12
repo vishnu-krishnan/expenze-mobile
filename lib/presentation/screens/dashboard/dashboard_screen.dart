@@ -11,8 +11,8 @@ import '../../providers/category_provider.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../data/models/expense.dart';
 import 'recent_expenses_screen.dart' hide RecentDoubleExtension;
-import 'category_transactions_screen.dart';
 import 'package:custom_refresh_indicator/custom_refresh_indicator.dart';
+import '../../widgets/liquid_glass_fab.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -72,6 +72,43 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return 'Up late?';
   }
 
+  Widget _buildHeaderDatePill() {
+    final now = DateTime.now();
+    final months = [
+      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+    ];
+    final dateStr = '${now.day} ${months[now.month - 1]}';
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.15),
+          width: 0.8,
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(LucideIcons.calendar, size: 14, color: Colors.white70),
+          const SizedBox(width: 8),
+          Text(
+            dateStr,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 12,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 0.5,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   String _formatMonthName(String key) {
     if (key.isEmpty) return 'Select Month';
     final parts = key.split('-');
@@ -113,28 +150,34 @@ class _DashboardScreenState extends State<DashboardScreen> {
               decoration: AppTheme.headerDecoration(context),
               padding: EdgeInsets.fromLTRB(
                   26, MediaQuery.of(context).padding.top + 10, 26, 0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    _getTimeBasedGreeting(),
-                    style: const TextStyle(
-                      color: Colors.white70,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w500,
-                      letterSpacing: 0.5,
-                    ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        _getTimeBasedGreeting(),
+                        style: const TextStyle(
+                          color: Colors.white70,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                      Text(
+                        user?['full_name'] ?? 'User',
+                        style: const TextStyle(
+                          fontSize: 26,
+                          fontWeight: FontWeight.w900,
+                          color: Colors.white,
+                          letterSpacing: -1,
+                        ),
+                      ),
+                    ],
                   ),
-                  Text(
-                    user?['full_name'] ?? 'User',
-                    style: const TextStyle(
-                      fontSize: 26,
-                      fontWeight: FontWeight.w900,
-                      color: Colors.white,
-                      letterSpacing: -1,
-                    ),
-                  ),
+                  _buildHeaderDatePill(),
                 ],
               ),
             ),
@@ -222,10 +265,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   child: NotificationListener<ScrollNotification>(
                     onNotification: (ScrollNotification notification) {
                       if (notification is ScrollUpdateNotification) {
+                        // Force visibility at top
+                        if (notification.metrics.pixels <= 10) {
+                          if (!_isFabVisible) {
+                            setState(() => _isFabVisible = true);
+                          }
+                          return false;
+                        }
+
                         if (notification.scrollDelta != null) {
-                          if (notification.scrollDelta! > 2 && _isFabVisible) {
+                          if (notification.scrollDelta! > 5 && _isFabVisible) {
                             setState(() => _isFabVisible = false);
-                          } else if (notification.scrollDelta! < -2 &&
+                          } else if (notification.scrollDelta! < -5 &&
                               !_isFabVisible) {
                             setState(() => _isFabVisible = true);
                           }
@@ -248,86 +299,29 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           ),
                         SliverToBoxAdapter(
                           child: Padding(
-                            padding: const EdgeInsets.only(bottom: 16),
+                            padding: const EdgeInsets.only(bottom: 24),
                             child: _buildWalletCard(actual, remaining, pctUsed,
                                 provider, summary, planned),
                           ),
                         ),
 
+                        // Action Hub
                         SliverToBoxAdapter(
-                          child: _buildQuickActions(context),
+                          child: _buildActionHub(context),
                         ),
+
                         if (_quoteText.isNotEmpty)
                           SliverToBoxAdapter(
                             child:
                                 _buildQuoteCard(textColor, secondaryTextColor),
                           ),
-                        SliverToBoxAdapter(
-                          child: Padding(
-                            padding: const EdgeInsets.fromLTRB(26, 32, 26, 16),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  'Where your money ran off to',
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                    color: textColor,
-                                    letterSpacing: -0.5,
-                                  ),
-                                ),
-                                  GestureDetector(
-                                    onTap: () => Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) =>
-                                              const RecentExpensesScreen()),
-                                    ),
-                                    child: Text(
-                                      'View All',
-                                      style: TextStyle(
-                                        color: secondaryTextColor,
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ),
-                              ],
-                            ),
+
+                        // Recent Pulse (Last 3 Transactions)
+                        if (provider.expenses.isNotEmpty)
+                          SliverToBoxAdapter(
+                            child: _buildRecentPulse(context, provider),
                           ),
-                        ),
-                        SliverPadding(
-                          padding: const EdgeInsets.symmetric(horizontal: 26),
-                          sliver: SliverList(
-                            delegate: SliverChildBuilderDelegate(
-                              (context, index) {
-                                final item = provider.categoryBreakdown[index];
-                                return GestureDetector(
-                                  onTap: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) =>
-                                            CategoryTransactionsScreen(
-                                          categoryId: item['id'] as int?,
-                                          categoryName: item['category_name'] ??
-                                              'Imported',
-                                          monthKey: provider.currentMonthKey,
-                                          categoryIcon: item['icon'],
-                                          categoryColor: item['color'],
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                  child: _buildCategoryItem(context, item),
-                                );
-                              },
-                              childCount:
-                                  provider.categoryBreakdown.take(3).length,
-                            ),
-                          ),
-                        ),
+
                         const SliverToBoxAdapter(child: SizedBox(height: 140)),
                       ],
                     ),
@@ -339,22 +333,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ],
       ),
       floatingActionButton: Padding(
-        padding: const EdgeInsets.only(bottom: 120),
+        padding: const EdgeInsets.only(bottom: 110),
         child: AnimatedSlide(
           duration: const Duration(milliseconds: 300),
           offset: _isFabVisible ? Offset.zero : const Offset(0, 2),
           child: AnimatedOpacity(
             duration: const Duration(milliseconds: 300),
             opacity: _isFabVisible ? 1.0 : 0.0,
-            child: FloatingActionButton(
+            child: LiquidGlassFAB(
               heroTag: 'dashboard_fab',
               onPressed: () => _showAddExpenseDialog(context),
-              backgroundColor: AppTheme.primary,
-              elevation: 10,
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(18)),
-              child:
-                  const Icon(LucideIcons.plus, color: Colors.white, size: 30),
+              icon: LucideIcons.plus,
             ),
           ),
         ),
@@ -806,7 +795,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   Widget _buildQuoteCard(Color textColor, Color secondaryTextColor) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(26, 20, 26, 0),
+      padding: const EdgeInsets.fromLTRB(26, 8, 26, 20),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(24),
         child: BackdropFilter(
@@ -854,109 +843,201 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  Widget _buildQuickActions(BuildContext context) {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      physics: const BouncingScrollPhysics(),
-      padding: const EdgeInsets.symmetric(horizontal: 26),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _AnimatedActionCard(
-            icon: LucideIcons.downloadCloud,
-            label: 'Import',
-            color: AppTheme.primary,
-            onTap: () => Navigator.pushNamed(context, '/import'),
-          ),
-          const SizedBox(width: 14),
-          _AnimatedActionCard(
-            icon: LucideIcons.repeat,
-            label: 'Regular',
-            color: const Color(0xFFE67E22), // Orange
-            onTap: () => Navigator.pushNamed(context, '/regular'),
-          ),
-          const SizedBox(width: 14),
-          _AnimatedActionCard(
-            icon: LucideIcons.stickyNote,
-            label: 'Notes',
-            color: AppTheme.success, // Green
-            onTap: () => Navigator.pushNamed(context, '/notes'),
-          ),
-          const SizedBox(width: 14),
-          _AnimatedActionCard(
-            icon: LucideIcons.gift,
-            label: 'Wishes',
-            color: const Color(0xFF9B59B6), // Purple
-            onTap: () => Navigator.pushNamed(context, '/wishes'),
-          ),
-          const SizedBox(width: 14),
-          _AnimatedActionCard(
-            icon: LucideIcons.layoutGrid,
-            label: 'Categories',
-            color: const Color(0xFFE74C3C), // Red
-            onTap: () => Navigator.pushNamed(context, '/categories'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCategoryItem(BuildContext context, Map<String, dynamic> item) {
+  Widget _buildActionHub(BuildContext context) {
     final textColor = AppTheme.getTextColor(context);
-    final secondaryTextColor =
-        AppTheme.getTextColor(context, isSecondary: true);
-    final actual = (item['total_actual'] as num?)?.toDouble() ?? 0.0;
-    final planned = (item['total_planned'] as num?)?.toDouble() ?? 0.0;
-    final amountNum = actual > 0 ? actual : planned;
-
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardTheme.color,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: AppTheme.softShadow,
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(item['category_name'] ?? 'Imported',
-                    style: TextStyle(
-                        fontWeight: FontWeight.w800,
-                        fontSize: 15,
-                        color: textColor)),
-              ],
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(26, 10, 26, 16),
+          child: Text(
+            'Action Hub',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: textColor,
+              letterSpacing: -0.5,
             ),
           ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
+        ),
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          physics: const BouncingScrollPhysics(),
+          padding: const EdgeInsets.symmetric(horizontal: 26),
+          child: Row(
             children: [
-              Text('₹${amountNum.toLocaleString()}',
-                  style: TextStyle(
-                      fontWeight: FontWeight.w900,
-                      fontSize: 16,
-                      color: textColor)),
-              Text(
-                  (planned == 0 && actual > 0)
-                      ? 'Unplanned'
-                      : (actual > 0 ? 'Spent' : 'Planned'),
-                  style: TextStyle(
-                      color: (planned == 0 && actual > 0)
-                          ? AppTheme.warning
-                          : (actual > 0
-                              ? AppTheme.primary
-                              : secondaryTextColor),
-                      fontSize: 10,
-                      fontWeight: FontWeight.bold)),
+              _AnimatedActionCard(
+                icon: LucideIcons.arrowDownToLine,
+                label: 'Import',
+                color: const Color(0xFF0EA5E9), // Sky Blue
+                onTap: () => Navigator.pushNamed(context, '/import'),
+              ),
+              const SizedBox(width: 14),
+              _AnimatedActionCard(
+                icon: LucideIcons.repeat,
+                label: 'Regular',
+                color: const Color(0xFFF59E0B), // Amber
+                onTap: () => Navigator.pushNamed(context, '/regular'),
+              ),
+              const SizedBox(width: 14),
+              _AnimatedActionCard(
+                icon: LucideIcons.fileText,
+                label: 'Notes',
+                color: const Color(0xFF10B981), // Emerald
+                onTap: () => Navigator.pushNamed(context, '/notes'),
+              ),
+              const SizedBox(width: 14),
+              _AnimatedActionCard(
+                icon: LucideIcons.sparkles,
+                label: 'Wishes',
+                color: const Color(0xFF8B5CF6), // Violet
+                onTap: () => Navigator.pushNamed(context, '/wishes'),
+              ),
+              const SizedBox(width: 14),
+              _AnimatedActionCard(
+                icon: LucideIcons.layoutGrid,
+                label: 'Categories',
+                color: const Color(0xFFEF4444), // Rose
+                onTap: () => Navigator.pushNamed(context, '/categories'),
+              ),
             ],
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
+
+
+  Widget _buildRecentPulse(BuildContext context, ExpenseProvider provider) {
+    final textColor = AppTheme.getTextColor(context);
+    final recentExpenses = provider.expenses.take(3).toList();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(26, 24, 26, 16),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Recent Pulse',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: textColor,
+                  letterSpacing: -0.5,
+                ),
+              ),
+              GestureDetector(
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const RecentExpensesScreen()),
+                ),
+                child: Text(
+                  'View All',
+                  style: TextStyle(
+                    color: AppTheme.primary,
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        ListView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          padding: const EdgeInsets.symmetric(horizontal: 26),
+          itemCount: recentExpenses.length,
+          itemBuilder: (context, index) {
+            final expense = recentExpenses[index];
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(24),
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+                  child: Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).cardTheme.color?.withValues(alpha: 0.7),
+                      borderRadius: BorderRadius.circular(24),
+                      border: Border.all(
+                        color: AppTheme.primary.withValues(alpha: 0.05),
+                      ),
+                      boxShadow: AppTheme.softShadow,
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 42,
+                          height: 42,
+                          decoration: BoxDecoration(
+                            color: (expense.actualAmount > 0
+                                    ? AppTheme.primary
+                                    : AppTheme.warning)
+                                .withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          child: Icon(
+                            expense.actualAmount > 0
+                                ? LucideIcons.checkCheck
+                                : LucideIcons.clock,
+                            size: 18,
+                            color: expense.actualAmount > 0
+                                ? AppTheme.primary
+                                : AppTheme.warning,
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                expense.name,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14,
+                                  color: textColor,
+                                ),
+                              ),
+                              Text(
+                                expense.paymentMode,
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  color: AppTheme.getTextColor(context,
+                                      isSecondary: true),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Text(
+                          '₹${(expense.actualAmount > 0 ? expense.actualAmount : expense.plannedAmount).toLocaleString()}',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w900,
+                            fontSize: 15,
+                            color: textColor,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      ],
+    );
+  }
+
 
   void _showAddExpenseDialog(BuildContext context) {
     // Re-using existing dialog logic but with slight UI polish
@@ -1184,34 +1265,120 @@ class _AnimatedActionCardState extends State<_AnimatedActionCard>
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cardBg = isDark
+        ? Colors.white.withValues(alpha: 0.05)
+        : Colors.black.withValues(alpha: 0.02);
 
     return GestureDetector(
       onTapDown: (_) => _controller.forward(),
       onTapUp: (_) {
         _controller.reverse();
+        HapticFeedback.lightImpact();
         widget.onTap();
       },
       onTapCancel: () => _controller.reverse(),
       child: ScaleTransition(
         scale: _scaleAnimation,
         child: Container(
-          width: MediaQuery.of(context).size.width * 0.22,
-          padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 8),
-          decoration: BoxDecoration(
-            color: isDark ? AppTheme.bgCardDark : Colors.white,
-            borderRadius: BorderRadius.circular(24),
-            boxShadow: AppTheme.softShadow,
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(widget.label,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w800,
-                      color: AppTheme.getTextColor(context))),
-            ],
+          width: MediaQuery.of(context).size.width * 0.23,
+          height: 110,
+          margin: const EdgeInsets.only(bottom: 20),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(28),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: cardBg,
+                  borderRadius: BorderRadius.circular(28),
+                  border: Border.all(
+                    color: widget.color.withValues(alpha: 0.25),
+                    width: 1.2,
+                  ),
+                  gradient: RadialGradient(
+                    center: Alignment.topLeft,
+                    radius: 1.5,
+                    colors: [
+                      widget.color.withValues(alpha: 0.1),
+                      Colors.transparent,
+                    ],
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: widget.color.withValues(alpha: 0.08),
+                      blurRadius: 20,
+                      offset: const Offset(0, 8),
+                    )
+                  ],
+                ),
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    // Dynamic Inner Light
+                    Positioned(
+                      top: -10,
+                      left: -10,
+                      child: Container(
+                        width: 50,
+                        height: 50,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          gradient: RadialGradient(
+                            colors: [
+                              widget.color.withValues(alpha: 0.2),
+                              Colors.transparent,
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: widget.color.withValues(alpha: 0.15),
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: widget.color.withValues(alpha: 0.12),
+                                blurRadius: 10,
+                                spreadRadius: 0.5,
+                              )
+                            ],
+                          ),
+                          child: Icon(
+                            widget.icon,
+                            color: widget.color,
+                            size: 22,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 4),
+                          child: Text(
+                            widget.label,
+                            textAlign: TextAlign.center,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: 0.1,
+                              height: 1.2,
+                              color: AppTheme.getTextColor(context)
+                                  .withValues(alpha: 1.0),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ),
         ),
       ),

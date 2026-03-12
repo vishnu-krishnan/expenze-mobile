@@ -6,6 +6,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../providers/theme_provider.dart';
 import '../../providers/wish_provider.dart';
 import '../../../data/models/wish.dart';
+import '../../widgets/liquid_glass_fab.dart';
 
 class WishesScreen extends StatefulWidget {
   const WishesScreen({super.key});
@@ -156,10 +157,16 @@ class _WishesScreenState extends State<WishesScreen> {
                   return NotificationListener<ScrollNotification>(
                     onNotification: (ScrollNotification notification) {
                       if (notification is ScrollUpdateNotification) {
+                        if (notification.metrics.pixels <= 10) {
+                          if (!_isFabVisible) {
+                            setState(() => _isFabVisible = true);
+                          }
+                          return false;
+                        }
                         if (notification.scrollDelta != null) {
-                          if (notification.scrollDelta! > 2 && _isFabVisible) {
+                          if (notification.scrollDelta! > 5 && _isFabVisible) {
                             setState(() => _isFabVisible = false);
-                          } else if (notification.scrollDelta! < -2 &&
+                          } else if (notification.scrollDelta! < -5 &&
                               !_isFabVisible) {
                             setState(() => _isFabVisible = true);
                           }
@@ -228,22 +235,17 @@ class _WishesScreenState extends State<WishesScreen> {
         ),
       ),
       floatingActionButton: Padding(
-        padding: const EdgeInsets.only(bottom: 120),
+        padding: const EdgeInsets.only(bottom: 110),
         child: AnimatedSlide(
           duration: const Duration(milliseconds: 300),
           offset: _isFabVisible ? Offset.zero : const Offset(0, 2),
           child: AnimatedOpacity(
             duration: const Duration(milliseconds: 300),
             opacity: _isFabVisible ? 1.0 : 0.0,
-            child: FloatingActionButton(
+            child: LiquidGlassFAB(
               heroTag: 'wishes_fab',
               onPressed: () => _showWishDialog(context),
-              backgroundColor: AppTheme.primary,
-              elevation: 8,
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(18)),
-              child:
-                  const Icon(LucideIcons.plus, color: Colors.white, size: 30),
+              icon: LucideIcons.plus,
             ),
           ),
         ),
