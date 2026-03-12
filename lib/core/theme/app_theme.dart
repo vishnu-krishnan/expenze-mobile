@@ -17,9 +17,15 @@ class AppTheme {
   static const Color danger = Color(0xFFEF4444);
   static const Color dangerDark = Color(0xFFB91C1C);
 
+  // System UI Styles
+  static final SystemUiOverlayStyle headerOverlayStyle = SystemUiOverlayStyle.light.copyWith(
+    statusBarColor: Colors.transparent,
+    systemStatusBarContrastEnforced: false,
+  );
+
   // Background colors - cleaner neutrals
-  static const Color bgPrimary = Color(0xFFF8FAFC); // Slate 50
-  static const Color bgSecondary = Color(0xFFF1F5F9); // Slate 100
+  static const Color bgPrimary = Colors.white; // Pure Elite White
+  static const Color bgSecondary = Color(0xFFF8FAFC); // Slate 50
   static const Color bgCard = Colors.white;
 
   // Text Colors - High contrast
@@ -59,28 +65,33 @@ class AppTheme {
   // Background patterns - softer gradients
   static BoxDecoration get backgroundDecoration => const BoxDecoration(
         color: bgPrimary,
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Color(0xFFF1F5F9), // Slate 100
-            Color(0xFFF8FAFC), // Slate 50
-            Colors.white,
-          ],
-        ),
       );
+
+  static BoxDecoration headerDecoration(BuildContext context) {
+    return BoxDecoration(
+      gradient: LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: Theme.of(context).brightness == Brightness.dark
+            ? [
+                const Color(0xFF134E4A), // Elite Teal 900 at top
+                bgPrimaryDark, // Dissolve
+              ]
+            : [
+                const Color(
+                    0xFF134E4A), // Dark Teal 900 at top (Notification area)
+                const Color(0xFF0F766E), // Strong Teal accent
+                bgPrimary, // Dissolve
+              ],
+        stops: Theme.of(context).brightness == Brightness.dark
+            ? const [0.0, 1.0]
+            : const [0.0, 0.4, 1.0],
+      ),
+    );
+  }
 
   static BoxDecoration get darkBackgroundDecoration => const BoxDecoration(
         color: bgPrimaryDark,
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            Color(0xFF020617), // Slate 950
-            Color(0xFF0F172A), // Slate 900
-            Color(0xFF020617), // Slate 950
-          ],
-        ),
       );
 
   // Helper method to get theme-aware text colors
@@ -126,8 +137,8 @@ class AppTheme {
       centerTitle: true,
       systemOverlayStyle: const SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
-        statusBarIconBrightness: Brightness.dark,
-        statusBarBrightness: Brightness.light,
+        statusBarIconBrightness: Brightness.light,
+        statusBarBrightness: Brightness.dark,
       ),
       titleTextStyle: GoogleFonts.outfit(
         color: textPrimary,

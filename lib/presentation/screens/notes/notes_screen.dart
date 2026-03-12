@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/rendering.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:intl/intl.dart';
@@ -153,16 +154,23 @@ class _NotesScreenState extends State<NotesScreen> {
             slivers: [
                 SliverAppBar(
                   backgroundColor: Colors.transparent,
+                  systemOverlayStyle: AppTheme.headerOverlayStyle,
                   automaticallyImplyLeading: false,
-                  expandedHeight: 100,
-                  floating: true,
-                  pinned: false,
+                  elevation: 0,
+                  scrolledUnderElevation: 0,
+                  surfaceTintColor: Colors.transparent,
+                  expandedHeight: 110,
+                  collapsedHeight: 110,
+                  toolbarHeight: 110,
+                  floating: false,
+                  pinned: true,
                   flexibleSpace: FlexibleSpaceBar(
                     titlePadding: EdgeInsets.zero,
-                    background: Padding(
+                    background: Container(
+                      decoration: AppTheme.headerDecoration(context),
                       padding: EdgeInsets.fromLTRB(
                           26, MediaQuery.of(context).padding.top + 10, 26, 0),
-                      child: Column(
+                      child: const Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
@@ -170,15 +178,15 @@ class _NotesScreenState extends State<NotesScreen> {
                               style: TextStyle(
                                   fontSize: 26,
                                   fontWeight: FontWeight.w900,
-                                  color: textColor,
-                                  letterSpacing: -0.8)),
-                          const SizedBox(height: 4),
+                                  color: Colors.white,
+                                  letterSpacing: -1)),
                           Text(
                             'Your brain called — it wants backup.',
                             style: TextStyle(
-                              color: secondaryTextColor,
-                              fontSize: 12,
+                              color: Colors.white70,
+                              fontSize: 13,
                               fontWeight: FontWeight.w500,
+                              letterSpacing: 0.5,
                             ),
                           ),
                         ],

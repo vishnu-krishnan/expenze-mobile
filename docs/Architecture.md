@@ -43,4 +43,4 @@
 - **Transparent Scaffolds**: Individual screens within the shell use `Colors.transparent` to ensure seamless visual integration.
 - **Standalone Resilience**: Screens outside the shell (Auth, Onboarding) implement their own `Container` using the same `AppTheme` definitions.
 
-Date: 2026-02-18
+Date: 2026-03-12

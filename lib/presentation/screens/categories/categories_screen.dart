@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/rendering.dart';
 import 'package:provider/provider.dart';
 import 'package:lucide_icons/lucide_icons.dart';
@@ -50,55 +51,44 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
             slivers: [
               SliverAppBar(
                 backgroundColor: Colors.transparent,
+                systemOverlayStyle: AppTheme.headerOverlayStyle,
                 automaticallyImplyLeading: false,
-                expandedHeight: 100,
-                floating: true,
-                pinned: false,
+                elevation: 0,
+                scrolledUnderElevation: 0,
+                surfaceTintColor: Colors.transparent,
+                expandedHeight: 110,
+                collapsedHeight: 110,
+                toolbarHeight: 110,
+                floating: false,
+                pinned: true,
                 flexibleSpace: FlexibleSpaceBar(
                   titlePadding: EdgeInsets.zero,
-                background: Padding(
+                  background: Container(
+                    decoration: AppTheme.headerDecoration(context),
                     padding: EdgeInsets.fromLTRB(
                         26, MediaQuery.of(context).padding.top + 10, 26, 0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Row(
-                        children: [
-                          GestureDetector(
-                            onTap: () => Navigator.pop(context),
-                            child: Container(
-                              padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                color: AppTheme.primary.withAlpha(25),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: const Icon(LucideIcons.arrowLeft,
-                                  size: 20, color: AppTheme.primary),
-                            ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Text('Categories',
+                            style: TextStyle(
+                                fontSize: 26,
+                                fontWeight: FontWeight.w900,
+                                color: Colors.white,
+                                letterSpacing: -1)),
+                        const Text(
+                          'Your expense toolkit',
+                          style: TextStyle(
+                            color: Colors.white70,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                            letterSpacing: 0.5,
                           ),
-                          const SizedBox(width: 16),
-                          Text('Categories',
-                              style: TextStyle(
-                                  fontSize: 26,
-                                  fontWeight: FontWeight.w900,
-                                  color: textColor,
-                                  fontFamily: 'Outfit',
-                                  letterSpacing: -0.8)),
-                        ],
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'Keep your spending organized.',
-                        style: TextStyle(
-                          color: secondaryTextColor,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
                 ),
               ),
               SliverPadding(
@@ -191,7 +181,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
           Text('Add categories to keep your money in check.',
               style: TextStyle(
                   fontSize: 13,
-                  color: secondaryTextColor.withValues(alpha: 0.7))),
+                  color: secondaryTextColor.withAlpha(180))),
         ],
       ),
     );
@@ -243,10 +233,10 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                        fontWeight: FontWeight.w900,
-                        fontSize: 16,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 15,
                         color: textColor,
-                        fontFamily: 'Outfit',
+                        letterSpacing: -0.3,
                       ),
                     ),
                   ),

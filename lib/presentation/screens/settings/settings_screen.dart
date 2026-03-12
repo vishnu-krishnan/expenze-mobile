@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -31,30 +32,38 @@ class SettingsScreen extends StatelessWidget {
         slivers: [
           SliverAppBar(
             backgroundColor: Colors.transparent,
-            expandedHeight: 100, // Corrected from 120
-            floating: true,
-            pinned: false,
+            systemOverlayStyle: AppTheme.headerOverlayStyle,
+            automaticallyImplyLeading: false,
+            elevation: 0,
+            scrolledUnderElevation: 0,
+            surfaceTintColor: Colors.transparent,
+            expandedHeight: 110,
+            collapsedHeight: 110,
+            toolbarHeight: 110,
+            floating: false,
+            pinned: true,
             flexibleSpace: FlexibleSpaceBar(
               titlePadding: EdgeInsets.zero,
-              background: Padding(
+              background: Container(
+                decoration: AppTheme.headerDecoration(context),
                 padding: EdgeInsets.fromLTRB(
-                    26, MediaQuery.of(context).padding.top + 10, 26, 0), // Corrected from + 20
-                child: Column(
+                    26, MediaQuery.of(context).padding.top + 10, 26, 0),
+                child: const Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text('Tweak it your way',
-                        style: TextStyle(
-                            color: secondaryTextColor,
-                            fontSize: 13,
-                            fontWeight: FontWeight.w500, // Matching analytics/dashboard feel
-                            letterSpacing: 0.5)),
                     Text('Settings',
                         style: TextStyle(
-                            fontSize: 26, // Corrected from 34
+                            fontSize: 26,
                             fontWeight: FontWeight.w900,
-                            color: textColor,
-                            letterSpacing: -0.8)), // Corrected from -1 for better consistency
+                            color: Colors.white,
+                            letterSpacing: -1)),
+                    Text('Tweak it your way',
+                        style: TextStyle(
+                            color: Colors.white70,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                            letterSpacing: 0.5)),
                   ],
                 ),
               ),

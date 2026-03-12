@@ -49,8 +49,8 @@ class _MainNavigationWrapperState extends State<MainNavigationWrapper> {
       child: AnnotatedRegion<SystemUiOverlayStyle>(
         value: SystemUiOverlayStyle(
           statusBarColor: Colors.transparent,
-          statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
-          statusBarBrightness: isDark ? Brightness.dark : Brightness.light,
+          statusBarIconBrightness: Brightness.light, // White icons for Android
+          statusBarBrightness: Brightness.dark,      // White text for iOS
           systemNavigationBarColor: const Color(0x00000000),
           systemNavigationBarDividerColor: Colors.transparent,
           systemNavigationBarIconBrightness:

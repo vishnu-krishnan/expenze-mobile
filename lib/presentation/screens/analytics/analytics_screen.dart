@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
@@ -39,11 +40,20 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
         slivers: [
           SliverAppBar(
             backgroundColor: Colors.transparent,
+            systemOverlayStyle: AppTheme.headerOverlayStyle,
             automaticallyImplyLeading: false,
-            expandedHeight: 100,
+            elevation: 0,
+            scrolledUnderElevation: 0,
+            surfaceTintColor: Colors.transparent,
+            expandedHeight: 110,
+            collapsedHeight: 110,
+            toolbarHeight: 110,
+            floating: false,
+            pinned: true,
             flexibleSpace: FlexibleSpaceBar(
               titlePadding: EdgeInsets.zero,
-              background: Padding(
+              background: Container(
+                decoration: AppTheme.headerDecoration(context),
                 padding: EdgeInsets.fromLTRB(
                     26, MediaQuery.of(context).padding.top + 10, 26, 0),
                 child: Row(
@@ -53,20 +63,21 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text('Where\'s it all going?',
-                            style: TextStyle(
-                                color: secondaryTextColor,
-                                fontSize: 13,
-                                letterSpacing: 0.5)),
-                        Text('Analytics',
+                        const Text('Analytics',
                             style: TextStyle(
                                 fontSize: 26,
                                 fontWeight: FontWeight.w900,
-                                color: textColor,
+                                color: Colors.white,
                                 letterSpacing: -1)),
+                        const Text('Where\'s it all going?',
+                            style: TextStyle(
+                                color: Colors.white70,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w500,
+                                letterSpacing: 0.5)),
                       ],
                     ),
-                    _buildPeriodSelector(textColor),
+                    _buildPeriodSelector(Colors.white),
                   ],
                 ),
               ),

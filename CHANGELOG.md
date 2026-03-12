@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.7.3+23] - 2026-03-12
+### Added
+- **Content-Area Refresh**: Refactored the Dashboard to keep the header (greeting/user name) static during pull-to-refresh, isolating the refresh animation to the scrollable content area.
+- **Header Synchronization**: Unified `SliverAppBar` properties (110px height, pinned state) and text hierarchy (Main title on top) across all screens including Monthly Planner, Regular Payments, and Settings.
+- **Enhanced Iconography**: Replaced the sparkles refresh icon with a specialized `rotateCw` icon for a more professional feel.
+- **Typography Deep-Sync**: Standardized header weights (`w900`) and Category card label styles (`w800`) across the platform.
+
+### Fixed
+- **Build Integrity**: Resolved `SystemUiOverlayStyle` undefined name error and cleaned up unused `GoogleFonts` imports and variables across multiple files.
+- **Clean Navigation**: Removed redundant back buttons on the Categories screen to align with the core navigation architecture.
+
 ## [1.7.2+22] - 2026-03-11
 ### Added
 - **Global Typography**: Implemented **Outfit** as the global application font.

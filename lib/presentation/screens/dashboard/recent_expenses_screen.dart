@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../../core/theme/app_theme.dart';
@@ -10,80 +11,129 @@ class RecentExpensesScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textColor = AppTheme.getTextColor(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: Container(
+        width: double.infinity,
+        height: double.infinity,
         decoration: isDark
             ? AppTheme.darkBackgroundDecoration
             : AppTheme.backgroundDecoration,
-        child: Column(
-          children: [
-            AppBar(
-              title: Text('Recent Expense Category',
-                  style:
-                      TextStyle(color: textColor, fontWeight: FontWeight.bold)),
+        child: CustomScrollView(
+          physics: const BouncingScrollPhysics(),
+          slivers: [
+            SliverAppBar(
               backgroundColor: Colors.transparent,
-              elevation: 0,
+              systemOverlayStyle: SystemUiOverlayStyle.light,
               automaticallyImplyLeading: false,
-              centerTitle: false,
-              actions: [
-                Consumer<ExpenseProvider>(
-                  builder: (context, provider, _) {
-                    return PopupMenuButton<SortOption>(
-                      icon: Icon(LucideIcons.arrowUpDown, color: textColor),
-                      onSelected: (option) {
-                        provider.setSortOption(option);
-                      },
-                      itemBuilder: (context) => [
-                        const PopupMenuItem(
-                          value: SortOption.recent,
-                          child: Text('Recent'),
-                        ),
-                        const PopupMenuItem(
-                          value: SortOption.amountAsc,
-                          child: Text('Amount (Low to High)'),
-                        ),
-                        const PopupMenuItem(
-                          value: SortOption.amountDesc,
-                          child: Text('Amount (High to Low)'),
-                        ),
-                      ],
-                    );
-                  },
+              elevation: 0,
+              scrolledUnderElevation: 0,
+              surfaceTintColor: Colors.transparent,
+              expandedHeight: 110,
+              collapsedHeight: 110,
+              toolbarHeight: 110,
+              floating: false,
+              pinned: true,
+              flexibleSpace: FlexibleSpaceBar(
+                titlePadding: EdgeInsets.zero,
+                background: Container(
+                  decoration: AppTheme.headerDecoration(context),
+                  padding: EdgeInsets.fromLTRB(
+                      26, MediaQuery.of(context).padding.top + 10, 26, 0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text("Recent Pitstops",
+                              style: TextStyle(
+                                  fontSize: 26,
+                                  fontWeight: FontWeight.w900,
+                                  color: Colors.white,
+                                  letterSpacing: -1)),
+                          Text("The Money Trail",
+                              style: TextStyle(
+                                  color: Colors.white70,
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w500,
+                                  letterSpacing: 0.5)),
+                        ],
+                      ),
+                      Consumer<ExpenseProvider>(
+                        builder: (context, provider, _) {
+                          return Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            child: PopupMenuButton<SortOption>(
+                              icon: const Icon(LucideIcons.arrowUpDown,
+                                  color: Colors.white, size: 20),
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20)),
+                              onSelected: (option) {
+                                provider.setSortOption(option);
+                              },
+                              itemBuilder: (context) => [
+                                const PopupMenuItem(
+                                  value: SortOption.recent,
+                                  child: Text('Recent'),
+                                ),
+                                const PopupMenuItem(
+                                  value: SortOption.amountAsc,
+                                  child: Text('Amount (Low to High)'),
+                                ),
+                                const PopupMenuItem(
+                                  value: SortOption.amountDesc,
+                                  child: Text('Amount (High to Low)'),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
                 ),
-                const SizedBox(width: 16),
-              ],
+              ),
             ),
-            Expanded(
-              child: Consumer<ExpenseProvider>(
+            SliverPadding(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
+              sliver: Consumer<ExpenseProvider>(
                 builder: (context, provider, child) {
                   if (provider.isLoading) {
-                    return Center(child: CircularProgressIndicator());
+                    return const SliverToBoxAdapter(
+                        child: Center(child: CircularProgressIndicator()));
                   }
 
                   if (provider.categoryBreakdown.isEmpty) {
-                    return Center(
-                      child: Text(
-                        'No expenses for this month',
-                        style: TextStyle(
-                          color:
-                              AppTheme.getTextColor(context, isSecondary: true),
-                          fontSize: 16,
+                    return SliverFillRemaining(
+                      hasScrollBody: false,
+                      child: Center(
+                        child: Text(
+                          'No expenses for this month',
+                          style: TextStyle(
+                            color: AppTheme.getTextColor(context,
+                                isSecondary: true),
+                            fontSize: 16,
+                          ),
                         ),
                       ),
                     );
                   }
 
-                  return ListView.builder(
-                    padding: const EdgeInsets.all(24),
-                    itemCount: provider.categoryBreakdown.length,
-                    itemBuilder: (context, index) {
-                      final item = provider.categoryBreakdown[index];
-                      return _buildCategoryItem(context, item);
-                    },
+                  return SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                      (context, index) {
+                        final item = provider.categoryBreakdown[index];
+                        return _buildCategoryItem(context, item);
+                      },
+                      childCount: provider.categoryBreakdown.length,
+                    ),
                   );
                 },
               ),

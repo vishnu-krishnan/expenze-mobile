@@ -1,5 +1,7 @@
 import 'dart:convert';
+import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/rendering.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
@@ -102,222 +104,233 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
     return Scaffold(
       backgroundColor: Colors.transparent,
-      body: Consumer<ExpenseProvider>(
-        builder: (context, provider, child) {
-          final summary = provider.summary;
-          final actual = summary['actual'] ?? 0.0;
-          final planned = summary['planned'] ?? 0.0;
-          final remaining = summary['remaining'] ?? 0.0;
-          final limit = summary['limit'] ?? 0.0;
-          final target = limit > 0 ? limit : planned;
-          // If actual > 0 and no target (budget) is set, we are effectively over budget
-          final pctUsed =
-              target > 0 ? (actual / target) : (actual > 0 ? 1.01 : 0.0);
-
-          return CustomRefreshIndicator(
-            onRefresh: () => Future.wait([
-              provider.resetToCurrentMonth(),
-              _fetchQuote(),
-            ]),
-            builder: (context, child, controller) {
-              return Stack(
-                alignment: Alignment.topCenter,
+      body: Column(
+        children: [
+          AnnotatedRegion<SystemUiOverlayStyle>(
+            value: AppTheme.headerOverlayStyle,
+            child: Container(
+              height: 110 + MediaQuery.of(context).padding.top,
+              width: double.infinity,
+              decoration: AppTheme.headerDecoration(context),
+              padding: EdgeInsets.fromLTRB(
+                  26, MediaQuery.of(context).padding.top + 10, 26, 0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  AnimatedBuilder(
-                    animation: controller,
-                    builder: (context, _) {
-                      final double dy = controller.value.clamp(0.0, 1.0) * 80.0;
-                      if (dy == 0) return const SizedBox.shrink();
-                      return Transform.translate(
-                        offset: Offset(0, dy - 40),
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 200),
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: AppTheme.primary.withValues(alpha: 0.1),
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                                color: AppTheme.primary.withValues(alpha: 0.2)),
-                            boxShadow: [
-                              BoxShadow(
-                                color: AppTheme.primary.withValues(alpha: 0.1),
-                                blurRadius: 20,
-                                spreadRadius: -5,
-                              )
-                            ],
-                          ),
-                          child: controller.state.isLoading
-                              ? SizedBox(
-                                  width: 20,
-                                  height: 20,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    valueColor: AlwaysStoppedAnimation<Color>(
-                                        AppTheme.primary),
-                                  ),
-                                )
-                              : Transform.rotate(
-                                  angle: controller.value * 2 * 3.1415,
-                                  child: Icon(
-                                    LucideIcons.sparkles,
-                                    color: AppTheme.primary,
-                                    size: 20,
-                                  ),
-                                ),
-                        ),
-                      );
-                    },
-                  ),
-                  Transform.translate(
-                    offset: Offset(0, controller.value.clamp(0.0, 1.0) * 80.0),
-                    child: child,
-                  ),
-                ],
-              );
-            },
-            child: NotificationListener<ScrollNotification>(
-              onNotification: (ScrollNotification notification) {
-                if (notification is ScrollUpdateNotification) {
-                  if (notification.scrollDelta != null) {
-                    if (notification.scrollDelta! > 2 && _isFabVisible) {
-                      setState(() => _isFabVisible = false);
-                    } else if (notification.scrollDelta! < -2 &&
-                        !_isFabVisible) {
-                      setState(() => _isFabVisible = true);
-                    }
-                  }
-                }
-                return false;
-              },
-              child: CustomScrollView(
-                physics: const AlwaysScrollableScrollPhysics(
-                  parent: BouncingScrollPhysics(),
-                ),
-                slivers: [
-                  if (provider.isLoading)
-                    const SliverToBoxAdapter(
-                      child: LinearProgressIndicator(
-                        minHeight: 3,
-                        color: AppTheme.primary,
-                        backgroundColor: Colors.transparent,
-                      ),
-                    ),
-                  SliverAppBar(
-                    backgroundColor: Colors.transparent,
-                    automaticallyImplyLeading: false,
-                    expandedHeight: 100,
-                    floating: true,
-                    pinned: false,
-                    flexibleSpace: FlexibleSpaceBar(
-                      titlePadding: EdgeInsets.zero,
-                      background: Padding(
-                        padding: EdgeInsets.fromLTRB(
-                            26, MediaQuery.of(context).padding.top + 10, 26, 0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              _getTimeBasedGreeting(),
-                              style: TextStyle(
-                                color: secondaryTextColor,
-                                fontSize: 14,
-                                letterSpacing: 0.5,
-                              ),
-                            ),
-                            Text(
-                              user?['full_name'] ?? 'User',
-                              style: TextStyle(
-                                fontSize: 26,
-                                fontWeight: FontWeight.w900,
-                                color: textColor,
-                                letterSpacing: -0.8,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
+                  Text(
+                    _getTimeBasedGreeting(),
+                    style: const TextStyle(
+                      color: Colors.white70,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                      letterSpacing: 0.5,
                     ),
                   ),
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.only(bottom: 16),
-                      child: _buildWalletCard(actual, remaining, pctUsed,
-                          provider, summary, planned),
+                  Text(
+                    user?['full_name'] ?? 'User',
+                    style: const TextStyle(
+                      fontSize: 26,
+                      fontWeight: FontWeight.w900,
+                      color: Colors.white,
+                      letterSpacing: -1,
                     ),
                   ),
-                  SliverToBoxAdapter(
-                    child: _buildQuickActions(context),
-                  ),
-                  if (_quoteText.isNotEmpty)
-                    SliverToBoxAdapter(
-                      child: _buildQuoteCard(textColor, secondaryTextColor),
-                    ),
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(26, 32, 26, 16),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'Where your money ran off to',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: textColor,
-                              letterSpacing: -0.5,
-                            ),
-                          ),
-                          GestureDetector(
-                            onTap: () => Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) =>
-                                      const RecentExpensesScreen()),
-                            ),
-                            child: Icon(LucideIcons.arrowRight,
-                                size: 18, color: secondaryTextColor),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  SliverPadding(
-                    padding: const EdgeInsets.symmetric(horizontal: 26),
-                    sliver: SliverList(
-                      delegate: SliverChildBuilderDelegate(
-                        (context, index) {
-                          final item = provider.categoryBreakdown[index];
-                          return GestureDetector(
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      CategoryTransactionsScreen(
-                                    categoryId: item['id'] as int?,
-                                    categoryName:
-                                        item['category_name'] ?? 'Imported',
-                                    monthKey: provider.currentMonthKey,
-                                    categoryIcon: item['icon'],
-                                    categoryColor: item['color'],
-                                  ),
-                                ),
-                              );
-                            },
-                            child: _buildCategoryItem(context, item),
-                          );
-                        },
-                        childCount: provider.categoryBreakdown.take(3).length,
-                      ),
-                    ),
-                  ),
-                  const SliverToBoxAdapter(child: SizedBox(height: 140)),
                 ],
               ),
             ),
-          );
-        },
+          ),
+          Expanded(
+            child: Consumer<ExpenseProvider>(
+              builder: (context, provider, child) {
+                final summary = provider.summary;
+                final actual = summary['actual'] ?? 0.0;
+                final planned = summary['planned'] ?? 0.0;
+                final remaining = summary['remaining'] ?? 0.0;
+                final limit = summary['limit'] ?? 0.0;
+                final target = limit > 0 ? limit : planned;
+                // If actual > 0 and no target (budget) is set, we are effectively over budget
+                final pctUsed =
+                    target > 0 ? (actual / target) : (actual > 0 ? 1.01 : 0.0);
+
+                return CustomRefreshIndicator(
+                  onRefresh: () => Future.wait([
+                    provider.resetToCurrentMonth(),
+                    _fetchQuote(),
+                  ]),
+                  builder: (context, child, controller) {
+                    return Stack(
+                      alignment: Alignment.topCenter,
+                      children: [
+                        AnimatedBuilder(
+                          animation: controller,
+                          builder: (context, _) {
+                            final double dy =
+                                controller.value.clamp(0.0, 1.0) * 80.0;
+                            if (dy == 0) return const SizedBox.shrink();
+                            return Transform.translate(
+                              offset: Offset(0, dy - 40),
+                              child: AnimatedContainer(
+                                duration: const Duration(milliseconds: 200),
+                                padding: const EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  color:
+                                      AppTheme.primary.withValues(alpha: 0.1),
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                      color: AppTheme.primary
+                                          .withValues(alpha: 0.2)),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: AppTheme.primary
+                                          .withValues(alpha: 0.1),
+                                      blurRadius: 20,
+                                      spreadRadius: -5,
+                                    )
+                                  ],
+                                ),
+                                child: controller.state.isLoading
+                                    ? SizedBox(
+                                        width: 20,
+                                        height: 20,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          valueColor:
+                                              AlwaysStoppedAnimation<Color>(
+                                                  AppTheme.primary),
+                                        ),
+                                      )
+                                    : Transform.rotate(
+                                        angle: controller.value * 2 * 3.1415,
+                                        child: Icon(
+                                          LucideIcons.rotateCw,
+                                          color: AppTheme.primary,
+                                          size: 20,
+                                        ),
+                                      ),
+                              ),
+                            );
+                          },
+                        ),
+                        Transform.translate(
+                          offset: Offset(
+                              0, controller.value.clamp(0.0, 1.0) * 80.0),
+                          child: child,
+                        ),
+                      ],
+                    );
+                  },
+                  child: NotificationListener<ScrollNotification>(
+                    onNotification: (ScrollNotification notification) {
+                      if (notification is ScrollUpdateNotification) {
+                        if (notification.scrollDelta != null) {
+                          if (notification.scrollDelta! > 2 && _isFabVisible) {
+                            setState(() => _isFabVisible = false);
+                          } else if (notification.scrollDelta! < -2 &&
+                              !_isFabVisible) {
+                            setState(() => _isFabVisible = true);
+                          }
+                        }
+                      }
+                      return false;
+                    },
+                    child: CustomScrollView(
+                      physics: const AlwaysScrollableScrollPhysics(
+                        parent: BouncingScrollPhysics(),
+                      ),
+                      slivers: [
+                        if (provider.isLoading)
+                          const SliverToBoxAdapter(
+                            child: LinearProgressIndicator(
+                              minHeight: 3,
+                              color: AppTheme.primary,
+                              backgroundColor: Colors.transparent,
+                            ),
+                          ),
+                        SliverToBoxAdapter(
+                          child: Padding(
+                            padding: const EdgeInsets.only(bottom: 16),
+                            child: _buildWalletCard(actual, remaining, pctUsed,
+                                provider, summary, planned),
+                          ),
+                        ),
+                        SliverToBoxAdapter(
+                          child: _buildQuickActions(context),
+                        ),
+                        if (_quoteText.isNotEmpty)
+                          SliverToBoxAdapter(
+                            child:
+                                _buildQuoteCard(textColor, secondaryTextColor),
+                          ),
+                        SliverToBoxAdapter(
+                          child: Padding(
+                            padding: const EdgeInsets.fromLTRB(26, 32, 26, 16),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  'Where your money ran off to',
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    color: textColor,
+                                    letterSpacing: -0.5,
+                                  ),
+                                ),
+                                GestureDetector(
+                                  onTap: () => Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) =>
+                                            const RecentExpensesScreen()),
+                                  ),
+                                  child: Icon(LucideIcons.arrowRight,
+                                      size: 18, color: secondaryTextColor),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        SliverPadding(
+                          padding: const EdgeInsets.symmetric(horizontal: 26),
+                          sliver: SliverList(
+                            delegate: SliverChildBuilderDelegate(
+                              (context, index) {
+                                final item = provider.categoryBreakdown[index];
+                                return GestureDetector(
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            CategoryTransactionsScreen(
+                                          categoryId: item['id'] as int?,
+                                          categoryName: item['category_name'] ??
+                                              'Imported',
+                                          monthKey: provider.currentMonthKey,
+                                          categoryIcon: item['icon'],
+                                          categoryColor: item['color'],
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                  child: _buildCategoryItem(context, item),
+                                );
+                              },
+                              childCount:
+                                  provider.categoryBreakdown.take(3).length,
+                            ),
+                          ),
+                        ),
+                        const SliverToBoxAdapter(child: SizedBox(height: 140)),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
       ),
       floatingActionButton: Padding(
         padding: const EdgeInsets.only(bottom: 120),
@@ -386,158 +399,170 @@ class _DashboardScreenState extends State<DashboardScreen> {
           _handleMonthChange(1); // Swipe Left -> Next
         }
       },
-      child: Container(
-        margin: const EdgeInsets.fromLTRB(24, 8, 24, 8),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: cardColors,
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-          borderRadius: BorderRadius.circular(32),
-          boxShadow: [
-            BoxShadow(
-              color: cardShadowColor,
-              blurRadius: 30,
-              offset: const Offset(0, 16),
-            ),
-          ],
-        ),
-        child: Stack(
-          children: [
-            // Decorative circle
-            Positioned(
-              right: -30,
-              bottom: -30,
-              child: CircleAvatar(
-                radius: 90,
-                backgroundColor: Colors.white.withValues(alpha: 0.04),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(32),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+          child: Container(
+            margin: EdgeInsets.zero,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors:
+                    cardColors.map((c) => c.withValues(alpha: 0.85)).toList(),
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
               ),
-            ),
-            Positioned(
-              left: -20,
-              top: -20,
-              child: CircleAvatar(
-                radius: 50,
-                backgroundColor: Colors.white.withValues(alpha: 0.03),
+              borderRadius: BorderRadius.circular(32),
+              border: Border.all(
+                color: Colors.white.withValues(alpha: 0.1),
+                width: 1.5,
               ),
+              boxShadow: [
+                BoxShadow(
+                  color: cardShadowColor,
+                  blurRadius: 30,
+                  offset: const Offset(0, 16),
+                ),
+              ],
             ),
-            Padding(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Top row — month navigation
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            child: Stack(
+              children: [
+                // Decorative circle
+                Positioned(
+                  right: -30,
+                  bottom: -30,
+                  child: CircleAvatar(
+                    radius: 90,
+                    backgroundColor: Colors.white.withValues(alpha: 0.04),
+                  ),
+                ),
+                Positioned(
+                  left: -20,
+                  top: -20,
+                  child: CircleAvatar(
+                    radius: 50,
+                    backgroundColor: Colors.white.withValues(alpha: 0.03),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text(
-                        'Total Spent',
-                        style: TextStyle(
-                            color: Colors.white70,
-                            fontSize: 13,
-                            fontWeight: FontWeight.w500,
-                            letterSpacing: 0.5),
-                      ),
+                      // Top row — month navigation
                       Row(
-                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          IconButton(
-                            icon: const Icon(LucideIcons.chevronLeft,
-                                color: Colors.white60, size: 18),
-                            onPressed: () => _handleMonthChange(-1),
-                            padding: EdgeInsets.zero,
-                            constraints: const BoxConstraints(),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 6),
-                            child: Text(
-                              _formatMonthName(provider.currentMonthKey),
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
+                          Text(
+                            'Total Spent',
+                            style: TextStyle(
+                                color: Colors.white70,
                                 fontSize: 13,
-                              ),
-                            ),
+                                fontWeight: FontWeight.w500,
+                                letterSpacing: 0.5),
                           ),
-                          IconButton(
-                            icon: const Icon(LucideIcons.chevronRight,
-                                color: Colors.white60, size: 18),
-                            onPressed: () => _handleMonthChange(1),
-                            padding: EdgeInsets.zero,
-                            constraints: const BoxConstraints(),
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              IconButton(
+                                icon: const Icon(LucideIcons.chevronLeft,
+                                    color: Colors.white60, size: 18),
+                                onPressed: () => _handleMonthChange(-1),
+                                padding: EdgeInsets.zero,
+                                constraints: const BoxConstraints(),
+                              ),
+                              Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 6),
+                                child: Text(
+                                  _formatMonthName(provider.currentMonthKey),
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 13,
+                                  ),
+                                ),
+                              ),
+                              IconButton(
+                                icon: const Icon(LucideIcons.chevronRight,
+                                    color: Colors.white60, size: 18),
+                                onPressed: () => _handleMonthChange(1),
+                                padding: EdgeInsets.zero,
+                                constraints: const BoxConstraints(),
+                              ),
+                            ],
                           ),
                         ],
                       ),
-                    ],
-                  ),
 
-                  const SizedBox(height: 6),
+                      const SizedBox(height: 6),
 
-                  // Main amount — large and prominent
-                  FittedBox(
-                    fit: BoxFit.scaleDown,
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      '₹${actual.toLocaleString()}',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 48,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: -1,
-                        height: 1.1,
-                      ),
-                    ),
-                  ),
-
-                  // Divider line
-                  Container(
-                    height: 1,
-                    color: Colors.white.withValues(alpha: 0.12),
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Two-column stats row
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _buildStatColumn(
-                          label: pctUsed >= 1.0 ? 'Overspent' : 'Remaining',
-                          value: '₹${remaining.abs().toLocaleString()}',
-                          valueColor: statusColor,
-                          icon: pctUsed >= 1.0
-                              ? LucideIcons.alertTriangle
-                              : LucideIcons.trendingDown,
+                      // Main amount — large and prominent
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          '₹${actual.toLocaleString()}',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 48,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: -1,
+                            height: 1.1,
+                          ),
                         ),
                       ),
+
+                      // Divider line
                       Container(
-                        width: 1,
-                        height: 48,
-                        color: Colors.white.withValues(alpha: 0.15),
+                        height: 1,
+                        color: Colors.white.withValues(alpha: 0.12),
                       ),
-                      Expanded(
-                        child: _buildStatColumn(
-                          label: 'Monthly Budget',
-                          value: budget > 0
-                              ? '₹${budget.toLocaleString()}'
-                              : 'Not set',
-                          valueColor: Colors.white,
-                          icon: LucideIcons.target,
-                          alignRight: true,
-                        ),
+                      const SizedBox(height: 16),
+
+                      // Two-column stats row
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _buildStatColumn(
+                              label: pctUsed >= 1.0 ? 'Overspent' : 'Remaining',
+                              value: '₹${remaining.abs().toLocaleString()}',
+                              valueColor: statusColor,
+                              icon: pctUsed >= 1.0
+                                  ? LucideIcons.alertTriangle
+                                  : LucideIcons.trendingDown,
+                            ),
+                          ),
+                          Container(
+                            width: 1,
+                            height: 48,
+                            color: Colors.white.withValues(alpha: 0.15),
+                          ),
+                          Expanded(
+                            child: _buildStatColumn(
+                              label: 'Monthly Budget',
+                              value: budget > 0
+                                  ? '₹${budget.toLocaleString()}'
+                                  : 'Not set',
+                              valueColor: Colors.white,
+                              icon: LucideIcons.target,
+                              alignRight: true,
+                            ),
+                          ),
+                        ],
                       ),
+
+                      const SizedBox(height: 16),
+
+                      // Progress bar
+                      _buildProgressBar(pctUsed, statusColor),
                     ],
                   ),
-
-                  const SizedBox(height: 16),
-
-                  // Progress bar
-                  _buildProgressBar(pctUsed, statusColor),
-                ],
-              ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
@@ -655,42 +680,36 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget _buildQuoteCard(Color textColor, Color secondaryTextColor) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(26, 20, 26, 0),
-      child: Container(
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: Theme.of(context).cardTheme.color,
-          borderRadius: BorderRadius.circular(24),
-          boxShadow: AppTheme.softShadow,
-          border: Border.all(color: AppTheme.primary.withValues(alpha: 0.08)),
-        ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: AppTheme.primary.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Text('✨', style: TextStyle(fontSize: 18)),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(24),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+          child: Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Theme.of(context).cardTheme.color?.withValues(alpha: 0.7),
+              borderRadius: BorderRadius.circular(24),
+              boxShadow: AppTheme.softShadow,
+              border:
+                  Border.all(color: AppTheme.primary.withValues(alpha: 0.1)),
             ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    '"$_quoteText"',
-                    style: TextStyle(
-                      color: textColor,
-                      fontSize: 13,
-                      fontStyle: FontStyle.italic,
-                      height: 1.5,
-                    ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '"$_quoteText"',
+                  style: TextStyle(
+                    color: textColor,
+                    fontSize: 13,
+                    fontStyle: FontStyle.italic,
+                    height: 1.5,
                   ),
-                  if (_quoteAuthor.isNotEmpty) ...[
-                    const SizedBox(height: 6),
-                    Text(
+                ),
+                if (_quoteAuthor.isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: Text(
                       '— $_quoteAuthor',
                       style: TextStyle(
                         color: AppTheme.primary,
@@ -698,11 +717,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                  ],
+                  ),
                 ],
-              ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
