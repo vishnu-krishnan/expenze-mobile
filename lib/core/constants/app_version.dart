@@ -11,22 +11,47 @@ class ReleaseInfo {
 }
 
 class AppVersion {
-  static const String current = '1.8.5';
-  static const String buildNumber = '29';
-  static const String releaseName = 'Pristine Light & Glossy Pulse';
+  static const String current = '1.8.7';
+  static const String buildNumber = '31';
+  static const String releaseName = 'Quick Actions Hub & EMI Calculator';
 
   static const String website = 'https://expenze-elite.netlify.app/';
   static const String supportEmail = 'expenzehelp@gmail.com';
 
   static const List<ReleaseInfo> history = [
     ReleaseInfo(
+      version: '1.8.7',
+      date: '2026-03-13',
+      changes: [
+        'Quick Actions Hub: Replaced the horizontal-scroll Action Hub with a clean, professional 2×3 fixed grid — all shortcuts visible at a glance, no swiping required.',
+        'Professional Card Design: Action cards now use a solid color-tinted background instead of Liquid Glass blur — sharper, faster to read, and consistent with premium fintech design.',
+        'EMI Calculator: Brand-new built-in loan calculator — enter principal, rate, and tenure to instantly get monthly EMI, total interest, and total payment with a visual breakdown bar.',
+        'Smart Number Formatting: EMI results display in Indian notation (Lakhs/Crores) for familiar readability.',
+        'Tenure Toggle: Switch between Years and Months for loan tenure with a single tap.',
+        'Real-Time Calculation: Results update instantly as values are typed — no "Calculate" button needed.',
+      ],
+    ),
+    ReleaseInfo(
+      version: '1.8.6',
+      date: '2026-03-13',
+      changes: [
+        'Category Modal: Add New Category is now a lightweight bottom sheet popup — no more full-screen navigation.',
+        'Compact Category Grid: Revamped the category list to a 3-column grid with smaller, cleaner tiles for better at-a-glance scanning.',
+        'Fade-In Animation: Each category card now enters with a smooth staggered fade-and-slide effect.',
+        'Duplicate Prevention: Creating a category with an existing name now shows an inline error — the sheet stays open for correction instead of silently failing.',
+        'Header Unification: Category Add and Edit screens now use the same premium Large Title gradient header as the Dashboard.',
+        'Text Clarity: Replaced playful internal slang ("New Squad Member", "The Usual Suspects") with clear, professional labels.',
+      ],
+    ),
+    ReleaseInfo(
       version: '1.8.5',
       date: '2026-03-13',
       changes: [
-        'Pristine Light Theme: Overhauled the Wallet card and background elements for light theme—removed all dark shades and murky tints for a pure, bright aesthetic.',
+        'Action Hub UX: Restored the intuitive horizontal navigation while upgrading cards to the new Liquid Glass aesthetic with luminous borders and inner glows.',
+        'Pristine Light Theme: Overhauled the Wallet card and background elements for light theme—removed all murky tints for a pure, bright aesthetic.',
+        'Category Management: Fixed incorrect header themes and enabled back navigation on Add/Edit screens for a seamless management experience.',
         'Glossy Progress Bar: Redesigned the budget progress bar with vibrant primary colors and a professional "glossy" finish.',
-        'Chronological Accuracy: Fixed sorting logic for "Recent Pitstops" and "Recent Pulse" to ensure the most recent activities always appear first.',
-        'UI Polish: Removed redundant back buttons and unified background colors across Profile and Notification settings.',
+        'Chronological Accuracy: Fixed sorting logic to ensure recent "Pitstops" and "Pulse" activities always appear at the top.',
       ],
     ),
     ReleaseInfo(

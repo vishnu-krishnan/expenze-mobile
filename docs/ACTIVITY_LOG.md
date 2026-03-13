@@ -1,5 +1,24 @@
 # Activity Log
 
+[2026-03-13] Action Hub & Category UX Fixes
+Change Type: Patch
+Decision made:
+- Reverted Action Hub to horizontal scrolling while maintaining Liquid Glass aesthetic.
+- Applied brand Teal header gradient to Category Add/Edit screens.
+- Enabled back navigation buttons on Category screens.
+- Added missing SystemUiOverlayStyle imports.
+Reason: Restore intuitive navigation and resolve theme inconsistencies on category screens.
+Impact: UX | Navigation | Branding
+
+[2026-03-13] Pristine Light Theme & Action Hub Grid
+Change Type: Minor
+Decision made:
+- Overhauled Wallet card with Midnight Slate font and subtle 3D lift shadows.
+- Redesigned Dashboard Progress Bar with glossy teal primary finish.
+- Fixed chronological sorting for Recent Pitstops and Pulse.
+Reason: Premiumization of Light Theme and information hierarchy improvement.
+Impact: UI | Visuals | UX
+
 [2026-03-12] Liquid Glass Dashboard Revamp
 Change Type: Major
 Decision made:

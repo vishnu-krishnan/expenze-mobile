@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../../core/theme/app_theme.dart';
@@ -48,19 +49,49 @@ class _CategoryEditScreenState extends State<CategoryEditScreen> {
             : AppTheme.backgroundDecoration,
         child: Column(
           children: [
-            AppBar(
-              title: Text('Refining the Vibes',
-                  style: TextStyle(color: AppTheme.getTextColor(context))),
-              backgroundColor: Colors.transparent,
-              elevation: 0,
-              centerTitle: false,
-              automaticallyImplyLeading: false,
-              actions: [
-                IconButton(
-                  icon: const Icon(LucideIcons.trash2, color: AppTheme.danger),
-                  onPressed: () => _showDeleteDialog(context),
+            AnnotatedRegion<SystemUiOverlayStyle>(
+              value: AppTheme.headerOverlayStyle,
+              child: Container(
+                width: double.infinity,
+                height: 110 + MediaQuery.of(context).padding.top,
+                decoration: AppTheme.headerDecoration(context),
+                padding: EdgeInsets.fromLTRB(
+                    26, MediaQuery.of(context).padding.top + 10, 26, 0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Text(
+                          'Edit Category',
+                          style: TextStyle(
+                            fontSize: 26,
+                            fontWeight: FontWeight.w900,
+                            color: Colors.white,
+                            letterSpacing: -1,
+                          ),
+                        ),
+                        const Text(
+                          'Refine your spending tool',
+                          style: TextStyle(
+                            color: Colors.white70,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                      ],
+                    ),
+                    IconButton(
+                      icon:
+                          const Icon(LucideIcons.trash2, color: Colors.white70),
+                      onPressed: () => _showDeleteDialog(context),
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
             Expanded(
               child: Consumer<CategoryProvider>(

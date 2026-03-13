@@ -26,6 +26,7 @@ import 'presentation/screens/settings/settings_screen.dart';
 import 'presentation/screens/settings/notifications_screen.dart';
 import 'presentation/providers/wish_provider.dart';
 import 'presentation/screens/wishes/wishes_screen.dart';
+import 'presentation/screens/tools/emi_calculator_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -151,6 +152,7 @@ class MyApp extends StatelessWidget {
               '/notifications': (context) => const NotificationSettingsScreen(),
               '/analytics': (context) =>
                   const MainNavigationWrapper(initialIndex: 1),
+              '/calculator': (context) => const EmiCalculatorScreen(),
             },
           );
         },

@@ -972,65 +972,73 @@ class _DashboardScreenState extends State<DashboardScreen>
   }
 
   Widget _buildActionHub(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final textColor = AppTheme.getTextColor(context);
+
+    final actions = [
+      _ActionItem(icon: LucideIcons.arrowDownToLine, label: 'SMS Import',   color: const Color(0xFF0EA5E9), route: '/import'),
+      _ActionItem(icon: LucideIcons.repeat,          label: 'Regular',      color: const Color(0xFFF59E0B), route: '/regular'),
+      _ActionItem(icon: LucideIcons.fileText,         label: 'Notes',        color: const Color(0xFF10B981), route: '/notes'),
+      _ActionItem(icon: LucideIcons.sparkles,         label: 'Wishes',       color: const Color(0xFF8B5CF6), route: '/wishes'),
+      _ActionItem(icon: LucideIcons.layoutGrid,       label: 'Categories',   color: const Color(0xFFEF4444), route: '/categories'),
+      _ActionItem(icon: LucideIcons.calculator,       label: 'EMI Calc',     color: const Color(0xFF06B6D4), route: '/calculator'),
+    ];
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.fromLTRB(26, 10, 26, 16),
-          child: Text(
-            'Action Hub',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: textColor,
-              letterSpacing: -0.5,
-            ),
-          ),
-        ),
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          physics: const BouncingScrollPhysics(),
-          padding: const EdgeInsets.symmetric(horizontal: 26),
+          padding: const EdgeInsets.fromLTRB(26, 20, 26, 14),
           child: Row(
             children: [
-              _AnimatedActionCard(
-                icon: LucideIcons.arrowDownToLine,
-                label: 'Import',
-                color: const Color(0xFF0EA5E9), // Sky Blue
-                onTap: () => Navigator.pushNamed(context, '/import'),
-              ),
-              const SizedBox(width: 14),
-              _AnimatedActionCard(
-                icon: LucideIcons.repeat,
-                label: 'Regular',
-                color: const Color(0xFFF59E0B), // Amber
-                onTap: () => Navigator.pushNamed(context, '/regular'),
-              ),
-              const SizedBox(width: 14),
-              _AnimatedActionCard(
-                icon: LucideIcons.fileText,
-                label: 'Notes',
-                color: const Color(0xFF10B981), // Emerald
-                onTap: () => Navigator.pushNamed(context, '/notes'),
-              ),
-              const SizedBox(width: 14),
-              _AnimatedActionCard(
-                icon: LucideIcons.sparkles,
-                label: 'Wishes',
-                color: const Color(0xFF8B5CF6), // Violet
-                onTap: () => Navigator.pushNamed(context, '/wishes'),
-              ),
-              const SizedBox(width: 14),
-              _AnimatedActionCard(
-                icon: LucideIcons.layoutGrid,
-                label: 'Categories',
-                color: const Color(0xFFEF4444), // Rose
-                onTap: () => Navigator.pushNamed(context, '/categories'),
+              Text('Quick Actions',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w900,
+                    color: textColor,
+                    letterSpacing: -0.5,
+                  )),
+              const Spacer(),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: AppTheme.primary.withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text('${actions.length} shortcuts',
+                    style: const TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      color: AppTheme.primary,
+                    )),
               ),
             ],
           ),
         ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: actions.length,
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 3,
+              mainAxisSpacing: 12,
+              crossAxisSpacing: 12,
+              childAspectRatio: 1.1,
+            ),
+            itemBuilder: (context, index) {
+              final item = actions[index];
+              return _AnimatedActionCard(
+                icon: item.icon,
+                label: item.label,
+                color: item.color,
+                onTap: () => Navigator.pushNamed(context, item.route),
+              );
+            },
+          ),
+        ),
+        const SizedBox(height: 8),
       ],
     );
   }
@@ -1352,6 +1360,14 @@ class _DashboardScreenState extends State<DashboardScreen>
   }
 }
 
+class _ActionItem {
+  final IconData icon;
+  final String label;
+  final Color color;
+  final String route;
+  const _ActionItem({required this.icon, required this.label, required this.color, required this.route});
+}
+
 class _AnimatedActionCard extends StatefulWidget {
   final IconData icon;
   final String label;
@@ -1378,8 +1394,8 @@ class _AnimatedActionCardState extends State<_AnimatedActionCard>
   void initState() {
     super.initState();
     _controller = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 150));
-    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.95)
+        vsync: this, duration: const Duration(milliseconds: 120));
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.94)
         .animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
   }
 
@@ -1392,9 +1408,6 @@ class _AnimatedActionCardState extends State<_AnimatedActionCard>
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final cardBg = isDark
-        ? Colors.white.withValues(alpha: 0.05)
-        : Colors.black.withValues(alpha: 0.02);
 
     return GestureDetector(
       onTapDown: (_) => _controller.forward(),
@@ -1407,105 +1420,50 @@ class _AnimatedActionCardState extends State<_AnimatedActionCard>
       child: ScaleTransition(
         scale: _scaleAnimation,
         child: Container(
-          width: MediaQuery.of(context).size.width * 0.23,
-          height: 110,
-          margin: const EdgeInsets.only(bottom: 20),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(28),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-              child: Container(
+          decoration: BoxDecoration(
+            color: isDark
+                ? widget.color.withValues(alpha: 0.1)
+                : widget.color.withValues(alpha: 0.08),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: widget.color.withValues(alpha: isDark ? 0.2 : 0.15),
+              width: 1,
+            ),
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(11),
                 decoration: BoxDecoration(
-                  color: cardBg,
-                  borderRadius: BorderRadius.circular(28),
-                  border: Border.all(
-                    color: widget.color.withValues(alpha: 0.25),
-                    width: 1.2,
-                  ),
-                  gradient: RadialGradient(
-                    center: Alignment.topLeft,
-                    radius: 1.5,
-                    colors: [
-                      widget.color.withValues(alpha: 0.1),
-                      Colors.transparent,
-                    ],
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: widget.color.withValues(alpha: 0.08),
-                      blurRadius: 20,
-                      offset: const Offset(0, 8),
-                    )
-                  ],
+                  color: widget.color.withValues(alpha: isDark ? 0.18 : 0.12),
+                  borderRadius: BorderRadius.circular(14),
                 ),
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    // Dynamic Inner Light
-                    Positioned(
-                      top: -10,
-                      left: -10,
-                      child: Container(
-                        width: 50,
-                        height: 50,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          gradient: RadialGradient(
-                            colors: [
-                              widget.color.withValues(alpha: 0.2),
-                              Colors.transparent,
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: widget.color.withValues(alpha: 0.15),
-                            shape: BoxShape.circle,
-                            boxShadow: [
-                              BoxShadow(
-                                color: widget.color.withValues(alpha: 0.12),
-                                blurRadius: 10,
-                                spreadRadius: 0.5,
-                              )
-                            ],
-                          ),
-                          child: Icon(
-                            widget.icon,
-                            color: widget.color,
-                            size: 22,
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 4),
-                          child: Text(
-                            widget.label,
-                            textAlign: TextAlign.center,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w800,
-                              letterSpacing: 0.1,
-                              height: 1.2,
-                              color: AppTheme.getTextColor(context)
-                                  .withValues(alpha: 1.0),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
+                child: Icon(
+                  widget.icon,
+                  size: 20,
+                  color: widget.color,
                 ),
               ),
-            ),
+              const SizedBox(height: 8),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 6),
+                child: Text(
+                  widget.label,
+                  textAlign: TextAlign.center,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: -0.1,
+                    color: isDark
+                        ? Colors.white.withValues(alpha: 0.85)
+                        : const Color(0xFF1E293B),
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ),

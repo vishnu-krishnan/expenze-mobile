@@ -115,16 +115,30 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                     return SliverGrid(
                       gridDelegate:
                           const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        mainAxisSpacing: 16,
-                        crossAxisSpacing: 16,
-                        childAspectRatio: 1.1,
+                        crossAxisCount: 3,
+                        mainAxisSpacing: 12,
+                        crossAxisSpacing: 12,
+                        childAspectRatio: 0.95,
                       ),
                       delegate: SliverChildBuilderDelegate(
                         (context, index) {
                           final cat = provider.categories[index];
-                          return _buildCategoryCard(
-                              context, cat, textColor, secondaryTextColor);
+                          return TweenAnimationBuilder<double>(
+                            duration: Duration(milliseconds: 350 + (index * 60)),
+                            curve: Curves.easeOutCubic,
+                            tween: Tween(begin: 0.0, end: 1.0),
+                            builder: (context, value, child) {
+                              return Opacity(
+                                opacity: value,
+                                child: Transform.translate(
+                                  offset: Offset(0, 16 * (1 - value)),
+                                  child: child,
+                                ),
+                              );
+                            },
+                            child: _buildCategoryCard(
+                                context, cat, textColor, secondaryTextColor),
+                          );
                         },
                         childCount: provider.categories.length,
                       ),
@@ -146,10 +160,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
               opacity: _isFabVisible ? 1.0 : 0.0,
             child: LiquidGlassFAB(
               heroTag: 'categories_fab',
-              onPressed: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => const CategoryAddScreen())),
+              onPressed: () => CategoryAddScreen.show(context),
               icon: LucideIcons.plus,
             ),
             ),
@@ -202,10 +213,10 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
       child: Container(
         decoration: BoxDecoration(
           color: Theme.of(context).cardTheme.color,
-          borderRadius: BorderRadius.circular(28),
+          borderRadius: BorderRadius.circular(20),
           boxShadow: AppTheme.softShadow,
           border: Border.all(
-            color: color.withValues(alpha: 0.1),
+            color: color.withValues(alpha: 0.12),
             width: 1,
           ),
         ),
@@ -216,29 +227,30 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Container(
-                    height: 64,
-                    width: 64,
+                    height: 40,
+                    width: 40,
                     decoration: BoxDecoration(
-                      color: color.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(20),
+                      color: color.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(14),
                     ),
                     alignment: Alignment.center,
-                    child:
-                        Text(cat.icon ?? '📁', style: TextStyle(fontSize: 32)),
+                    child: Text(cat.icon ?? '📁',
+                        style: const TextStyle(fontSize: 20)),
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 8),
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
                     child: Text(
                       cat.name,
                       textAlign: TextAlign.center,
-                      maxLines: 1,
+                      maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                        fontWeight: FontWeight.w800,
-                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 12,
                         color: textColor,
-                        letterSpacing: -0.3,
+                        letterSpacing: -0.2,
+                        height: 1.2,
                       ),
                     ),
                   ),
@@ -246,13 +258,13 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
               ),
             ),
             Positioned(
-              top: 8,
-              right: 8,
+              top: 4,
+              right: 2,
               child: PopupMenuButton<String>(
                 icon: Icon(LucideIcons.moreVertical,
-                    size: 18, color: secondaryTextColor.withValues(alpha: 0.5)),
+                    size: 15, color: secondaryTextColor.withValues(alpha: 0.4)),
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16)),
+                    borderRadius: BorderRadius.circular(14)),
                 onSelected: (value) {
                   if (value == 'edit') {
                     Navigator.push(
