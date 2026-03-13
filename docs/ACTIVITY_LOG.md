@@ -1,5 +1,16 @@
 # Activity Log
 
+[2026-03-13] Analytics Revamp & UX Polish
+Change Type: Minor
+Decision made:
+- Implemented "Liquid Glass" aesthetic for Analytics summary cards with backdrop blurring.
+- Redesigned period chooser (1W, 1M, 3M) with glassy finish and high-visibility active states.
+- Removed UniqueKey from CustomScrollView to fix scroll-to-top bug on list expansion.
+- Optimized chart axes (reserved size, intervals) for better readability of large amounts.
+- Fixed a missing dart:ui import in AnalyticsScreen.
+Reason: Improve visual consistency with Dashboard and resolve UX friction in data visualization.
+Impact: UI | UX | Performance
+
 [2026-03-13] Action Hub & Category UX Fixes
 Change Type: Patch
 Decision made:

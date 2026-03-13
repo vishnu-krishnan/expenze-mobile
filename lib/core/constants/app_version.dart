@@ -11,14 +11,25 @@ class ReleaseInfo {
 }
 
 class AppVersion {
-  static const String current = '1.8.7';
-  static const String buildNumber = '31';
-  static const String releaseName = 'Quick Actions Hub & EMI Calculator';
+  static const String current = '1.8.8';
+  static const String buildNumber = '32';
+  static const String releaseName = 'Analytics Revamp & UX Polish';
 
   static const String website = 'https://expenze-elite.netlify.app/';
   static const String supportEmail = 'expenzehelp@gmail.com';
 
   static const List<ReleaseInfo> history = [
+    ReleaseInfo(
+      version: '1.8.8',
+      date: '2026-03-13',
+      changes: [
+        'Analytics Revamp: Implemented a "Liquid Glass" aesthetic for summary cards (Total Spent, Daily Avg, Peak Day) with high-quality backdrop blurring.',
+        'Scroll Fix: Resolved a bug where expanding the history list would incorrectly scroll the screen back to the top.',
+        'Enhanced Period Selection: Redesigned the period chooser (1W, 1M, 3M) with a premium glassy finish and improved active state visibility.',
+        'Chart Precision: Optimized Y-axis label spacing to prevent clipping of large currency values and refined X-axis intervals for better readability.',
+        'Stability: Fixed a missing framework import that could cause rendering issues on certain devices.',
+      ],
+    ),
     ReleaseInfo(
       version: '1.8.7',
       date: '2026-03-13',

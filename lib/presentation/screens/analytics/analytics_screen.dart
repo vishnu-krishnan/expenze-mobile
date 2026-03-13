@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -35,7 +36,6 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: CustomScrollView(
-        key: UniqueKey(),
         physics: const AlwaysScrollableScrollPhysics(),
         slivers: [
           SliverAppBar(
@@ -178,8 +178,12 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
     return Container(
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
-        color: AppTheme.primary.withValues(alpha: 0.12),
+        color: Colors.white.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.2),
+          width: 0.8,
+        ),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -206,18 +210,26 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
         duration: const Duration(milliseconds: 300),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected ? AppTheme.primary : Colors.transparent,
+          color: isSelected ? Colors.white : Colors.transparent,
           borderRadius: BorderRadius.circular(10),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.1),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  )
+                ]
+              : null,
         ),
         child: Text(
           label,
           style: TextStyle(
             color: isSelected
-                ? Colors.white
-                : AppTheme.getTextColor(context, isSecondary: true)
-                    .withValues(alpha: 0.8),
+                ? AppTheme.primary
+                : Colors.white.withValues(alpha: 0.7),
             fontSize: 11,
-            fontWeight: FontWeight.bold,
+            fontWeight: FontWeight.w900,
           ),
         ),
       ),
@@ -331,10 +343,10 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
 
                   return SideTitleWidget(
                     meta: meta,
-                    space: 4,
+                    space: 8,
                     child: Text(label,
                         style: TextStyle(
-                            fontSize: _selectedPeriod == 30 ? 9 : 10,
+                            fontSize: _selectedPeriod == 30 ? 8 : 9,
                             fontWeight: FontWeight.bold,
                             color: secondaryTextColor)),
                   );
@@ -358,7 +370,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                     style: TextStyle(fontSize: 10, color: secondaryTextColor),
                     textAlign: TextAlign.center);
               },
-              reservedSize: 35,
+              reservedSize: 42,
             ),
           ),
           rightTitles:
@@ -517,37 +529,51 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
       highLabel = 'Peak Day';
     }
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [AppTheme.primary, AppTheme.primaryDark],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+        color: isDark
+            ? Colors.white.withValues(alpha: 0.05)
+            : AppTheme.primary.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(32),
-        boxShadow: [
-          BoxShadow(
-            color: AppTheme.primary.withValues(alpha: 0.3),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
-          ),
-        ],
+        border: Border.all(
+          color: (isDark ? Colors.white : AppTheme.primary)
+              .withValues(alpha: 0.1),
+          width: 1.5,
+        ),
       ),
-      child: Row(
-        children: [
-          _buildSummaryItem(
-              'Total Spent',
-              '₹${provider.periodTotalSpent.toInt()}',
-              Colors.white,
-              Colors.white70),
-          Container(height: 40, width: 1, color: Colors.white24),
-          _buildSummaryItem(avgLabel, '₹${provider.avgMonthlySpent.toInt()}',
-              Colors.white, Colors.white70),
-          Container(height: 40, width: 1, color: Colors.white24),
-          _buildSummaryItem(highLabel, '₹${provider.maxMonthlySpent.toInt()}',
-              Colors.white, Colors.white70),
-        ],
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(32),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+          child: Row(
+            children: [
+              _buildSummaryItem(
+                  'Total Spent',
+                  '₹${provider.periodTotalSpent.toInt()}',
+                  textColor,
+                  secondaryTextColor),
+              Container(
+                  height: 40,
+                  width: 1,
+                  color: isDark
+                      ? Colors.white.withValues(alpha: 0.1)
+                      : AppTheme.primary.withValues(alpha: 0.1)),
+              _buildSummaryItem(avgLabel,
+                  '₹${provider.avgMonthlySpent.toInt()}', textColor, secondaryTextColor),
+              Container(
+                  height: 40,
+                  width: 1,
+                  color: isDark
+                      ? Colors.white.withValues(alpha: 0.1)
+                      : AppTheme.primary.withValues(alpha: 0.1)),
+              _buildSummaryItem(highLabel,
+                  '₹${provider.maxMonthlySpent.toInt()}', textColor, secondaryTextColor),
+            ],
+          ),
+        ),
       ),
     );
   }

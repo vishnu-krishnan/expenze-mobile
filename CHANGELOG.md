@@ -2,10 +2,32 @@
 
 All notable changes to this project will be documented in this file.
 
-## [1.8.2+26] - 2026-03-13
+## [1.8.8+32] - 2026-03-13
 ### Added
-- **Dynamic Aurora Backgrounds**: Added smooth, drifting animations to the Dashboard card backgrounds for a more premium and "alive" visual experience.
-- **Improved Card Depth**: Enhanced the visual layering of the Wallet and Quote cards to improve depth and focus.
+- **Analytics Revamp**: Implemented a "Liquid Glass" aesthetic for summary cards (Total Spent, Daily Avg, Peak Day) with high-quality backdrop blurring.
+- **Enhanced Period Selection**: Redesigned the period chooser (1W, 1M, 3M) with a premium glassy finish and improved active state visibility.
+
+### Fixed
+- **Scroll Position Bug**: Resolved an issue where expanding the history list would incorrectly scroll the screen back to the top.
+- **Chart Precision**: Optimized Y-axis label spacing to prevent clipping of large currency values and refined X-axis intervals for better readability.
+- **Stability Fix**: Resolved a missing framework import that caused rendering issues on some devices.
+
+## [1.8.7+31] - 2026-03-13
+### Added
+- **Quick Actions Hub**: Replaced the horizontal-scroll Action Hub with a clean, professional 2×3 fixed grid — all shortcuts visible at a glance, no swiping required.
+- **EMI Calculator**: Brand-new built-in loan calculator with real-time calculations and Indian notation formatting.
+
+### Changed
+- **Professional Card Design**: Action cards now use a solid color-tinted background instead of Liquid Glass blur for better contrast and performance.
+
+## [1.8.6+30] - 2026-03-13
+### Added
+- **Category Modal**: Add New Category is now a lightweight bottom sheet popup.
+- **Compact Category Grid**: Revamped the category list to a 3-column grid with staggered fade animations.
+
+### Changed
+- **Header Unification**: Category screens now use the premium Large Title gradient header.
+- **Text Clarity**: Replaced playful labels with clear, professional financial terminology.
 
 ## [1.8.1+25] - 2026-03-13
 ### Added
