@@ -11,24 +11,85 @@ class ReleaseInfo {
 }
 
 class AppVersion {
-  static const String current = '1.7.2';
-  static const String buildNumber = '22';
-  static const String releaseName = 'Elite Typography & Layout Consistency';
+  static const String current = '1.8.5';
+  static const String buildNumber = '29';
+  static const String releaseName = 'Pristine Light & Glossy Pulse';
 
   static const String website = 'https://expenze-elite.netlify.app/';
   static const String supportEmail = 'expenzehelp@gmail.com';
 
   static const List<ReleaseInfo> history = [
     ReleaseInfo(
+      version: '1.8.5',
+      date: '2026-03-13',
+      changes: [
+        'Pristine Light Theme: Overhauled the Wallet card and background elements for light theme—removed all dark shades and murky tints for a pure, bright aesthetic.',
+        'Glossy Progress Bar: Redesigned the budget progress bar with vibrant primary colors and a professional "glossy" finish.',
+        'Chronological Accuracy: Fixed sorting logic for "Recent Pitstops" and "Recent Pulse" to ensure the most recent activities always appear first.',
+        'UI Polish: Removed redundant back buttons and unified background colors across Profile and Notification settings.',
+      ],
+    ),
+    ReleaseInfo(
+      version: '1.8.4',
+      date: '2026-03-13',
+      changes: [
+        'Speed Boost: Background aurora animations are now 75% faster and more energetic.',
+        'Snappy Navigation: Removed fade-in effects to restore instant screen switching.',
+      ],
+    ),
+    ReleaseInfo(
+      version: '1.8.3',
+      date: '2026-03-13',
+      changes: [
+        'Performance Boost: Optimized background rendering for faster screen loading.',
+        'Seamless Transitions: Added professional fade transitions when navigating between screens and tabs.',
+        'Enhanced Aurora: Made the color-drifting animations more visible and smooth.',
+      ],
+    ),
+    ReleaseInfo(
+      version: '1.8.2',
+      date: '2026-03-13',
+      changes: [
+        'Dynamic Aurora Backgrounds: Smooth, drifting animations added to the Dashboard cards for a premium "alive" feel.',
+        'Improved Card Depth: Enhanced the visual layering of the Wallet and Quote cards to improve focus.',
+      ],
+    ),
+    ReleaseInfo(
+      version: '1.8.1',
+      date: '2026-03-13',
+      changes: [
+        'Frosted Glass Cards: Overhauled the Dashboard design with a modern "frosted glass" effect.',
+        'Unified Status Bar: Synchronized the phone\'s status bar with the application\'s header colors across all screens.',
+        'Immersive Display: Enabled full edge-to-edge support for a more modern mobile experience.',
+        'Navigation Polish: Corrected Quote card alignment and visual layout.',
+      ],
+    ),
+    ReleaseInfo(
+      version: '1.8.0',
+      date: '2026-03-12',
+      changes: [
+        'Liquid Glass Design: Redesigned the main action button with a premium new shape and inner highlights.',
+        'Revamped Action Hub: Updated Dashboard action cards with vibrant new colors and modernized icons.',
+        'Dashboard Date Pill: Added a subtle date indicator to the Dashboard header.',
+      ],
+    ),
+    ReleaseInfo(
+      version: '1.7.3',
+      date: '2026-03-12',
+      changes: [
+        'Improved Refresh Experience: Dashboard header now stays fixed during pull-to-refresh.',
+        'Consistent Header Design: Standardized top header layout across all major screens.',
+        'Professional Iconography: Updated icons and typography for a more polished look.',
+      ],
+    ),
+    ReleaseInfo(
       version: '1.7.2',
       date: '2026-03-11',
       changes: [
-        'Global Typography: Implemented \'Outfit\' as the mandatory global font across the entire application.',
-        'Layout Synchronization: Standardized all screen headers (Dashboard, Analytics, Settings, Notes, Wishlist, Categories) with unified padding, font sizes, and weights.',
-        'Header Refinement: Realigned Settings screen title to match Dashboard (26pt, w900) and matched all top insets.',
-        'Navigation Polish: Removed redundant back buttons on main tab screens (Notes, Wishlist) to streamline the UX flow.',
-        'FAB Standardization: Synchronized the Floating Action Button (Plus button) position and padding across all modules (120px bottom offset).',
-        'System UI: Finalized edge-to-edge transparent system navigation bar integration on Android.',
+        'Modern Typography: Updated the app-wide font to \'Outfit\' for a cleaner look.',
+        'Header Synchronization: Unified design and spacing across all major modules.',
+        'Standardized Actions: Aligned primary action button positions for intuitive navigation.',
+        'Seamless System Navigation: Improved integration with device navigation bars.',
       ],
     ),
     ReleaseInfo(

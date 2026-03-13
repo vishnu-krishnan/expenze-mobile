@@ -13,23 +13,20 @@ class NotificationSettingsScreen extends StatelessWidget {
     final textColor = AppTheme.getTextColor(context);
     final secondaryTextColor =
         AppTheme.getTextColor(context, isSecondary: true);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        decoration: isDark
+        decoration: Theme.of(context).brightness == Brightness.dark
             ? AppTheme.darkBackgroundDecoration
             : AppTheme.backgroundDecoration,
-        child: SafeArea(
-          bottom: false,
-          child: Column(
-            children: [
-              _buildHeader(context, textColor),
-              Expanded(
-                child: SingleChildScrollView(
+        child: Column(
+          children: [
+            _buildHeader(context, textColor),
+          Expanded(
+            child: SingleChildScrollView(
                   physics: const BouncingScrollPhysics(),
                   padding: const EdgeInsets.all(24),
                   child: Column(
@@ -112,30 +109,35 @@ class NotificationSettingsScreen extends StatelessWidget {
             ],
           ),
         ),
-      ),
     );
   }
 
   Widget _buildHeader(BuildContext context, Color textColor) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Container(
+      width: double.infinity,
+      decoration: AppTheme.headerDecoration(context),
+      padding: EdgeInsets.fromLTRB(26, MediaQuery.of(context).padding.top + 10, 26, 20),
+      child: const Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          IconButton(
-            onPressed: () => Navigator.pop(context),
-            icon: Icon(LucideIcons.chevronLeft, color: textColor),
-          ),
           Text(
             'Notifications',
             style: TextStyle(
-              color: textColor,
-              fontSize: 18,
+              color: Colors.white,
+              fontSize: 26,
               fontWeight: FontWeight.w900,
-              letterSpacing: -0.5,
+              letterSpacing: -1,
             ),
           ),
-          const SizedBox(width: 48), // Placeholder for symmetry
+          Text(
+            'Manage your alerts and preferences',
+            style: TextStyle(
+              color: Colors.white70,
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
+              letterSpacing: 0.5,
+            ),
+          ),
         ],
       ),
     );

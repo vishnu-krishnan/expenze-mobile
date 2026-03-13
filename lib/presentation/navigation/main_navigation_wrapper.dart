@@ -165,7 +165,7 @@ class _MainNavigationWrapperState extends State<MainNavigationWrapper> {
         child: ClipRRect(
           borderRadius: BorderRadius.circular(35),
           child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+            filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 10),
               child: Row(

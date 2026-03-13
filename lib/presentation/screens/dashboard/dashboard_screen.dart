@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:ui';
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
@@ -21,7 +22,9 @@ class DashboardScreen extends StatefulWidget {
   State<DashboardScreen> createState() => _DashboardScreenState();
 }
 
-class _DashboardScreenState extends State<DashboardScreen> {
+class _DashboardScreenState extends State<DashboardScreen>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _bgAnimationController;
   String _quoteText = '';
   String _quoteAuthor = '';
   bool _isFabVisible = true;
@@ -29,11 +32,22 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   void initState() {
     super.initState();
+    _bgAnimationController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 12),
+    )..repeat();
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final provider = Provider.of<ExpenseProvider>(context, listen: false);
       provider.loadMonthData(provider.currentMonthKey);
     });
     _fetchQuote();
+  }
+
+  @override
+  void dispose() {
+    _bgAnimationController.dispose();
+    super.dispose();
   }
 
   Future<void> _fetchQuote() async {
@@ -75,8 +89,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget _buildHeaderDatePill() {
     final now = DateTime.now();
     final months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec'
     ];
     final dateStr = '${now.day} ${months[now.month - 1]}';
 
@@ -355,98 +379,77 @@ class _DashboardScreenState extends State<DashboardScreen> {
       ExpenseProvider provider, Map<String, double> summary, double planned) {
     List<Color> cardColors;
     if (pctUsed < 0.5) {
-      // 0-50%: Safe (Soft Emerald/Teal)
       cardColors = [const Color(0xFF10B981), const Color(0xFF059669)];
     } else if (pctUsed < 0.7) {
-      // 50-70%: Caution (Soft Lime)
       cardColors = [const Color(0xFF84CC16), const Color(0xFF65A30D)];
     } else if (pctUsed < 0.85) {
-      // 70-85%: Warning (Soft Amber)
       cardColors = [const Color(0xFFF59E0B), const Color(0xFFD97706)];
     } else if (pctUsed < 1.1) {
-      // 85-110%: Danger (Soft Rose/Red)
       cardColors = [const Color(0xFFEF4444), const Color(0xFFDC2626)];
     } else {
-      // >110%: Critical (Better Red - less dark)
       cardColors = [const Color(0xFFB91C1C), const Color(0xFF991B1B)];
     }
 
-    final desaturatedColors =
-        cardColors.map((c) => AppTheme.desaturate(c, amount: 0.45)).toList();
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final desaturatedColors = cardColors.map((c) {
+      Color color = AppTheme.desaturate(c, amount: 0.45);
+      if (!isDark) {
+        final hsl = HSLColor.fromColor(color);
+        color =
+            hsl.withLightness((hsl.lightness + 0.3).clamp(0.0, 1.0)).toColor();
+      }
+      return color;
+    }).toList();
 
-    // Soften the progress bar significantly
-    final progressColor =
-        AppTheme.desaturate(cardColors[0], amount: 0.25).withValues(alpha: 0.7);
-    final statusColor = Colors.white;
+    final progressColor = isDark
+        ? AppTheme.desaturate(cardColors[0], amount: 0.25).withValues(alpha: 0.7)
+        : cardColors[0];
+    final contentColor = isDark ? Colors.white : const Color(0xFF020617); // Rich Midnight Slate 950
+    final secondaryContentColor = isDark
+        ? Colors.white.withValues(alpha: 0.75)
+        : const Color(0xFF1E293B); // Rich Slate 800
+    final statusColor = contentColor;
 
-    // Correctly determine budget display: Prioritize limit, fallback to planned sum
     final budgetLimit = summary['limit'] ?? 0.0;
     final budget =
         budgetLimit > 0 ? budgetLimit : (planned > 0 ? planned : 0.0);
 
-    return Stack(
-      alignment: Alignment.center,
-      children: [
-        // Background Blobs for Liquid Glass effect
-        Positioned(
-          bottom: 0,
-          right: 40,
-          child: Container(
-            width: 160,
-            height: 160,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: RadialGradient(
-                colors: [
-                  desaturatedColors[1].withValues(alpha: 0.2),
-                  Colors.transparent,
-                ],
-                stops: const [0.3, 1.0],
-              ),
-            ),
-          ),
-        ),
-        Positioned(
-          top: 0,
-          right: 10,
-          child: Container(
-            width: 110,
-            height: 110,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: RadialGradient(
-                colors: [
-                  desaturatedColors[0].withValues(alpha: 0.25),
-                  Colors.transparent,
-                ],
-                stops: const [0.3, 1.0],
-              ),
-            ),
-          ),
-        ),
-        GestureDetector(
-          onHorizontalDragEnd: (details) {
-            if (details.primaryVelocity! > 0) {
-              _handleMonthChange(-1); // Swipe Right -> Prev
-            } else if (details.primaryVelocity! < 0) {
-              _handleMonthChange(1); // Swipe Left -> Next
-            }
-          },
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 26, vertical: 10),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(32),
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 25, sigmaY: 25),
-                child: Container(
-                  margin: EdgeInsets.zero,
+    return GestureDetector(
+      onHorizontalDragEnd: (details) {
+        if (details.primaryVelocity! > 0) {
+          _handleMonthChange(-1);
+        } else if (details.primaryVelocity! < 0) {
+          _handleMonthChange(1);
+        }
+      },
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 26, vertical: 10),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(32),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 25, sigmaY: 25),
+            child: Stack(
+              children: [
+                if (!isDark)
+                  Positioned.fill(
+                    child: Container(color: Colors.white),
+                  ),
+                Positioned.fill(
+                  child: _buildAnimatedBackground(desaturatedColors),
+                ),
+                if (!isDark)
+                  Positioned.fill(
+                    child:
+                        Container(color: Colors.white.withValues(alpha: 0.4)),
+                  ),
+                Container(
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       colors: [
                         desaturatedColors[0].withValues(alpha: 0.25),
-                        desaturatedColors[0].withValues(alpha: 0.03),
-                        desaturatedColors[1].withValues(alpha: 0.02),
-                        desaturatedColors[1].withValues(alpha: 0.15),
+                        desaturatedColors[0].withValues(alpha: 0.1),
+                        desaturatedColors[1].withValues(alpha: 0.08),
+                        desaturatedColors[1].withValues(alpha: 0.2),
                       ],
                       stops: const [0.0, 0.4, 0.7, 1.0],
                       begin: Alignment.topLeft,
@@ -454,23 +457,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     ),
                     borderRadius: BorderRadius.circular(32),
                     border: Border.all(
-                      color: Colors.white
-                          .withValues(alpha: 0.25), // Sharper glass edge
-                      width: 1.2,
+                      color: isDark
+                          ? Colors.white.withValues(alpha: 0.2)
+                          : Colors.white.withValues(alpha: 0.5),
+                      width: 1.5,
                     ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: desaturatedColors[0].withValues(alpha: 0.15),
-                        blurRadius: 40,
-                        spreadRadius: -5,
-                        offset: const Offset(0, 20),
-                      ),
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.05),
-                        blurRadius: 20,
-                        offset: const Offset(0, 10),
-                      ),
-                    ],
                   ),
                   child: Stack(
                     children: [
@@ -491,13 +482,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           ),
                         ),
                       ),
-                      // Decorative circle
+                      // Decorative circles
                       Positioned(
                         right: -30,
                         bottom: -30,
                         child: CircleAvatar(
                           radius: 90,
-                          backgroundColor: Colors.white.withValues(alpha: 0.05),
+                          backgroundColor: Colors.white
+                              .withValues(alpha: isDark ? 0.05 : 0.15),
                         ),
                       ),
                       Positioned(
@@ -505,7 +497,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         top: -20,
                         child: CircleAvatar(
                           radius: 50,
-                          backgroundColor: Colors.white.withValues(alpha: 0.04),
+                          backgroundColor: Colors.white
+                              .withValues(alpha: isDark ? 0.04 : 0.12),
                         ),
                       ),
                       Padding(
@@ -514,99 +507,132 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            // Top row — month navigation
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                const Text(
+                                Text(
                                   'Total Spent',
                                   style: TextStyle(
-                                      color: Colors.white, // Full white for better visibility
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w600,
-                                      letterSpacing: 0.5,
-                                      shadows: [
-                                        Shadow(
-                                            color: Colors.black26,
-                                            blurRadius: 4,
-                                            offset: Offset(0, 1))
-                                      ]),
+                                    color: contentColor,
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w600,
+                                    letterSpacing: 0.5,
+                                    shadows: isDark
+                                        ? [
+                                            Shadow(
+                                                color: Colors.black
+                                                    .withValues(alpha: 0.5),
+                                                blurRadius: 4,
+                                                offset: const Offset(0, 2))
+                                          ]
+                                        : [],
+                                  ),
                                 ),
                                 Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     GestureDetector(
                                       onTap: () => _handleMonthChange(-1),
-                                      child: const Padding(
-                                        padding: EdgeInsets.all(8.0),
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(8.0),
                                         child: Text('‹',
                                             style: TextStyle(
-                                                color: Colors.white60,
-                                                fontSize: 22,
-                                                fontWeight: FontWeight.w300)),
+                                                color: secondaryContentColor,
+                                                fontSize:
+                                                    30, // Increased from 22
+                                                shadows: isDark
+                                                    ? [
+                                                        Shadow(
+                                                            color: Colors.black
+                                                                .withValues(
+                                                                    alpha: 0.3),
+                                                            blurRadius: 4)
+                                                      ]
+                                                    : [])),
                                       ),
                                     ),
-                                    Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 4),
-                                      child: Text(
-                                        _formatMonthName(
-                                            provider.currentMonthKey),
-                                        style: const TextStyle(
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 13,
-                                        ),
+                                    Text(
+                                      _formatMonthName(
+                                          provider.currentMonthKey),
+                                      style: TextStyle(
+                                        color: contentColor,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 13,
+                                        shadows: isDark
+                                            ? [
+                                                Shadow(
+                                                    color: Colors.black
+                                                        .withValues(alpha: 0.5),
+                                                    blurRadius: 5)
+                                              ]
+                                            : [],
                                       ),
                                     ),
                                     GestureDetector(
                                       onTap: () => _handleMonthChange(1),
-                                      child: const Padding(
-                                        padding: EdgeInsets.all(8.0),
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(8.0),
                                         child: Text('›',
                                             style: TextStyle(
-                                                color: Colors.white60,
-                                                fontSize: 22,
-                                                fontWeight: FontWeight.w300)),
+                                                color: secondaryContentColor,
+                                                fontSize:
+                                                    30, // Increased from 22
+                                                shadows: isDark
+                                                    ? [
+                                                        Shadow(
+                                                            color: Colors.black
+                                                                .withValues(
+                                                                    alpha: 0.3),
+                                                            blurRadius: 4)
+                                                      ]
+                                                    : [])),
                                       ),
                                     ),
                                   ],
                                 ),
                               ],
                             ),
-
                             const SizedBox(height: 6),
-
-                            // Main amount — large and prominent
                             FittedBox(
                               fit: BoxFit.scaleDown,
                               alignment: Alignment.centerLeft,
                               child: Text(
                                 '₹${actual.toLocaleString()}',
-                                style: const TextStyle(
-                                  color: Colors.white,
+                                style: TextStyle(
+                                  color: contentColor,
                                   fontSize: 48,
                                   fontWeight: FontWeight.w900,
                                   letterSpacing: -1,
                                   height: 1.1,
-                                  shadows: [
-                                    Shadow(
-                                        color: Colors.black26,
-                                        blurRadius: 8,
-                                        offset: Offset(0, 2))
-                                  ],
+                                  shadows: isDark
+                                      ? [
+                                          Shadow(
+                                              color: Colors.black
+                                                  .withValues(alpha: 0.7),
+                                              blurRadius: 18,
+                                              offset: const Offset(0, 6)),
+                                          Shadow(
+                                              color: Colors.black
+                                                  .withValues(alpha: 0.4),
+                                              blurRadius: 4,
+                                              offset: const Offset(0, 2)),
+                                        ]
+                                      : [
+                                          Shadow(
+                                            color: Colors.white
+                                                .withValues(alpha: 0.8),
+                                            offset: const Offset(0, 2),
+                                            blurRadius: 4,
+                                          )
+                                        ],
                                 ),
                               ),
                             ),
-
-                            // Divider line
                             Container(
                               height: 1,
-                              color: Colors.white.withValues(alpha: 0.12),
+                              color: contentColor.withValues(alpha: 0.12),
                             ),
                             const SizedBox(height: 16),
-
-                            // Two-column stats row
                             Row(
                               children: [
                                 Expanded(
@@ -622,7 +648,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                 Container(
                                   width: 1,
                                   height: 48,
-                                  color: Colors.white.withValues(alpha: 0.15),
+                                  color: contentColor.withValues(alpha: 0.15),
                                 ),
                                 Expanded(
                                   child: _buildStatColumn(
@@ -630,16 +656,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                     value: budget > 0
                                         ? '₹${budget.toLocaleString()}'
                                         : 'Not set',
-                                    valueColor: Colors.white,
+                                    valueColor: contentColor,
                                     alignRight: true,
                                   ),
                                 ),
                               ],
                             ),
-
                             const SizedBox(height: 16),
-
-                            // Progress bar
                             _buildProgressBar(pctUsed, progressColor),
                           ],
                         ),
@@ -647,11 +670,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     ],
                   ),
                 ),
-              ),
+              ],
             ),
           ),
         ),
-      ],
+      ),
     );
   }
 
@@ -661,6 +684,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     required Color valueColor,
     bool alignRight = false,
   }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Padding(
       padding: EdgeInsets.only(
           left: alignRight ? 16 : 0, right: alignRight ? 0 : 16),
@@ -672,18 +696,23 @@ class _DashboardScreenState extends State<DashboardScreen> {
             mainAxisAlignment:
                 alignRight ? MainAxisAlignment.end : MainAxisAlignment.start,
             children: [
-              Text(label,
-                  style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.85), // Increased opacity
-                      fontSize: 11,
-                      fontWeight: FontWeight.w700, // Bolder label
-                      letterSpacing: 0.3,
-                      shadows: [
-                        Shadow(
-                            color: Colors.black26,
-                            blurRadius: 2,
-                            offset: Offset(0, 1))
-                      ])),
+              Text(
+                label,
+                style: TextStyle(
+                  color: isDark ? Colors.white : Colors.black,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 0.3,
+                  shadows: isDark
+                      ? [
+                          Shadow(
+                              color: Colors.black.withValues(alpha: 0.65),
+                              blurRadius: 4,
+                              offset: const Offset(0, 1))
+                        ]
+                      : [],
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 4),
@@ -694,15 +723,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
             child: Text(
               value,
               style: TextStyle(
-                  color: valueColor,
-                  fontSize: 20,
-                  fontWeight: FontWeight.w800,
-                  shadows: [
-                    Shadow(
-                        color: Colors.black26,
-                        blurRadius: 4,
-                        offset: Offset(0, 1))
-                  ]),
+                color: valueColor,
+                fontSize: 20,
+                fontWeight: FontWeight.w800,
+                shadows: isDark
+                    ? [
+                        Shadow(
+                            color: Colors.black.withValues(alpha: 0.6),
+                            blurRadius: 6,
+                            offset: const Offset(0, 2))
+                      ]
+                    : [],
+              ),
             ),
           ),
         ],
@@ -711,6 +743,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Widget _buildProgressBar(double pct, Color color) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final contentColor = isDark ? Colors.white : Colors.black;
+
     return Column(
       children: [
         Row(
@@ -727,64 +762,93 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                 ? 'Mind the spending'
                                 : 'Looking good'))),
                 style: TextStyle(
-                    color: Colors.white,
+                    color: contentColor,
                     fontSize: 11,
                     fontWeight: FontWeight.bold,
-                    shadows: [
-                      Shadow(
-                          color: Colors.black38,
-                          blurRadius: 4,
-                          offset: const Offset(0, 1))
-                    ])),
+                    shadows: isDark
+                        ? [
+                            Shadow(
+                                color: Colors.black38,
+                                blurRadius: 4,
+                                offset: const Offset(0, 1))
+                          ]
+                        : [])),
             Text('${(pct * 100).toInt()}% used',
                 style: TextStyle(
-                    color: Colors.white,
+                    color: contentColor,
                     fontSize: 11,
                     fontWeight: FontWeight.bold,
-                    shadows: [
-                      Shadow(
-                          color: Colors.black38,
-                          blurRadius: 4,
-                          offset: const Offset(0, 1))
-                    ])),
+                    shadows: isDark
+                        ? [
+                            Shadow(
+                                color: Colors.black38,
+                                blurRadius: 4,
+                                offset: const Offset(0, 1))
+                          ]
+                        : [])),
           ],
         ),
         const SizedBox(height: 8),
         Container(
           height: 6, // Slightly slimmer for elegance
           decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.08), // More subtle background
+            color: (isDark ? Colors.white : Colors.black)
+                .withValues(alpha: 0.08), // More subtle background
             borderRadius: BorderRadius.circular(3),
           ),
           child: Align(
             alignment: Alignment.centerLeft,
             child: FractionallySizedBox(
               widthFactor: pct.clamp(0.0, 1.0),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: color,
-                  borderRadius: BorderRadius.circular(3),
-                  boxShadow: [
-                    BoxShadow(
-                        color: color.withValues(alpha: 0.25), blurRadius: 4),
-                  ],
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(3),
-                  child: Container(
+              child: Stack(
+                children: [
+                  Container(
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
                         colors: [
-                          Colors.white.withValues(alpha: 0.2),
-                          Colors.transparent,
+                          color,
+                          color.withValues(alpha: 0.8),
                         ],
-                        stops: const [0.0, 0.4],
+                        begin: Alignment.centerLeft,
+                        end: Alignment.centerRight,
+                      ),
+                      borderRadius: BorderRadius.circular(3),
+                      boxShadow: isDark
+                          ? [
+                              BoxShadow(
+                                  color: color.withValues(alpha: 0.35),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 2)),
+                            ]
+                          : [],
+                    ),
+                  ),
+                  // Glossy Highlight & Inner Glow
+                  Positioned.fill(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(3),
+                        border: isDark
+                            ? null
+                            : Border.all(
+                                color: Colors.white.withValues(alpha: 0.3),
+                                width: 0.5,
+                              ),
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Colors.white.withValues(alpha: isDark ? 0.35 : 0.6),
+                            Colors.white.withValues(alpha: isDark ? 0.05 : 0.2),
+                            Colors.transparent,
+                            Colors.black.withValues(alpha: isDark ? 0.1 : 0.05),
+                          ],
+                          stops: const [0.0, 0.4, 0.6, 1.0],
+                        ),
                       ),
                     ),
                   ),
-                ),
+                ],
               ),
             ),
           ),
@@ -796,50 +860,114 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget _buildQuoteCard(Color textColor, Color secondaryTextColor) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(26, 8, 26, 20),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(24),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-          child: Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: Theme.of(context).cardTheme.color?.withValues(alpha: 0.7),
-              borderRadius: BorderRadius.circular(24),
-              boxShadow: AppTheme.softShadow,
-              border:
-                  Border.all(color: AppTheme.primary.withValues(alpha: 0.1)),
+      child: Container(
+        width: double.infinity,
+        decoration: BoxDecoration(
+          color: Theme.of(context).cardTheme.color,
+          borderRadius: BorderRadius.circular(24),
+          boxShadow: AppTheme.softShadow,
+        ),
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              '"$_quoteText"',
+              style: TextStyle(
+                color: textColor,
+                fontSize: 14,
+                fontStyle: FontStyle.italic,
+                height: 1.5,
+                fontWeight: FontWeight.w500,
+                letterSpacing: 0.2,
+              ),
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  '"$_quoteText"',
+            if (_quoteAuthor.isNotEmpty) ...[
+              const SizedBox(height: 16),
+              Align(
+                alignment: Alignment.centerRight,
+                child: Text(
+                  '— $_quoteAuthor',
                   style: TextStyle(
-                    color: textColor,
-                    fontSize: 13,
-                    fontStyle: FontStyle.italic,
-                    height: 1.5,
+                    color: secondaryTextColor,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 0.5,
                   ),
                 ),
-                if (_quoteAuthor.isNotEmpty) ...[
-                  const SizedBox(height: 8),
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: Text(
-                      '— $_quoteAuthor',
-                      style: TextStyle(
-                        color: AppTheme.primary,
-                        fontSize: 11,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ],
-              ],
-            ),
-          ),
+              ),
+            ],
+          ],
         ),
       ),
+    );
+  }
+
+  Widget _buildAnimatedBackground(List<Color> colors) {
+    return AnimatedBuilder(
+      animation: _bgAnimationController,
+      builder: (context, child) {
+        final t = _bgAnimationController.value * 2 * math.pi;
+        return Stack(
+          children: [
+            // Blob 1: Large and slow
+            Positioned(
+              bottom: -60 + 100 * math.sin(t),
+              right: -60 + 120 * math.cos(t),
+              child: Container(
+                width: 300,
+                height: 300,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: RadialGradient(
+                    colors: [
+                      colors[1].withValues(alpha: 0.4),
+                      Colors.transparent,
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            // Blob 2: Medium and steady
+            Positioned(
+              top: -80 + 100 * math.cos(t * 2),
+              left: -40 + 110 * math.sin(t * 2),
+              child: Container(
+                width: 220,
+                height: 220,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: RadialGradient(
+                    colors: [
+                      colors[0].withValues(alpha: 0.35),
+                      Colors.transparent,
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            // Blob 3: Accent pulse
+            Positioned(
+              top: 40 + 60 * math.sin(t * 3),
+              right: 20 + 70 * math.cos(t * 3),
+              child: Container(
+                width: 140,
+                height: 140,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: RadialGradient(
+                    colors: [
+                      colors[colors.length > 2 ? 2 : 0].withValues(alpha: 0.2),
+                      Colors.transparent,
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -907,7 +1035,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-
   Widget _buildRecentPulse(BuildContext context, ExpenseProvider provider) {
     final textColor = AppTheme.getTextColor(context);
     final recentExpenses = provider.expenses.take(3).toList();
@@ -963,7 +1090,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   child: Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: Theme.of(context).cardTheme.color?.withValues(alpha: 0.7),
+                      color: Theme.of(context)
+                          .cardTheme
+                          .color
+                          ?.withValues(alpha: 0.7),
                       borderRadius: BorderRadius.circular(24),
                       border: Border.all(
                         color: AppTheme.primary.withValues(alpha: 0.05),
@@ -1037,7 +1167,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
       ],
     );
   }
-
 
   void _showAddExpenseDialog(BuildContext context) {
     // Re-using existing dialog logic but with slight UI polish
@@ -1130,8 +1259,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         setModalState(() => selectedPaymentMode = val);
                       }
                     },
-                    decoration: AppTheme.inputDecoration(
-                        'Select mode', null,
+                    decoration: AppTheme.inputDecoration('Select mode', null,
                         context: context),
                   ),
                   const SizedBox(height: 20),
@@ -1150,8 +1278,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   TextField(
                     controller: amountController,
                     keyboardType: TextInputType.number,
-                    decoration: AppTheme.inputDecoration(
-                        'e.g. 1200', null,
+                    decoration: AppTheme.inputDecoration('e.g. 1200', null,
                         context: context),
                     style: TextStyle(color: textColor),
                   ),

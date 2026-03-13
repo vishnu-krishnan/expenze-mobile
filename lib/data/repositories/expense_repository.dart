@@ -222,7 +222,7 @@ class ExpenseRepository {
         c.color,
         SUM(e.planned_amount) as total_planned,
         SUM(e.actual_amount) as total_actual,
-        MAX(e.created_at) as last_activity
+        MAX(COALESCE(e.paid_date, e.created_at)) as last_activity
       FROM expenses e
       LEFT JOIN categories c ON e.category_id = c.id
       WHERE e.month_key = ?

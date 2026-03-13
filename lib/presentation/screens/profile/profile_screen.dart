@@ -48,7 +48,6 @@ class ProfileScreen extends StatelessWidget {
     final textColor = AppTheme.getTextColor(context);
     final secondaryTextColor =
         AppTheme.getTextColor(context, isSecondary: true);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     if (user == null) {
       return const Scaffold(body: Center(child: Text('Not logged in')));
@@ -59,86 +58,91 @@ class ProfileScreen extends StatelessWidget {
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        decoration: isDark
+        decoration: Theme.of(context).brightness == Brightness.dark
             ? AppTheme.darkBackgroundDecoration
             : AppTheme.backgroundDecoration,
-        child: SafeArea(
-          bottom: false,
-          child: Column(
-            children: [
-              _buildHeader(context, textColor),
-              Expanded(
-                child: SingleChildScrollView(
-                  physics: const BouncingScrollPhysics(),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-                  child: Column(
+        child: Column(
+          children: [
+            _buildHeader(context, textColor),
+          Expanded(
+            child: SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+              child: Column(
+                children: [
+                  _buildUserAvatar(context, user, textColor),
+                  const SizedBox(height: 20),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      _buildUserAvatar(context, user, textColor),
-                      const SizedBox(height: 20),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            user['full_name'] ?? 'Guest User',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontSize: 32,
-                              fontWeight: FontWeight.w900,
-                              color: textColor,
-                              letterSpacing: -1,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 4),
                       Text(
-                        user['email'] ?? 'No email set',
+                        user['full_name'] ?? 'Guest User',
+                        textAlign: TextAlign.center,
                         style: TextStyle(
-                          fontSize: 14,
-                          color: secondaryTextColor,
-                          fontWeight: FontWeight.w500,
+                          fontSize: 32,
+                          fontWeight: FontWeight.w900,
+                          color: textColor,
+                          letterSpacing: -1,
                         ),
                       ),
-                      const SizedBox(height: 32),
-                      _buildAccountSummary(
-                          context, textColor, secondaryTextColor),
-                      const SizedBox(height: 32),
-                      _buildPreferencesSection(
-                          context, user, textColor, secondaryTextColor),
-                      const SizedBox(height: 40),
-                      _buildLogoutButton(context),
-                      const SizedBox(height: 100),
                     ],
                   ),
-                ),
+                  const SizedBox(height: 4),
+                  Text(
+                    user['email'] ?? 'No email set',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: secondaryTextColor,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const SizedBox(height: 32),
+                  _buildAccountSummary(
+                      context, textColor, secondaryTextColor),
+                  const SizedBox(height: 32),
+                  _buildPreferencesSection(
+                      context, user, textColor, secondaryTextColor),
+                  const SizedBox(height: 40),
+                  _buildLogoutButton(context),
+                  const SizedBox(height: 100),
+                ],
               ),
-            ],
+            ),
           ),
-        ),
+        ],
       ),
-    );
-  }
+    ),
+  );
+}
 
   // ── Header ───────────────────────────────────────────────────────────────
   Widget _buildHeader(BuildContext context, Color textColor) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Container(
+      width: double.infinity,
+      decoration: AppTheme.headerDecoration(context),
+      padding: EdgeInsets.fromLTRB(26, MediaQuery.of(context).padding.top + 10, 26, 20),
+      child: const Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SizedBox(width: 48),
           Text(
             'Account',
             style: TextStyle(
-              color: textColor,
-              fontSize: 18,
+              color: Colors.white,
+              fontSize: 26,
               fontWeight: FontWeight.w900,
-              letterSpacing: -0.5,
+              letterSpacing: -1,
             ),
           ),
-          // Placeholder to keep title centred
-          const SizedBox(width: 48),
+          Text(
+            'Manage your profile and settings',
+            style: TextStyle(
+              color: Colors.white70,
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
+              letterSpacing: 0.5,
+            ),
+          ),
         ],
       ),
     );

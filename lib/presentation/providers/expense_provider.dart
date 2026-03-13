@@ -289,6 +289,13 @@ class ExpenseProvider with ChangeNotifier {
   }
 
   void applySort() {
+    // 1. Sort the main expenses list (Recent Pulse/Pitstops)
+    _expenses.sort((a, b) {
+      final aDate = a.paidDate ?? a.createdAt ?? '';
+      final bDate = b.paidDate ?? b.createdAt ?? '';
+      return bDate.compareTo(aDate); // Recent first
+    });
+
     if (_categoryBreakdown.isEmpty) return;
 
     final sortedList = List<Map<String, dynamic>>.from(_categoryBreakdown);

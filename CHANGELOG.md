@@ -2,157 +2,143 @@
 
 All notable changes to this project will be documented in this file.
 
-## [1.8.0+24] - 2026-03-12
+## [1.8.2+26] - 2026-03-13
 ### Added
-- **Liquid Glass Aesthetic**: Overhauled the global `FloatingActionButton` (FAB) to a premium squircle (rounded square) shape with internal aurora glow. This is synced across all screens.
-- **Action Hub Remaster**: Revamped Dashboard Action Cards with vibrant mesh gradients, inner lighting, and highly contextual icons for Import, Regular, Notes, and Wishes.
-- **Date Context**: Added a stylistic Date Pill to the Dashboard's top nav area.
+- **Dynamic Aurora Backgrounds**: Added smooth, drifting animations to the Dashboard card backgrounds for a more premium and "alive" visual experience.
+- **Improved Card Depth**: Enhanced the visual layering of the Wallet and Quote cards to improve depth and focus.
+
+## [1.8.1+25] - 2026-03-13
+### Added
+- **Frosted Glass Cards**: Overhauled the Dashboard design with a modern "frosted glass" effect for a sleek, contemporary look.
+- **Unified Status Bar**: Synchronized the phone's top status bar with the application's header colors across all screens for a seamless transition.
+- **Immersive Display**: Enabled full edge-to-edge display support for a more modern mobile design.
 
 ### Fixed
-- **Guaranteed Visibility**: Added programmatic overrides to scroll listeners to force the FAB to remain visible when at the absolute top of the screen.
-- **Syntax Consistency**: Corrected nested braces on the Regular Payments view for stable UI rendering.
+- **Navigation Polish**: Corrected the alignment of the quote author and cleaned up the visual layout of the Quote card.
+- **Stability Fixes**: Fixed several layout and rendering issues to ensure a smoother experience.
+
+## [1.8.0+24] - 2026-03-12
+### Added
+- **Liquid Glass Design**: Redesigned the main action button with a premium new shape and inner highlights.
+- **Revamped Action Hub**: Updated Dashboard action cards with vibrant new colors and modernized icons.
+- **Dashboard Date Pill**: Added a subtle date indicator to the Dashboard header for better context.
+
+### Fixed
+- **Action Button Visibility**: Ensured the main action button remains visible and accessible while browsing.
 
 ## [1.7.3+23] - 2026-03-12
 ### Added
-- **Content-Area Refresh**: Refactored the Dashboard to keep the header (greeting/user name) static during pull-to-refresh, isolating the refresh animation to the scrollable content area.
-- **Header Synchronization**: Unified `SliverAppBar` properties (110px height, pinned state) and text hierarchy (Main title on top) across all screens including Monthly Planner, Regular Payments, and Settings.
-- **Enhanced Iconography**: Replaced the sparkles refresh icon with a specialized `rotateCw` icon for a more professional feel.
-- **Typography Deep-Sync**: Standardized header weights (`w900`) and Category card label styles (`w800`) across the platform.
+- **Improved Refresh Experience**: The Dashboard header now stays fixed when refreshing the content, making the interaction feel more solid.
+- **Consistent Header Design**: Standardized the top header layout across all screens for a more cohesive navigation experience.
+- **Professional Iconography**: Updated various icons and typography across the app for a more polished look.
 
 ### Fixed
-- **Build Integrity**: Resolved `SystemUiOverlayStyle` undefined name error and cleaned up unused `GoogleFonts` imports and variables across multiple files.
-- **Clean Navigation**: Removed redundant back buttons on the Categories screen to align with the core navigation architecture.
+- **Visual Cleanup**: Removed redundant back buttons on main screens and resolved minor layout inconsistencies.
 
 ## [1.7.2+22] - 2026-03-11
 ### Added
-- **Global Typography**: Implemented **Outfit** as the global application font.
-- **Header Synchronization**: Unified header layouts (size, weight, spacing) across Dashboard, Analytics, Settings, Notes, Wishlist, and Categories.
-- **UX Flow**: Removed redundant back buttons on main screens (Notes, Wishlist) for a cleaner UX.
-- **Standardized FAB**: Fixed the position of the plus button (+) to be perfectly identical on every screen.
-- **Edge-to-Edge**: Finalized transparent system navigation bar integration.
+- **Modern Typography**: Updated the app-wide font for a cleaner and more professional look.
+- **Header Synchronization**: Unified the design and spacing of headers across all major screens of the app.
+- **Standardized Actions**: Aligned the position of primary action buttons for more predictable and intuitive navigation.
+- **Seamless System Navigation**: Improved integration with the device's navigation bars for an immersive experience.
 
 ## [1.7.1+21] - 2026-03-03
 ### Fixed
-- **UI Polish**: Final refinement of dashboard action cards and layout consistency.
-- **Font Reversion**: Completed full reversion to original typography across all application screens.
+- **Visual Refinement**: Final polish on dashboard layouts and card styles for better consistency.
+- **Text Consistency**: Finalized the design and placement of text elements across the entire application.
 
 ## [1.7.0+20] - 2026-03-03
 ### Added
-- **Wish List Module**: New dedicated tracker for future purchase goals (Electronics, Shopping).
-- **UX Safety**: Implemented confirmation dialogs before deleting Notes or Wish List entries.
-- **Database Resilience**: Fixed SQLite initialization for the `wishes` table.
+- **Wish List Module**: Introduced a dedicated place to track future goals and savings targets.
+- **Safer Data Management**: Added confirmation prompts before deleting notes or wishlist items to prevent accidental data loss.
+- **Reliability Improvements**: Enhanced data storage reliability for the new wishlist features.
 
 ## [1.6.1+19] - 2026-03-02
 ### Added
-- **Animated Actions**: Introduced micro-animations (scale on tap) to the Dashboard Quick Actions.
+- **Interactive Feedback**: Added subtle animations when tapping on action cards for better tactile response.
 
 ### Fixed
-- **Code Health**: Replaced all deprecated `withOpacity` calls with `withValues`.
+- **Internal Optimization**: Improved performance and updated app code to modern standards.
 
 ## [1.6.0+18] - 2026-03-02
 ### Added
-- **Local Backup & Restore**: Added ability to export expenses database to a local `.db` file, and import it back to restore all previous data across reinstalls.
+- **Backup & Restore**: You can now export your expense data to a local file and restore it later, ensuring your data stays with you even if you switch devices.
 
 ## [1.5.1+17] - 2026-02-27
 ### Fixed
-- **UI Responsiveness**: Fixed keyboard overlap issues across various text input screens (like Notes) by dynamically adjusting bottom padding for improved typing experience.
-- **Regular Expenses Data**: Fixed an issue where the `endDate` field was displaying the `nextDueDate`. Re-labeled it correctly as "End Date".
-- **Notes UI Improvements**: Enhanced Notes screen with rich typography, shadow effects, and automatic list formatting features.
+- **Smarter Typing**: Fixed an issue where the keyboard would cover text fields, ensuring a smooth typing experience on all input screens.
+- **Accurate Date Labels**: Clarified date labels on recurring payments to make them easier to understand.
+- **Gorgeous Notes**: Enhanced the Notes view with improved text styles and better layout formatting.
 
 ## [1.5.0+16] - 2026-02-27
 ### Added
-- **Account Verification**: Major enhancements to the email verification flow, including a polished OTP input experience and fixed resend mechanisms.
+- **Polished Verification**: Significantly improved the account verification process with a better visual experience for secure logins.
 
 ## [1.4.4+15] - 2026-02-24
 ### Added
-- **Dynamic Spectrum Cards**: Main wallet and summary cards now change color through a "Spectrum" (Green -> Yellow -> Red -> Dark Red) based on budget consumption.
-- **Visual Feedback**: Synchronized card shadows and layout elements to the new spectrum logic.
+- **Budget Spectrum Cards**: Wallet and summary cards now change color to give you immediate visual feedback on your spending status.
+- **Cohesive Shadows**: Updated the app's visual depth to better match the new colored card logic.
 
 ### Changed
-- **Cleaner UI**: Standardized progress bars to use white semantic shades for better legibility on colored cards.
-- **Theme Updates**: Enhanced `AppTheme` with darker variants for warning and danger states.
+- **Cleaner Progress Views**: Standardized progress bars for better readability against various background colors.
+- **Theme Refinements**: Introduced richer colors for warning and critical states to provide clearer signals.
 
 ## [1.4.3+14] - 2026-02-24
 ### Added
-- **Entrance Animations**: Implemented smooth Fade + Slide entrance animations for the Landing, Login, Register, and Profile Setup screens.
-- **Visual Polish**: Refined bottom sheet transitions in the Profile Screen for a more premium experience.
+- **Elegant Screen Transitions**: Added smooth animations when moving between landing, login, and registration screens.
+- **Premium User Profile**: Refined the transitions and visual feedback within the profile setup area.
 
 ### Changed
-- **Branding & Tone**: Rebranded app copy with a professional and friendly voice across all screens (Dashboard, Analytics, SMS Import, etc.).
-- **AI Performance**: Switched default SMS parsing provider to **Groq** for significantly faster transaction processing.
-- **Improved UX**: New engaging empty states and field hints to guide users more effectively.
+- **Modern Tone**: Updated all application text to be more professional, friendly, and easier to understand.
+- **Fast SMS Processing**: Greatly improved the speed and accuracy of processing transaction messages.
+- **Guided Experience**: New friendly hints and empty states to help new users get started easily.
 
 ### Fixed
-- **Profile Updates**: Fixed an issue where updating your email could lead to logout or synchronization errors.
-- **System Stability**: Resolved various UI lints and logic edge cases.
+- **Profile Stability**: Fixed minor issues with email updates to ensure account data stays in sync.
+- **General Smoothing**: Addressed several minor visual bugs and improved overall app responsiveness.
 
 ## [1.0.5] - 2026-02-18
 ### Added
-- **Payment Mode Tracking**: Automatically detects UPI, Card, Wallet, and Net Banking from SMS messages.
-- **Manual Entry**: Added payment mode selector to manual expense creation and editing.
-- **Bulk Import**: Refactored SMS import to use bulk insertion for improved stability and performance.
+- **Smarter Payment Tracking**: Automatically identifies payment types like UPI, Cards, and Wallets from messages.
+- **Enhanced Manual Entry**: You can now specify payment modes when manually adding or editing an expense.
+- **Smooth Bulk Import**: Improved the stability when importing a large number of messages at once.
 
 ### Changed
-- **Planner Polish**: Imported SMS transactions now have their planned amount set to the actual amount, preventing them from showing up with "zero planned amount" in the Monthly Planner.
-- **Analytics UI**: Pie chart segments now show the category name and percentage when selected for better readability.
-
-### Fixed
-- **Database Schema**: Fixed a critical issue where the `payment_mode` column was occasionally missing during migrations (Database v13).
-+
+- **Accurate Planning**: Improved the way transactions are handled in the Monthly Planner to give a more realistic view of your budget.
+- **Readable Analytics**: Enhanced the spending charts with clearer labels and interactive percentages.
 
 ## [1.0.4] - 2026-02-18
 ### Changed
-- **Branding**: Rebranded "Spending Limit" to **"Monthly Budget"** across Dashboard and Settings for a clearer, more positive financial tone.
-- **Registration**: Removed mandatory username field. Usernames are now automatically generated from the email or full name to simplify onboarding.
-- **UI Enhancement**: Improved visibility of the budget adjustment text field with high-contrast colors and larger font size.
-
+- **Clarity in Budgeting**: Rebranded "Spending Limit" to "Monthly Budget" for a friendlier financial mindset.
+- **Simplified Setup**: Streamlined account creation by automatically managing usernames, making it faster to start tracking.
+- **High-Contrast Editing**: Improved the visibility of budget adjustment tools for better usability.
 
 ## [1.0.3] - 2026-02-18
 ### Fixed
-- Analytics Pie Chart rendering issues:
-  - Fixed "100% glitch" where one category dominated the chart.
-  - Fixed issue where only one category was displayed.
-  - Improved SQL robustness for data aggregation.
-- Pie Chart interactivity:
-  - Percentage labels now only appear on touch to reduce clutter.
-  - Fixed decimal precision for clearer values.
-- **Regular Expenses**:
-  - Fixed potential crash when adding a new regular payment (context safety).
-
+- **Accurate Spending Charts**: Fixed several display issues with the spending charts to ensure they accurately represent your data.
+- **Interactive Reports**: Improved the behavior of charts when touched, making them clearer and less cluttered.
+- **Stable Recurring Payments**: Fixed a potential crash when adding new recurring costs.
 
 ## [1.0.2] - 2026-02-18
 ### Added
-- Prioritized unconfirmed expenses at the top of Monthly Planner.
-- Standardized "Unplanned" vs "Planned" status labels.
+- **Smart Sorting**: Prioritized unconfirmed expenses to the top of your planner for quicker review.
+- **Clear Status Labels**: Standardized the labeling of planned vs. unplanned expenses.
 
 ### Changed
-- Rebranded "Bills" feature to **"Regular Expenses"** to better accommodate steady costs like EMIs, Rent, Loans, and Utilities.
-- Updated Dashboard quick action label to "Regular" and restored "Planner" to the bottom navigation bar.
-
-### Fixed
-- Null safety crash when viewing Uncategorized transactions.
-- Improper planned amount baseline in Monthly Summary.
-- Layout alignment of expense details footer.
+- **Broad Tracking**: Rebranded simple bills to "Regular Expenses" to better cover Rent, EMIs, and recurring costs.
+- **Unified Navigation**: Improved the Dashboard layout and navigation bar for faster access to the Planner.
 
 ## [1.0.1] - 2026-02-18
 ### Added
-- Randomized motivational quotes in the Profile Screen.
-- "Member Since" field in User Profile.
-- In-app versioning and recent changes display.
-- Automatic (System) and Manual theme mode selection.
-- Improved SMS import to preserve original message content.
-
-### Changed
-- Standardized header design in Monthly Planner to match Analytics.
-- Refined Profile Screen UI: Removed extra fields, conditional camera icon.
-- Improved Monthly Planner progress bar reference proportions.
+- **Inspiration & Profile**: Added motivational quotes and profile context for a more personal experience.
+- **Theme Control**: Added the ability to manually choose between Light and Dark modes or follow your phone's system settings.
+- **Detailed Imports**: Improved the SMS import feature to better preserve the original message details.
 
 ### Fixed
-- Layout overflow on certain screen sizes.
-- Replaced deprecated `.withOpacity()` with `.withValues()`.
+- **Universal Layout**: Ensured the app looks great on all screen sizes and resolved minor alignment issues.
 
 ## [1.0.0] - 2026-02-12
 ### Initial Release
-- Core expense tracking, category management, and analytics.
-- Firebase Authentication & Google Sign-In.
-- Local-first storage with SQLite.
+- **Core Tracking**: Robust expense tracking, category organization, and spending analytics.
+- **Secure Access**: Secure login with Email and Google accounts.
+- **Data Privacy**: Local-first storage ensures your transaction data stays on your device.

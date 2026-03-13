@@ -608,7 +608,6 @@ class _SmsImportScreenState extends State<SmsImportScreen>
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final textColor = AppTheme.getTextColor(context);
     final secondaryTextColor =
         AppTheme.getTextColor(context, isSecondary: true);
@@ -618,38 +617,33 @@ class _SmsImportScreenState extends State<SmsImportScreen>
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        decoration: isDark
+        decoration: Theme.of(context).brightness == Brightness.dark
             ? AppTheme.darkBackgroundDecoration
             : AppTheme.backgroundDecoration,
         child: Column(
           children: [
-            SafeArea(
-              bottom: false,
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(26, 20, 26, 0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('Your inbox, decoded.',
-                            style: TextStyle(
-                                color: secondaryTextColor,
-                                fontSize: 13,
-                                letterSpacing: 0.5)),
-                        Text('SMS Scanner',
-                            style: TextStyle(
-                                fontSize: 26,
-                                fontWeight: FontWeight.w900,
-                                color: textColor,
-                                letterSpacing: -1)),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
+          Container(
+            width: double.infinity,
+            decoration: AppTheme.headerDecoration(context),
+            padding: EdgeInsets.fromLTRB(26, MediaQuery.of(context).padding.top + 10, 26, 20),
+            child: const Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Your inbox, decoded.',
+                    style: TextStyle(
+                        color: Colors.white70,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                        letterSpacing: 0.5)),
+                Text('SMS Scanner',
+                    style: TextStyle(
+                        fontSize: 26,
+                        fontWeight: FontWeight.w900,
+                        color: Colors.white,
+                        letterSpacing: -1)),
+              ],
             ),
+          ),
             TabBar(
               controller: _tabController,
               indicatorColor: AppTheme.primary,
