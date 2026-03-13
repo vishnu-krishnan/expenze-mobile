@@ -1,5 +1,64 @@
 # Expenze Application Changelog
 
+## Version 1.8.11+35 - 2026-03-13
+### Fixed
+- **Wallet Card Color Purity**: Finalized the removal of all dark/desaturated shades, replacing legacy Red 700 with high-vibrancy Rose Red for over-budget states.
+- **Simplified Color Logic**: Streamlined the status engine to use single vibrant primary colors paired exclusively with white for maximum clarity and vibrancy.
+
+## Version 1.8.10+34 - 2026-03-13
+### Changed
+- **Dashboard Hierarchy**: Expanded the Wallet Card vertical presence with 38px internal padding and 16px top clearance for a more professional visual tier.
+- **Elite Mini-Grid**: Redesigned the Quick Actions hub into a high-density "mini-tile" grid with optimized 1.5 aspect ratios and trimmed icon padding.
+- **Layout Compression**: Tightened vertical gaps between all main dashboard sections to maximize glanceable information.
+
+## Version 1.8.9+33 - 2026-03-13
+### Added
+- **Enhanced Time Context**: Updated the header date pill to include the current weekday for better glanceability (e.g., "Fri, 13 Mar").
+
+### Changed
+- **Pristine Wallet Card**: Refined the "Total Spent" card with a high-vibrancy "usage color + pure white" aesthetic, removing muddy desaturated tones and dark shades.
+- **Standardized Navigation**: Modernized month picker arrows with circular tap targets and professional Lucide iconography for perfect alignment.
+
+### Fixed
+- **Visual Polish**: Optimized backdrop filter transparency and removed inconsistent shadows in the main wallet container.
+
+## Version 1.8.8+32 - 2026-03-13
+### Added
+- **Analytics Revamp**: Implemented a "Liquid Glass" aesthetic for summary cards (Total Spent, Daily Avg, Peak Day) with high-quality backdrop blurring.
+- **Enhanced Period Selection**: Redesigned the period chooser (1W, 1M, 3M) with a premium glassy finish and improved active state visibility.
+
+### Fixed
+- **Scroll Position Bug**: Resolved an issue where expanding the history list would incorrectly scroll the screen back to the top.
+- **Chart Precision**: Optimized Y-axis label spacing to prevent clipping of large currency values and refined X-axis intervals for better readability.
+- **Stability Fix**: Resolved a missing framework import that caused rendering issues on some devices.
+
+## Version 1.8.7+31 - 2026-03-13
+### Added
+- **Quick Actions Hub**: Replaced the horizontal-scroll Action Hub with a clean, professional 2×3 fixed grid — all shortcuts visible at a glance, no swiping required.
+- **EMI Calculator**: Brand-new built-in loan calculator with real-time calculations and Indian notation formatting.
+
+### Changed
+- **Professional Card Design**: Action cards now use a solid color-tinted background instead of Liquid Glass blur for better contrast and performance.
+
+## Version 1.8.6+30 - 2026-03-13
+### Added
+- **Category Modal**: Add New Category is now a lightweight bottom sheet popup.
+- **Compact Category Grid**: Revamped the category list to a 3-column grid with staggered fade animations.
+
+### Changed
+- **Header Unification**: Category screens now use the premium Large Title gradient header.
+- **Text Clarity**: Replaced playful labels with clear, professional financial terminology.
+
+## Version 1.8.1+25 - 2026-03-13
+### Added
+- **Frosted Glass Cards**: Overhauled the Dashboard design with a modern "frosted glass" effect for a sleek, contemporary look.
+- **Unified Status Bar**: Synchronized the phone's top status bar with the application's header colors across all screens for a seamless transition.
+- **Immersive Display**: Enabled full edge-to-edge display support for a more modern mobile design.
+
+### Fixed
+- **Navigation Polish**: Corrected the alignment of the quote author and cleaned up the visual layout of the Quote card.
+- **Stability Fixes**: Fixed several layout and rendering issues to ensure a smoother experience.
+
 ## Version 1.6.0+18 - 2026-03-02
 
 ### Added

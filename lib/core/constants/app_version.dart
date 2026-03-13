@@ -11,14 +11,41 @@ class ReleaseInfo {
 }
 
 class AppVersion {
-  static const String current = '1.8.8';
-  static const String buildNumber = '32';
-  static const String releaseName = 'Analytics Revamp & UX Polish';
+  static const String current = '1.8.11';
+  static const String buildNumber = '35';
+  static const String releaseName = 'Pristine Color Enforcement';
 
   static const String website = 'https://expenze-elite.netlify.app/';
   static const String supportEmail = 'expenzehelp@gmail.com';
 
   static const List<ReleaseInfo> history = [
+    ReleaseInfo(
+      version: '1.8.11',
+      date: '2026-03-13',
+      changes: [
+        'Wallet Card Color Purity: Finalized the removal of all dark/desaturated shades, replacing legacy Red 700 with high-vibrancy Rose Red for over-budget states.',
+        'Simplified Color Logic: Streamlined the status engine to use single vibrant primary colors paired exclusively with white for maximum clarity.',
+      ],
+    ),
+    ReleaseInfo(
+      version: '1.8.10',
+      date: '2026-03-13',
+      changes: [
+        'Dashboard Hierarchy: Expanded the Wallet Card vertical presence with 38px internal padding and 16px top clearance.',
+        'Elite Mini-Grid: Redesigned the Quick Actions hub into a high-density "mini-tile" grid with optimized 1.5 aspect ratios.',
+        'Layout Compression: Tightened vertical gaps between all dashboard sections to maximize glanceable information.',
+      ],
+    ),
+    ReleaseInfo(
+      version: '1.8.9',
+      date: '2026-03-13',
+      changes: [
+        'Pristine Wallet Card: Refined the "Total Spent" card with a high-vibrancy "usage color + pure white" aesthetic, removing muddy desat tones.',
+        'Enhanced Time Context: Updated the header date pill to include the current weekday for better glanceability (e.g., "Fri, 13 Mar").',
+        'Standardized Navigation: Modernized month picker arrows with circular tap targets and professional Lucide iconography.',
+        'Visual Polish: Optimized backdrop filter transparency and removed inconsistent shadows in the main wallet container.',
+      ],
+    ),
     ReleaseInfo(
       version: '1.8.8',
       date: '2026-03-13',

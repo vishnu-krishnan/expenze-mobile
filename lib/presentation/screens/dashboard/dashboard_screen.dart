@@ -88,6 +88,7 @@ class _DashboardScreenState extends State<DashboardScreen>
 
   Widget _buildHeaderDatePill() {
     final now = DateTime.now();
+    final weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
     final months = [
       'Jan',
       'Feb',
@@ -102,7 +103,8 @@ class _DashboardScreenState extends State<DashboardScreen>
       'Nov',
       'Dec'
     ];
-    final dateStr = '${now.day} ${months[now.month - 1]}';
+    final dateStr =
+        '${weekdays[now.weekday - 1]}, ${now.day} ${months[now.month - 1]}';
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
@@ -323,7 +325,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                           ),
                         SliverToBoxAdapter(
                           child: Padding(
-                            padding: const EdgeInsets.only(bottom: 24),
+                            padding: const EdgeInsets.only(bottom: 4),
                             child: _buildWalletCard(actual, remaining, pctUsed,
                                 provider, summary, planned),
                           ),
@@ -379,32 +381,25 @@ class _DashboardScreenState extends State<DashboardScreen>
       ExpenseProvider provider, Map<String, double> summary, double planned) {
     List<Color> cardColors;
     if (pctUsed < 0.5) {
-      cardColors = [const Color(0xFF10B981), const Color(0xFF059669)];
+      cardColors = [const Color(0xFF10B981)]; // Pure Emerald 500
     } else if (pctUsed < 0.7) {
-      cardColors = [const Color(0xFF84CC16), const Color(0xFF65A30D)];
+      cardColors = [const Color(0xFF84CC16)]; // Pure Lime 500
     } else if (pctUsed < 0.85) {
-      cardColors = [const Color(0xFFF59E0B), const Color(0xFFD97706)];
+      cardColors = [const Color(0xFFF59E0B)]; // Pure Amber 500
     } else if (pctUsed < 1.1) {
-      cardColors = [const Color(0xFFEF4444), const Color(0xFFDC2626)];
+      cardColors = [const Color(0xFFEF4444)]; // Pure Red 500
     } else {
-      cardColors = [const Color(0xFFB91C1C), const Color(0xFF991B1B)];
+      cardColors = [const Color(0xFFF43F5E)]; // Vibrant Rose/Pulse Red
     }
 
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final desaturatedColors = cardColors.map((c) {
-      Color color = AppTheme.desaturate(c, amount: 0.45);
-      if (!isDark) {
-        final hsl = HSLColor.fromColor(color);
-        color =
-            hsl.withLightness((hsl.lightness + 0.3).clamp(0.0, 1.0)).toColor();
-      }
-      return color;
-    }).toList();
+    final usageColor = cardColors[0]; // Pure usage color, no dark shade
+    final pureColors = [usageColor, Colors.white];
 
-    final progressColor = isDark
-        ? AppTheme.desaturate(cardColors[0], amount: 0.25).withValues(alpha: 0.7)
-        : cardColors[0];
-    final contentColor = isDark ? Colors.white : const Color(0xFF020617); // Rich Midnight Slate 950
+    final progressColor = usageColor;
+    final contentColor = isDark
+        ? Colors.white
+        : const Color(0xFF020617); // Rich Midnight Slate 950
     final secondaryContentColor = isDark
         ? Colors.white.withValues(alpha: 0.75)
         : const Color(0xFF1E293B); // Rich Slate 800
@@ -423,19 +418,20 @@ class _DashboardScreenState extends State<DashboardScreen>
         }
       },
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 26, vertical: 10),
+        padding: const EdgeInsets.only(top: 16, bottom: 6, left: 16, right: 16),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(32),
           child: BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 25, sigmaY: 25),
             child: Stack(
               children: [
-                if (!isDark)
-                  Positioned.fill(
-                    child: Container(color: Colors.white),
-                  ),
                 Positioned.fill(
-                  child: _buildAnimatedBackground(desaturatedColors),
+                  child: Container(
+                    color: Colors.white.withValues(alpha: isDark ? 0.08 : 0.8),
+                  ),
+                ),
+                Positioned.fill(
+                  child: _buildAnimatedBackground(pureColors),
                 ),
                 if (!isDark)
                   Positioned.fill(
@@ -446,10 +442,10 @@ class _DashboardScreenState extends State<DashboardScreen>
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       colors: [
-                        desaturatedColors[0].withValues(alpha: 0.25),
-                        desaturatedColors[0].withValues(alpha: 0.1),
-                        desaturatedColors[1].withValues(alpha: 0.08),
-                        desaturatedColors[1].withValues(alpha: 0.2),
+                        pureColors[0].withValues(alpha: 0.25),
+                        pureColors[1].withValues(alpha: 0.15),
+                        pureColors[0].withValues(alpha: 0.1),
+                        pureColors[1].withValues(alpha: 0.25),
                       ],
                       stops: const [0.0, 0.4, 0.7, 1.0],
                       begin: Alignment.topLeft,
@@ -502,7 +498,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                         ),
                       ),
                       Padding(
-                        padding: const EdgeInsets.all(24),
+                        padding: const EdgeInsets.fromLTRB(26, 38, 26, 38),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisSize: MainAxisSize.min,
@@ -533,31 +529,32 @@ class _DashboardScreenState extends State<DashboardScreen>
                                   children: [
                                     GestureDetector(
                                       onTap: () => _handleMonthChange(-1),
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(8.0),
-                                        child: Text('‹',
-                                            style: TextStyle(
-                                                color: secondaryContentColor,
-                                                fontSize:
-                                                    30, // Increased from 22
-                                                shadows: isDark
-                                                    ? [
-                                                        Shadow(
-                                                            color: Colors.black
-                                                                .withValues(
-                                                                    alpha: 0.3),
-                                                            blurRadius: 4)
-                                                      ]
-                                                    : [])),
+                                      child: Container(
+                                        padding: const EdgeInsets.all(4),
+                                        decoration: BoxDecoration(
+                                          color: isDark
+                                              ? Colors.white
+                                                  .withValues(alpha: 0.1)
+                                              : Colors.black
+                                                  .withValues(alpha: 0.05),
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: Icon(
+                                          LucideIcons.chevronLeft,
+                                          color: secondaryContentColor,
+                                          size: 14,
+                                        ),
                                       ),
                                     ),
+                                    const SizedBox(width: 10),
                                     Text(
                                       _formatMonthName(
                                           provider.currentMonthKey),
                                       style: TextStyle(
                                         color: contentColor,
-                                        fontWeight: FontWeight.bold,
+                                        fontWeight: FontWeight.w800,
                                         fontSize: 13,
+                                        letterSpacing: 0.2,
                                         shadows: isDark
                                             ? [
                                                 Shadow(
@@ -568,24 +565,24 @@ class _DashboardScreenState extends State<DashboardScreen>
                                             : [],
                                       ),
                                     ),
+                                    const SizedBox(width: 10),
                                     GestureDetector(
                                       onTap: () => _handleMonthChange(1),
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(8.0),
-                                        child: Text('›',
-                                            style: TextStyle(
-                                                color: secondaryContentColor,
-                                                fontSize:
-                                                    30, // Increased from 22
-                                                shadows: isDark
-                                                    ? [
-                                                        Shadow(
-                                                            color: Colors.black
-                                                                .withValues(
-                                                                    alpha: 0.3),
-                                                            blurRadius: 4)
-                                                      ]
-                                                    : [])),
+                                      child: Container(
+                                        padding: const EdgeInsets.all(4),
+                                        decoration: BoxDecoration(
+                                          color: isDark
+                                              ? Colors.white
+                                                  .withValues(alpha: 0.1)
+                                              : Colors.black
+                                                  .withValues(alpha: 0.05),
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: Icon(
+                                          LucideIcons.chevronRight,
+                                          color: secondaryContentColor,
+                                          size: 14,
+                                        ),
                                       ),
                                     ),
                                   ],
@@ -976,19 +973,43 @@ class _DashboardScreenState extends State<DashboardScreen>
     final textColor = AppTheme.getTextColor(context);
 
     final actions = [
-      _ActionItem(icon: LucideIcons.arrowDownToLine, label: 'SMS Import',   color: const Color(0xFF0EA5E9), route: '/import'),
-      _ActionItem(icon: LucideIcons.repeat,          label: 'Regular',      color: const Color(0xFFF59E0B), route: '/regular'),
-      _ActionItem(icon: LucideIcons.fileText,         label: 'Notes',        color: const Color(0xFF10B981), route: '/notes'),
-      _ActionItem(icon: LucideIcons.sparkles,         label: 'Wishes',       color: const Color(0xFF8B5CF6), route: '/wishes'),
-      _ActionItem(icon: LucideIcons.layoutGrid,       label: 'Categories',   color: const Color(0xFFEF4444), route: '/categories'),
-      _ActionItem(icon: LucideIcons.calculator,       label: 'EMI Calc',     color: const Color(0xFF06B6D4), route: '/calculator'),
+      _ActionItem(
+          icon: LucideIcons.arrowDownToLine,
+          label: 'SMS Import',
+          color: const Color(0xFF0EA5E9),
+          route: '/import'),
+      _ActionItem(
+          icon: LucideIcons.repeat,
+          label: 'Regular',
+          color: const Color(0xFFF59E0B),
+          route: '/regular'),
+      _ActionItem(
+          icon: LucideIcons.fileText,
+          label: 'Notes',
+          color: const Color(0xFF10B981),
+          route: '/notes'),
+      _ActionItem(
+          icon: LucideIcons.sparkles,
+          label: 'Wishes',
+          color: const Color(0xFF8B5CF6),
+          route: '/wishes'),
+      _ActionItem(
+          icon: LucideIcons.layoutGrid,
+          label: 'Categories',
+          color: const Color(0xFFEF4444),
+          route: '/categories'),
+      _ActionItem(
+          icon: LucideIcons.calculator,
+          label: 'EMI Calc',
+          color: const Color(0xFF06B6D4),
+          route: '/calculator'),
     ];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.fromLTRB(26, 20, 26, 14),
+          padding: const EdgeInsets.fromLTRB(26, 8, 26, 8),
           child: Row(
             children: [
               Text('Quick Actions',
@@ -1000,7 +1021,8 @@ class _DashboardScreenState extends State<DashboardScreen>
                   )),
               const Spacer(),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
                   color: AppTheme.primary.withValues(alpha: 0.08),
                   borderRadius: BorderRadius.circular(20),
@@ -1023,9 +1045,9 @@ class _DashboardScreenState extends State<DashboardScreen>
             itemCount: actions.length,
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 3,
-              mainAxisSpacing: 12,
-              crossAxisSpacing: 12,
-              childAspectRatio: 1.1,
+              mainAxisSpacing: 8,
+              crossAxisSpacing: 8,
+              childAspectRatio: 1.5,
             ),
             itemBuilder: (context, index) {
               final item = actions[index];
@@ -1038,7 +1060,7 @@ class _DashboardScreenState extends State<DashboardScreen>
             },
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 4),
       ],
     );
   }
@@ -1051,7 +1073,7 @@ class _DashboardScreenState extends State<DashboardScreen>
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.fromLTRB(26, 24, 26, 16),
+          padding: const EdgeInsets.fromLTRB(26, 12, 26, 16),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -1365,7 +1387,11 @@ class _ActionItem {
   final String label;
   final Color color;
   final String route;
-  const _ActionItem({required this.icon, required this.label, required this.color, required this.route});
+  const _ActionItem(
+      {required this.icon,
+      required this.label,
+      required this.color,
+      required this.route});
 }
 
 class _AnimatedActionCard extends StatefulWidget {
@@ -1434,18 +1460,18 @@ class _AnimatedActionCardState extends State<_AnimatedActionCard>
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Container(
-                padding: const EdgeInsets.all(11),
+                padding: const EdgeInsets.all(7),
                 decoration: BoxDecoration(
                   color: widget.color.withValues(alpha: isDark ? 0.18 : 0.12),
-                  borderRadius: BorderRadius.circular(14),
+                  borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(
                   widget.icon,
-                  size: 20,
+                  size: 18,
                   color: widget.color,
                 ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 4),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 6),
                 child: Text(

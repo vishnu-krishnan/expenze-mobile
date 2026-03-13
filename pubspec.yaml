@@ -1,7 +1,7 @@
 name: expenze
 description: "Expenze - Smart Expense Tracking Mobile App"
 publish_to: 'none'
-version: 1.8.8+32
+version: 1.8.11+35
 
 environment:
   sdk: ^3.6.0

@@ -1,5 +1,17 @@
 # Activity Log
 
+[2026-03-13] Wallet Card Color Purity Enforcement
+Change Type: Patch
+Decision made:
+- Eliminated all "dark shades" and desaturated variants from the Dashboard status colors.
+- Replaced Red 700 with vibrant Rose/Red 500 for over-budget states.
+- Simplified color logic to use single vibrant primary colors paired exclusively with pure white.
+Reason: Strictly follow user request for a "pure color + white" aesthetic without dark additives.
+Impact: UI | UX
+
+[2026-03-13] Quick Action Hub Optimization
+
+
 [2026-03-13] Analytics Revamp & UX Polish
 Change Type: Minor
 Decision made:

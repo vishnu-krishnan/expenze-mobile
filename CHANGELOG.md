@@ -2,6 +2,28 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.8.11+35] - 2026-03-13
+### Fixed
+- **Wallet Card Color Purity**: Finalized the removal of all dark/desaturated shades, replacing legacy Red 700 with high-vibrancy Rose Red for over-budget states.
+- **Simplified Color Logic**: Streamlined the status engine to use single vibrant primary colors paired exclusively with white for maximum clarity and vibrancy.
+
+## [1.8.10+34] - 2026-03-13
+### Changed
+- **Dashboard Hierarchy**: Expanded the Wallet Card vertical presence with 38px internal padding and 16px top clearance.
+- **Elite Mini-Grid**: Redesigned the Quick Actions hub into a high-density "mini-tile" grid with a 1.5 aspect ratio and optimized spacing.
+- **Layout Compression**: Tightened vertical gaps between all dashboard sections for a more professional, information-rich overview.
+
+## [1.8.9+33] - 2026-03-13
+### Added
+- **Enhanced Time Context**: Updated the header date pill to include the current weekday for better glanceability (e.g., "Fri, 13 Mar").
+
+### Changed
+- **Pristine Wallet Card**: Refined the "Total Spent" card with a high-vibrancy "usage color + pure white" aesthetic, removing muddy desaturated tones and dark shades.
+- **Standardized Navigation**: Modernized month picker arrows with circular tap targets and professional Lucide iconography for perfect alignment.
+
+### Fixed
+- **Visual Polish**: Optimized backdrop filter transparency and removed inconsistent shadows in the main wallet container.
+
 ## [1.8.8+32] - 2026-03-13
 ### Added
 - **Analytics Revamp**: Implemented a "Liquid Glass" aesthetic for summary cards (Total Spent, Daily Avg, Peak Day) with high-quality backdrop blurring.
